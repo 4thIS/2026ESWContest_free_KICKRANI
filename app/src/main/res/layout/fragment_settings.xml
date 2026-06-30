@@ -3,8 +3,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:padding="24dp">
+
     <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="설정 화면" />
+        android:text="장치 WiFi 설정"
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SSID" />
+    <EditText android:id="@+id/et_ssid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="비밀번호" />
+    <EditText android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="장치 IP" />
+    <EditText android:id="@+id/et_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_marginBottom="24dp"/>
+
+    <Button android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="저장" />
 </LinearLayout>
