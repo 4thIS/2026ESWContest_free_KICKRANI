@@ -3,8 +3,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
-    <TextView android:layout_width="wrap_content"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- 연결 상태 -->
+    <TextView android:id="@+id/tv_connection"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="메인 화면" />
+        android:text="○ 미연결"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
+
+    <Button android:id="@+id/btn_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WiFi 연결"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- GPS 속도 -->
+    <TextView android:id="@+id/tv_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.0 km/h"
+        android:textSize="48sp"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- 세션 제어 버튼 -->
+    <Button android:id="@+id/btn_sync"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="시각 동기화"
+        android:layout_marginBottom="8dp"/>
+
+    <Button android:id="@+id/btn_session"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="세션 시작"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- 타이머 -->
+    <TextView android:id="@+id/tv_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00:00"
+        android:textSize="32sp"/>
 </LinearLayout>
