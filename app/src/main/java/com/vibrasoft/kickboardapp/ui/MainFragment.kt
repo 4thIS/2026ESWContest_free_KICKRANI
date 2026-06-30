@@ -73,7 +73,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun syncTime() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             api.sync(System.currentTimeMillis())
         }
     }
@@ -91,7 +91,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun startSession() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             api.sync(System.currentTimeMillis())
             api.start()
             gpsLogger.start()
@@ -103,7 +103,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun stopSession() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             api.stop()
             val points = gpsLogger.stop()
             api.sendSpeedLog(points)
@@ -116,7 +116,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun startTimer() {
         timerJob?.cancel()
-        timerJob = lifecycleScope.launch {
+        timerJob = viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
                 delay(1000)
                 elapsedSeconds++
