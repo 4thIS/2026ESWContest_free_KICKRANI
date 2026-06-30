@@ -48,7 +48,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         wifiConnector = WifiConnector(requireContext())
 
         gpsLogger.onSpeedUpdate = { speed ->
-            binding.tvSpeed.text = "%.1f km/h".format(speed)
+            _binding?.tvSpeed?.text = "%.1f km/h".format(speed)
         }
 
         binding.btnConnect.setOnClickListener { connectWifi() }
@@ -64,8 +64,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.tvConnection.text = "연결 중..."
         wifiConnector.connect(settings.ssid, settings.password) { success ->
             requireActivity().runOnUiThread {
+                val b = _binding ?: return@runOnUiThread
                 isConnected = success
-                binding.tvConnection.text = if (success) "● 연결됨" else "○ 미연결"
+                b.tvConnection.text = if (success) "● 연결됨" else "○ 미연결"
                 updateButtonStates()
             }
         }
@@ -136,6 +137,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onDestroyView() {
         super.onDestroyView()
         timerJob?.cancel()
+        gpsLogger.onSpeedUpdate = null
         _binding = null
     }
 }
