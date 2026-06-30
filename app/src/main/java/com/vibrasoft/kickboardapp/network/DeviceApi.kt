@@ -20,12 +20,21 @@ class DeviceApi(private val deviceIp: String) {
     private val json = "application/json".toMediaType()
 
     companion object {
+        private fun escapeJsonString(s: String): String =
+            s.replace("\\", "\\\\").replace("\"", "\\\"")
+
         fun buildSpeedLogJson(points: List<GpsPoint>): String {
             val entries = points.joinToString(",") {
                 """{"timestamp":${it.timestamp},"speed":${it.speed}}"""
             }
             return "[$entries]"
         }
+
+        fun buildMemoJson(file: String, memo: String): String =
+            """{"file":"${escapeJsonString(file)}","memo":"${escapeJsonString(memo)}"}"""
+
+        fun buildRenameJson(old: String, new: String): String =
+            """{"old":"${escapeJsonString(old)}","new":"${escapeJsonString(new)}"}"""
     }
 
     suspend fun sync(timestamp: Long): Boolean = post(
@@ -58,11 +67,11 @@ class DeviceApi(private val deviceIp: String) {
     }
 
     suspend fun renameFile(oldName: String, newName: String): Boolean = post(
-        "/rename", """{"old":"$oldName","new":"$newName"}"""
+        "/rename", buildRenameJson(oldName, newName)
     )
 
     suspend fun addMemo(fileName: String, memo: String): Boolean = post(
-        "/memo", """{"file":"$fileName","memo":"$memo"}"""
+        "/memo", buildMemoJson(fileName, memo)
     )
 
     private suspend fun post(path: String, bodyStr: String): Boolean =
