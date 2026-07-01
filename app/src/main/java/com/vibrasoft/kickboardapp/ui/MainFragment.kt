@@ -3,6 +3,7 @@ package com.vibrasoft.kickboardapp.ui
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log // TEMP DEBUG
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -106,6 +107,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         viewLifecycleOwner.lifecycleScope.launch {
             api.stop()
             val points = gpsLogger.stop()
+            Log.d("GpsDebug", "===== speed-log payload (${points.size} points) =====") // TEMP DEBUG
+            Log.d("GpsDebug", DeviceApi.buildSpeedLogJson(points)) // TEMP DEBUG
             api.sendSpeedLog(points)
             isSessionRunning = false
             timerJob?.cancel()
@@ -130,7 +133,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun updateButtonStates() {
         binding.btnSync.isEnabled = isConnected && !isSessionRunning
-        binding.btnSession.isEnabled = isConnected
+        binding.btnSession.isEnabled = true // TEMP DEBUG (원래: isConnected) — 장치 없이 GPS 수집 테스트용
         binding.btnSession.text = if (isSessionRunning) "세션 종료" else "세션 시작"
     }
 

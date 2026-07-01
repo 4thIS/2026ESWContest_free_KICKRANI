@@ -3,6 +3,7 @@ package com.vibrasoft.kickboardapp.gps
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Looper
+import android.util.Log // TEMP DEBUG
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -34,7 +35,9 @@ class GpsLogger(context: Context) {
             override fun onLocationResult(result: LocationResult) {
                 val loc = result.lastLocation ?: return
                 val speedKmh = loc.speed * 3.6f
-                points.add(GpsPoint(System.currentTimeMillis(), speedKmh))
+                val ts = System.currentTimeMillis()
+                points.add(GpsPoint(ts, speedKmh))
+                Log.d("GpsDebug", "point #${points.size}: timestamp=$ts, speed=$speedKmh km/h (raw ${loc.speed} m/s), lat=${loc.latitude}, lng=${loc.longitude}, accuracy=${loc.accuracy}m") // TEMP DEBUG (위경도는 개발자 확인용, ML/CSV 미포함)
                 onSpeedUpdate?.invoke(speedKmh)
             }
         }
