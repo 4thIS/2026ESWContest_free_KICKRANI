@@ -24,14 +24,14 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     private val roadTypes = listOf("아스팔트", "보도블럭", "콘크리트", "비포장", "기타")
     private val roadConditions = listOf("정상", "불량")
     private var pendingRename: Pair<String, String>? = null
+    private var isConnected = false
 
     private val filesCallback: (List<String>) -> Unit = { files ->
         _binding?.let { adapter.updateFiles(files) }
     }
     private val ackCallback: (String, Boolean) -> Unit = { cmd, ok -> handleAck(cmd, ok) }
-    private val onErrorCallback: (String, String) -> Unit = { cmd, message ->
-        handleError(cmd, message)
-    }
+    private val onErrorCallback: (String, String) -> Unit = { cmd, message -> handleError(cmd, message) }
+    private val disconnectedCallback: () -> Unit = { updateConnectionState() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,8 +40,8 @@ class FileFragment : Fragment(R.layout.fragment_file) {
 
         adapter = FileAdapter(
             mutableListOf(),
-            onRename = { fileName -> showRoadTypeDialog(fileName) },
-            onMemo = { fileName -> showMemoDialog(fileName) }
+            onRename = { fileName -> if (isConnected) showRoadTypeDialog(fileName) },
+            onMemo = { fileName -> if (isConnected) showMemoDialog(fileName) }
         )
         binding.rvFiles.layoutManager = LinearLayoutManager(requireContext())
         binding.rvFiles.adapter = adapter
@@ -49,9 +49,23 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.addFilesListener(filesCallback)
         rpiProtocol.addAckListener(ackCallback)
         rpiProtocol.addErrorListener(onErrorCallback)
+        rpiProtocol.addDisconnectedListener(disconnectedCallback)
 
         binding.btnRefresh.setOnClickListener { loadFiles() }
-        loadFiles()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateConnectionState()
+    }
+
+    private fun updateConnectionState() {
+        val b = _binding ?: return
+        isConnected = (requireActivity() as MainActivity).bluetoothConnector.isConnected()
+        b.btnRefresh.isEnabled = isConnected
+        b.tvDisconnectedNotice.visibility = if (isConnected) View.GONE else View.VISIBLE
+        b.rvFiles.alpha = if (isConnected) 1.0f else 0.4f
+        if (isConnected) loadFiles()
     }
 
     private fun loadFiles() {
@@ -167,6 +181,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.removeFilesListener(filesCallback)
         rpiProtocol.removeAckListener(ackCallback)
         rpiProtocol.removeErrorListener(onErrorCallback)
+        rpiProtocol.removeDisconnectedListener(disconnectedCallback)
         _binding = null
     }
 }
