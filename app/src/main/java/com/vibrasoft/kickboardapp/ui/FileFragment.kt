@@ -32,6 +32,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     private val ackCallback: (String, Boolean) -> Unit = { cmd, ok -> handleAck(cmd, ok) }
     private val onErrorCallback: (String, String) -> Unit = { cmd, message -> handleError(cmd, message) }
     private val disconnectedCallback: () -> Unit = { updateConnectionState() }
+    private val connectedCallback: () -> Unit = { updateConnectionState() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,6 +51,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.addAckListener(ackCallback)
         rpiProtocol.addErrorListener(onErrorCallback)
         rpiProtocol.addDisconnectedListener(disconnectedCallback)
+        rpiProtocol.addConnectedListener(connectedCallback)
 
         binding.btnRefresh.setOnClickListener { loadFiles() }
     }
@@ -182,6 +184,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.removeAckListener(ackCallback)
         rpiProtocol.removeErrorListener(onErrorCallback)
         rpiProtocol.removeDisconnectedListener(disconnectedCallback)
+        rpiProtocol.removeConnectedListener(connectedCallback)
         _binding = null
     }
 }

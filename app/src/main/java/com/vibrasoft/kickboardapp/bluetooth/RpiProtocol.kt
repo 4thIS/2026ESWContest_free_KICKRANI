@@ -32,6 +32,7 @@ class RpiProtocol(private val connector: BluetoothConnector) {
     private val filesListeners = mutableListOf<(List<String>) -> Unit>()
     private val errorListeners = mutableListOf<(String, String) -> Unit>()
     private val disconnectedListeners = mutableListOf<() -> Unit>()
+    private val connectedListeners = mutableListOf<() -> Unit>()
 
     fun addAckListener(listener: (String, Boolean) -> Unit) { ackListeners.add(listener) }
     fun removeAckListener(listener: (String, Boolean) -> Unit) { ackListeners.remove(listener) }
@@ -48,7 +49,11 @@ class RpiProtocol(private val connector: BluetoothConnector) {
     fun addDisconnectedListener(listener: () -> Unit) { disconnectedListeners.add(listener) }
     fun removeDisconnectedListener(listener: () -> Unit) { disconnectedListeners.remove(listener) }
 
+    fun addConnectedListener(listener: () -> Unit) { connectedListeners.add(listener) }
+    fun removeConnectedListener(listener: () -> Unit) { connectedListeners.remove(listener) }
+
     fun startListening() {
+        connectedListeners.toList().forEach { it.invoke() }
         listenJob?.cancel()
         listenJob = scope.launch {
             while (isActive) {

@@ -32,6 +32,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
         }
     }
+    private val connectedCallback: () -> Unit = { refreshConnectionState() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,6 +42,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         rpiProtocol.addStatusListener(statusCallback)
         rpiProtocol.addDisconnectedListener(disconnectedCallback)
         rpiProtocol.addErrorListener(onErrorCallback)
+        rpiProtocol.addConnectedListener(connectedCallback)
 
         binding.btnSession.setOnClickListener {
             if (isSessionRunning) stopSession() else startSession()
@@ -140,6 +142,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         rpiProtocol.removeStatusListener(statusCallback)
         rpiProtocol.removeDisconnectedListener(disconnectedCallback)
         rpiProtocol.removeErrorListener(onErrorCallback)
+        rpiProtocol.removeConnectedListener(connectedCallback)
         _binding = null
     }
 }
