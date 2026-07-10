@@ -45,9 +45,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
-    implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.play.services.location)
     implementation(libs.androidx.recyclerview)
 
     testImplementation(libs.junit)
