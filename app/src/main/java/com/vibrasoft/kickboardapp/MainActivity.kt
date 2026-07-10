@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.vibrasoft.kickboardapp.bluetooth.BluetoothConnector
 import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
 import com.vibrasoft.kickboardapp.databinding.ActivityMainBinding
+import com.vibrasoft.kickboardapp.ui.SettingsBottomSheet
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_settings) {
-            navController.navigate(R.id.settingsFragment)
+            SettingsBottomSheet().show(supportFragmentManager, "settings")
             return true
         }
         return super.onOptionsItemSelected(item)

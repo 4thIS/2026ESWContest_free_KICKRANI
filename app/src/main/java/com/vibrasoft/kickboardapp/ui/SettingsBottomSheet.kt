@@ -2,17 +2,18 @@ package com.vibrasoft.kickboardapp.ui
 
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.fragment.app.Fragment
+import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.vibrasoft.kickboardapp.MainActivity
-import com.vibrasoft.kickboardapp.R
 import com.vibrasoft.kickboardapp.data.AppSettings
-import com.vibrasoft.kickboardapp.databinding.FragmentSettingsBinding
+import com.vibrasoft.kickboardapp.databinding.BottomsheetSettingsBinding
 import kotlinx.coroutines.launch
 
-class SettingsFragment : Fragment(R.layout.fragment_settings) {
-    private var _binding: FragmentSettingsBinding? = null
+class SettingsBottomSheet : BottomSheetDialogFragment() {
+    private var _binding: BottomsheetSettingsBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var settings: AppSettings
@@ -23,9 +24,17 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         onDeviceSelected = { device -> connectTo(device) }
     )
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = BottomsheetSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentSettingsBinding.bind(view)
         settings = AppSettings(requireContext())
 
         updateCurrentDeviceLabel()

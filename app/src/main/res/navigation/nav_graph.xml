@@ -12,8 +12,4 @@
         android:id="@+id/fileFragment"
         android:name="com.vibrasoft.kickboardapp.ui.FileFragment"
         android:label="파일" />
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.vibrasoft.kickboardapp.ui.SettingsFragment"
-        android:label="설정" />
 </navigation>
