@@ -7,18 +7,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.vibrasoft.kickboardapp.MainActivity
 import com.vibrasoft.kickboardapp.R
-import com.vibrasoft.kickboardapp.data.AppSettings
+import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
 import com.vibrasoft.kickboardapp.databinding.FragmentFileBinding
-import com.vibrasoft.kickboardapp.gps.GpsLogger
-import com.vibrasoft.kickboardapp.network.DeviceApi
 import kotlinx.coroutines.launch
 
 class FileFragment : Fragment(R.layout.fragment_file) {
     private var _binding: FragmentFileBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var api: DeviceApi
+    private lateinit var rpiProtocol: RpiProtocol
     private lateinit var adapter: FileAdapter
 
     private val roadTypes = listOf("아스팔트", "보도블럭", "콘크리트", "비포장", "기타")
@@ -27,7 +26,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileBinding.bind(view)
-        api = DeviceApi(AppSettings(requireContext()).deviceIp)
+        rpiProtocol = (requireActivity() as MainActivity).rpiProtocol
 
         adapter = FileAdapter(
             mutableListOf(),
@@ -37,15 +36,17 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         binding.rvFiles.layoutManager = LinearLayoutManager(requireContext())
         binding.rvFiles.adapter = adapter
 
+        rpiProtocol.onFiles = { files ->
+            _binding?.let { adapter.updateFiles(files) }
+        }
+
         binding.btnRefresh.setOnClickListener { loadFiles() }
         loadFiles()
     }
 
     private fun loadFiles() {
-        lifecycleScope.launch {
-            val files = api.getFiles()
-            _binding ?: return@launch
-            adapter.updateFiles(files)
+        viewLifecycleOwner.lifecycleScope.launch {
+            rpiProtocol.sendCommand(RpiProtocol.buildListFilesCommand())
         }
     }
 
@@ -102,10 +103,10 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     }
 
     private fun renameFile(oldName: String, roadType: String, condition: String) {
-        val newName = GpsLogger.buildNewFileName(oldName, roadType, condition)
-        lifecycleScope.launch {
-            val success = api.renameFile(oldName, newName)
-            if (success) adapter.renameFile(oldName, newName)
+        val newName = RpiProtocol.buildNewFileName(oldName, roadType, condition)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val sent = rpiProtocol.sendCommand(RpiProtocol.buildRenameCommand(oldName, newName))
+            if (sent) adapter.renameFile(oldName, newName)
         }
     }
 
@@ -117,7 +118,9 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             .setPositiveButton("추가") { _, _ ->
                 val memo = input.text.toString().trim()
                 if (memo.isNotEmpty()) {
-                    lifecycleScope.launch { api.addMemo(fileName, memo) }
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        rpiProtocol.sendCommand(RpiProtocol.buildMemoCommand(fileName, memo))
+                    }
                 }
             }
             .setNegativeButton("취소", null)
@@ -126,6 +129,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        rpiProtocol.onFiles = null
         _binding = null
     }
 }

@@ -7,39 +7,18 @@
 
     <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="장치 WiFi 설정"
+        android:text="연결 기기"
         android:textSize="18sp"
-        android:layout_marginBottom="24dp"/>
-
-    <TextView android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SSID" />
-    <EditText android:id="@+id/et_ssid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
         android:layout_marginBottom="16dp"/>
 
-    <TextView android:layout_width="wrap_content"
+    <TextView android:id="@+id/tv_current_device"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="비밀번호" />
-    <EditText android:id="@+id/et_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:layout_marginBottom="16dp"/>
-
-    <TextView android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="장치 IP" />
-    <EditText android:id="@+id/et_ip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
+        android:text="선택된 기기 없음"
         android:layout_marginBottom="24dp"/>
 
-    <Button android:id="@+id/btn_save"
+    <Button android:id="@+id/btn_reselect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="저장" />
+        android:text="기기 재선택"/>
 </LinearLayout>

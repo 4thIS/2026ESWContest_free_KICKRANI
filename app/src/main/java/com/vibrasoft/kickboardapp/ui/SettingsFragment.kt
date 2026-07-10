@@ -1,32 +1,53 @@
 package com.vibrasoft.kickboardapp.ui
 
+import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.vibrasoft.kickboardapp.MainActivity
 import com.vibrasoft.kickboardapp.R
 import com.vibrasoft.kickboardapp.data.AppSettings
 import com.vibrasoft.kickboardapp.databinding.FragmentSettingsBinding
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var settings: AppSettings
+
+    private val devicePicker = BluetoothDevicePicker(
+        fragment = this,
+        connectorProvider = { (requireActivity() as MainActivity).bluetoothConnector },
+        onDeviceSelected = { device -> connectTo(device) }
+    )
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSettingsBinding.bind(view)
-        val settings = AppSettings(requireContext())
+        settings = AppSettings(requireContext())
 
-        // 저장된 값 불러오기
-        binding.etSsid.setText(settings.ssid)
-        binding.etPassword.setText(settings.password)
-        binding.etIp.setText(settings.deviceIp)
+        updateCurrentDeviceLabel()
+        binding.btnReselect.setOnClickListener { devicePicker.requestPick() }
+    }
 
-        binding.btnSave.setOnClickListener {
-            settings.ssid = binding.etSsid.text.toString().trim()
-            settings.password = binding.etPassword.text.toString()
-            settings.deviceIp = binding.etIp.text.toString().trim()
-            Toast.makeText(requireContext(), "저장됨", Toast.LENGTH_SHORT).show()
+    private fun updateCurrentDeviceLabel() {
+        val address = settings.deviceAddress
+        _binding?.tvCurrentDevice?.text = address.ifEmpty { "선택된 기기 없음" }
+    }
+
+    private fun connectTo(device: BluetoothDevice) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val connector = (requireActivity() as MainActivity).bluetoothConnector
+            val protocol = (requireActivity() as MainActivity).rpiProtocol
+            val success = connector.connect(device)
+            _binding ?: return@launch
+            if (success) {
+                settings.deviceAddress = device.address
+                protocol.startListening()
+                updateCurrentDeviceLabel()
+            }
         }
     }
 
