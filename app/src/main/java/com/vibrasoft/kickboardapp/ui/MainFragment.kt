@@ -1,6 +1,5 @@
 package com.vibrasoft.kickboardapp.ui
 
-import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -10,7 +9,6 @@ import com.vibrasoft.kickboardapp.MainActivity
 import com.vibrasoft.kickboardapp.R
 import com.vibrasoft.kickboardapp.bluetooth.RpiMessage
 import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
-import com.vibrasoft.kickboardapp.data.AppSettings
 import com.vibrasoft.kickboardapp.databinding.FragmentMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,19 +18,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var settings: AppSettings
     private lateinit var rpiProtocol: RpiProtocol
 
     private var isConnected = false
     private var isSessionRunning = false
     private var timerJob: Job? = null
     private var elapsedSeconds = 0L
-
-    private val devicePicker = BluetoothDevicePicker(
-        fragment = this,
-        connectorProvider = { (requireActivity() as MainActivity).bluetoothConnector },
-        onDeviceSelected = { device -> connectTo(device) }
-    )
 
     private val statusCallback: (RpiMessage.Status) -> Unit = { status -> updateStatusDisplay(status) }
     private val disconnectedCallback: () -> Unit = { handleDisconnected() }
@@ -45,44 +36,32 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMainBinding.bind(view)
-        settings = AppSettings(requireContext())
         rpiProtocol = (requireActivity() as MainActivity).rpiProtocol
 
         rpiProtocol.addStatusListener(statusCallback)
         rpiProtocol.addDisconnectedListener(disconnectedCallback)
         rpiProtocol.addErrorListener(onErrorCallback)
 
-        binding.btnConnect.setOnClickListener { devicePicker.requestPick() }
-        binding.rgMode.setOnCheckedChangeListener { _, _ -> updateButtonStates() }
         binding.btnSession.setOnClickListener {
             if (isSessionRunning) stopSession() else startSession()
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        refreshConnectionState()
+    }
+
+    private fun refreshConnectionState() {
         val connector = (requireActivity() as MainActivity).bluetoothConnector
         isConnected = connector.isConnected()
         binding.tvConnection.text = if (isConnected) "● 연결됨" else "○ 미연결"
-
         updateButtonStates()
-    }
-
-    private fun connectTo(device: BluetoothDevice) {
-        binding.tvConnection.text = "연결 중..."
-        viewLifecycleOwner.lifecycleScope.launch {
-            val connector = (requireActivity() as MainActivity).bluetoothConnector
-            val success = connector.connect(device)
-            val b = _binding ?: return@launch
-            isConnected = success
-            b.tvConnection.text = if (success) "● 연결됨" else "○ 미연결"
-            if (success) {
-                settings.deviceAddress = device.address
-                rpiProtocol.startListening()
-            }
-            updateButtonStates()
-        }
     }
 
     private fun startSession() {
         val mode = if (binding.rbDemo.isChecked) "DEMO" else "COLLECT"
+        resetTelemetryDisplay()
         viewLifecycleOwner.lifecycleScope.launch {
             rpiProtocol.sendCommand(RpiProtocol.buildSetModeCommand(mode))
             rpiProtocol.sendCommand(RpiProtocol.buildStartCommand())
@@ -104,8 +83,23 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun updateStatusDisplay(status: RpiMessage.Status) {
         val b = _binding ?: return
-        b.tvRoadType.text = status.roadType
         b.tvSpeed.text = "%.1f km/h".format(status.speed)
+        b.tvDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
+        b.tvVibration.text = status.vibration?.let { "%.2f".format(it) } ?: "-"
+        if (status.roadType != null) {
+            b.rowRoadType.visibility = View.VISIBLE
+            b.tvRoadType.text = status.roadType
+        } else {
+            b.rowRoadType.visibility = View.GONE
+        }
+    }
+
+    private fun resetTelemetryDisplay() {
+        val b = _binding ?: return
+        b.tvSpeed.text = "- km/h"
+        b.tvDistance.text = "- m"
+        b.tvVibration.text = "-"
+        b.rowRoadType.visibility = View.GONE
     }
 
     private fun handleDisconnected() {
@@ -114,6 +108,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             isSessionRunning = false
             timerJob?.cancel()
             b.tvConnection.text = "○ 미연결"
+            resetTelemetryDisplay()
             updateButtonStates()
         }
     }
@@ -133,13 +128,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun updateButtonStates() {
-        val demoMode = binding.rbDemo.isChecked
         binding.rbCollect.isEnabled = isConnected && !isSessionRunning
         binding.rbDemo.isEnabled = isConnected && !isSessionRunning
         binding.btnSession.isEnabled = isConnected
         binding.btnSession.text = if (isSessionRunning) "정지" else "출발"
-        binding.tvRoadType.visibility = if (demoMode) View.VISIBLE else View.GONE
-        binding.tvSpeed.visibility = if (demoMode) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {

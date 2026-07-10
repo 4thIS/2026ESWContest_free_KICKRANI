@@ -1,73 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal">
+    android:layout_height="match_parent">
 
-    <!-- 연결 상태 -->
-    <TextView android:id="@+id/tv_connection"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="○ 미연결"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
-
-    <Button android:id="@+id/btn_connect"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="기기 선택"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-    <!-- 모드 토글 -->
-    <RadioGroup android:id="@+id/rg_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="24dp">
-
-        <RadioButton android:id="@+id/rb_collect"
+        <!-- 연결 상태 (읽기 전용 — 기기 선택은 설정에서만) -->
+        <TextView android:id="@+id/tv_connection"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="수집모드"
-            android:checked="true"/>
+            android:text="○ 미연결"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
 
-        <RadioButton android:id="@+id/rb_demo"
+        <!-- 모드 토글 -->
+        <RadioGroup android:id="@+id/rg_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="시연모드"
-            android:layout_marginStart="16dp"/>
-    </RadioGroup>
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
 
-    <!-- 노면 유형 · 속도 (시연모드에서만 표시) -->
-    <TextView android:id="@+id/tv_road_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="16sp"
-        android:visibility="gone"
-        android:layout_marginBottom="8dp"/>
+            <RadioButton android:id="@+id/rb_collect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수집모드"
+                android:checked="true"/>
 
-    <TextView android:id="@+id/tv_speed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0.0 km/h"
-        android:textSize="48sp"
-        android:visibility="gone"
-        android:layout_marginBottom="24dp"/>
+            <RadioButton android:id="@+id/rb_demo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="시연모드"
+                android:layout_marginStart="16dp"/>
+        </RadioGroup>
 
-    <!-- 출발/정지 -->
-    <Button android:id="@+id/btn_session"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="출발"
-        android:layout_marginBottom="24dp"/>
+        <!-- 텔레메트리 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp">
 
-    <!-- 타이머 -->
-    <TextView android:id="@+id/tv_timer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="00:00:00"
-        android:textSize="32sp"/>
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="경과 시간"/>
+                    <TextView android:id="@+id/tv_timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00:00"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="속도"/>
+                    <TextView android:id="@+id/tv_speed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- km/h"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="이동거리"/>
+                    <TextView android:id="@+id/tv_distance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- m"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="진동값"/>
+                    <TextView android:id="@+id/tv_vibration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/row_road_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="노면 유형"/>
+                    <TextView android:id="@+id/tv_road_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 출발/정지 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_session"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="출발"/>
+
+    </LinearLayout>
+</ScrollView>
