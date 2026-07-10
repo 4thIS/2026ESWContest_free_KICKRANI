@@ -34,6 +34,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         onDeviceSelected = { device -> connectTo(device) }
     )
 
+    private val onErrorCallback: (String, String) -> Unit = { cmd, message ->
+        _binding?.let {
+            Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMainBinding.bind(view)
@@ -42,11 +48,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         rpiProtocol.onStatus = { status -> updateStatusDisplay(status) }
         rpiProtocol.onDisconnected = { handleDisconnected() }
-        rpiProtocol.onError = { cmd, message ->
-            _binding?.let {
-                Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
-            }
-        }
+        rpiProtocol.onError = onErrorCallback
 
         binding.btnConnect.setOnClickListener { devicePicker.requestPick() }
         binding.rgMode.setOnCheckedChangeListener { _, _ -> updateButtonStates() }
@@ -143,7 +145,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         timerJob?.cancel()
         rpiProtocol.onStatus = null
         rpiProtocol.onDisconnected = null
-        rpiProtocol.onError = null
+        if (rpiProtocol.onError === onErrorCallback) rpiProtocol.onError = null
         _binding = null
     }
 }

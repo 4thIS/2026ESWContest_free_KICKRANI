@@ -25,6 +25,10 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     private val roadConditions = listOf("정상", "불량")
     private var pendingRename: Pair<String, String>? = null
 
+    private val onErrorCallback: (String, String) -> Unit = { cmd, message ->
+        handleError(cmd, message)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileBinding.bind(view)
@@ -42,7 +46,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             _binding?.let { adapter.updateFiles(files) }
         }
         rpiProtocol.onAck = { cmd, ok -> handleAck(cmd, ok) }
-        rpiProtocol.onError = { cmd, message -> handleError(cmd, message) }
+        rpiProtocol.onError = onErrorCallback
 
         binding.btnRefresh.setOnClickListener { loadFiles() }
         loadFiles()
@@ -160,7 +164,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         super.onDestroyView()
         rpiProtocol.onFiles = null
         rpiProtocol.onAck = null
-        rpiProtocol.onError = null
+        if (rpiProtocol.onError === onErrorCallback) rpiProtocol.onError = null
         _binding = null
     }
 }
