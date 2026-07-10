@@ -3,6 +3,7 @@ package com.vibrasoft.kickboardapp.ui
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.vibrasoft.kickboardapp.MainActivity
@@ -41,12 +42,21 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         rpiProtocol.onStatus = { status -> updateStatusDisplay(status) }
         rpiProtocol.onDisconnected = { handleDisconnected() }
+        rpiProtocol.onError = { cmd, message ->
+            _binding?.let {
+                Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         binding.btnConnect.setOnClickListener { devicePicker.requestPick() }
         binding.rgMode.setOnCheckedChangeListener { _, _ -> updateButtonStates() }
         binding.btnSession.setOnClickListener {
             if (isSessionRunning) stopSession() else startSession()
         }
+
+        val connector = (requireActivity() as MainActivity).bluetoothConnector
+        isConnected = connector.isConnected()
+        binding.tvConnection.text = if (isConnected) "● 연결됨" else "○ 미연결"
 
         updateButtonStates()
     }
@@ -133,6 +143,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         timerJob?.cancel()
         rpiProtocol.onStatus = null
         rpiProtocol.onDisconnected = null
+        rpiProtocol.onError = null
         _binding = null
     }
 }

@@ -3,6 +3,7 @@ package com.vibrasoft.kickboardapp.ui
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +23,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
 
     private val roadTypes = listOf("아스팔트", "보도블럭", "콘크리트", "비포장", "기타")
     private val roadConditions = listOf("정상", "불량")
+    private var pendingRename: Pair<String, String>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,6 +41,8 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.onFiles = { files ->
             _binding?.let { adapter.updateFiles(files) }
         }
+        rpiProtocol.onAck = { cmd, ok -> handleAck(cmd, ok) }
+        rpiProtocol.onError = { cmd, message -> handleError(cmd, message) }
 
         binding.btnRefresh.setOnClickListener { loadFiles() }
         loadFiles()
@@ -104,9 +108,34 @@ class FileFragment : Fragment(R.layout.fragment_file) {
 
     private fun renameFile(oldName: String, roadType: String, condition: String) {
         val newName = RpiProtocol.buildNewFileName(oldName, roadType, condition)
+        pendingRename = oldName to newName
         viewLifecycleOwner.lifecycleScope.launch {
             val sent = rpiProtocol.sendCommand(RpiProtocol.buildRenameCommand(oldName, newName))
-            if (sent) adapter.renameFile(oldName, newName)
+            if (!sent) {
+                pendingRename = null
+                _binding?.let {
+                    Toast.makeText(requireContext(), "이름 변경 요청 전송 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun handleAck(cmd: String, ok: Boolean) {
+        if (cmd != "RENAME") return
+        val (oldName, newName) = pendingRename ?: return
+        pendingRename = null
+        _binding?.let {
+            if (ok) {
+                adapter.renameFile(oldName, newName)
+            } else {
+                Toast.makeText(requireContext(), "이름 변경 실패: $oldName", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun handleError(cmd: String, message: String) {
+        _binding?.let {
+            Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -130,6 +159,8 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     override fun onDestroyView() {
         super.onDestroyView()
         rpiProtocol.onFiles = null
+        rpiProtocol.onAck = null
+        rpiProtocol.onError = null
         _binding = null
     }
 }
