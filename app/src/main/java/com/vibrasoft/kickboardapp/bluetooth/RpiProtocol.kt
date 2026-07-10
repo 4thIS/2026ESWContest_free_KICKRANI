@@ -14,7 +14,10 @@ class RpiProtocol {
 
     companion object {
         private fun escape(s: String): String =
-            s.replace("\\", "\\\\").replace("\"", "\\\"")
+            s.replace("\\", "\\\\")
+             .replace("\"", "\\\"")
+             .replace("\n", "\\n")
+             .replace("\r", "\\r")
 
         fun buildSetModeCommand(mode: String): String =
             """{"cmd":"SET_MODE","mode":"${escape(mode)}"}"""

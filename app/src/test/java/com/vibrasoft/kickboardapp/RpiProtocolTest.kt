@@ -72,6 +72,30 @@ class RpiProtocolTest {
     }
 
     @Test
+    fun buildMemoCommand_escapesNewline() {
+        assertEquals(
+            "{\"cmd\":\"MEMO\",\"file\":\"road.csv\",\"memo\":\"line1\\nline2\"}",
+            RpiProtocol.buildMemoCommand("road.csv", "line1\nline2")
+        )
+    }
+
+    @Test
+    fun buildMemoCommand_escapesCarriageReturn() {
+        assertEquals(
+            "{\"cmd\":\"MEMO\",\"file\":\"road.csv\",\"memo\":\"line1\\rline2\"}",
+            RpiProtocol.buildMemoCommand("road.csv", "line1\rline2")
+        )
+    }
+
+    @Test
+    fun buildRenameCommand_escapesNewline() {
+        assertEquals(
+            "{\"cmd\":\"RENAME\",\"old\":\"old\\nname.csv\",\"new\":\"new\\nname.csv\"}",
+            RpiProtocol.buildRenameCommand("old\nname.csv", "new\nname.csv")
+        )
+    }
+
+    @Test
     fun buildNewFileName_appendsTypeAndCondition() {
         assertEquals(
             "20260630_143022_아스팔트_불량.csv",
