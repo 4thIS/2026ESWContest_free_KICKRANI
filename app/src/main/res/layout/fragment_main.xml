@@ -17,29 +17,52 @@
     <Button android:id="@+id/btn_connect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="WiFi 연결"
-        android:layout_marginBottom="32dp"/>
+        android:text="기기 선택"
+        android:layout_marginBottom="24dp"/>
 
-    <!-- GPS 속도 -->
+    <!-- 모드 토글 -->
+    <RadioGroup android:id="@+id/rg_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <RadioButton android:id="@+id/rb_collect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="수집모드"
+            android:checked="true"/>
+
+        <RadioButton android:id="@+id/rb_demo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="시연모드"
+            android:layout_marginStart="16dp"/>
+    </RadioGroup>
+
+    <!-- 노면 유형 · 속도 (시연모드에서만 표시) -->
+    <TextView android:id="@+id/tv_road_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"/>
+
     <TextView android:id="@+id/tv_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0.0 km/h"
         android:textSize="48sp"
-        android:layout_marginBottom="32dp"/>
+        android:visibility="gone"
+        android:layout_marginBottom="24dp"/>
 
-    <!-- 세션 제어 버튼 -->
-    <Button android:id="@+id/btn_sync"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="시각 동기화"
-        android:layout_marginBottom="8dp"/>
-
+    <!-- 출발/정지 -->
     <Button android:id="@+id/btn_session"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="세션 시작"
-        android:layout_marginBottom="32dp"/>
+        android:text="출발"
+        android:layout_marginBottom="24dp"/>
 
     <!-- 타이머 -->
     <TextView android:id="@+id/tv_timer"

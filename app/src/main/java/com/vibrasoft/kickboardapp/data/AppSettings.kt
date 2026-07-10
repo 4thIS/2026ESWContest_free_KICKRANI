@@ -16,4 +16,8 @@ class AppSettings(context: Context) {
     var deviceIp: String
         get() = prefs.getString("device_ip", "192.168.4.1") ?: "192.168.4.1"
         set(value) { prefs.edit().putString("device_ip", value).apply() }
+
+    var deviceAddress: String
+        get() = prefs.getString("device_address", "") ?: ""
+        set(value) { prefs.edit().putString("device_address", value).apply() }
 }
