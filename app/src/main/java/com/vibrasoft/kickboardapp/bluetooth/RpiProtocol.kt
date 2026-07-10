@@ -1,5 +1,11 @@
 package com.vibrasoft.kickboardapp.bluetooth
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -10,7 +16,43 @@ sealed class RpiMessage {
     data class Error(val cmd: String, val message: String) : RpiMessage()
 }
 
-class RpiProtocol {
+class RpiProtocol(private val connector: BluetoothConnector) {
+    // Dispatchers.Main: readLine()의 실제 블로킹 호출은 connector 내부에서 IO로 전환되고,
+    // 콜백 디스패치는 여기서 Main으로 돌아와 UI를 바로 건드릴 수 있게 한다.
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var listenJob: Job? = null
+
+    var onAck: ((String, Boolean) -> Unit)? = null
+    var onStatus: ((RpiMessage.Status) -> Unit)? = null
+    var onFiles: ((List<String>) -> Unit)? = null
+    var onError: ((String, String) -> Unit)? = null
+    var onDisconnected: (() -> Unit)? = null
+
+    fun startListening() {
+        listenJob?.cancel()
+        listenJob = scope.launch {
+            while (isActive) {
+                val line = connector.readLine()
+                if (line == null) {
+                    onDisconnected?.invoke()
+                    break
+                }
+                when (val message = parseMessage(line)) {
+                    is RpiMessage.Ack -> onAck?.invoke(message.cmd, message.ok)
+                    is RpiMessage.Status -> onStatus?.invoke(message)
+                    is RpiMessage.Files -> onFiles?.invoke(message.files)
+                    is RpiMessage.Error -> onError?.invoke(message.cmd, message.message)
+                    null -> {}
+                }
+            }
+        }
+    }
+
+    fun stopListening() {
+        listenJob?.cancel()
+    }
+
+    suspend fun sendCommand(command: String): Boolean = connector.send(command)
 
     companion object {
         private fun escape(s: String): String =
