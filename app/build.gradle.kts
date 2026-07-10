@@ -51,4 +51,5 @@ dependencies {
     implementation(libs.androidx.recyclerview)
 
     testImplementation(libs.junit)
+    testImplementation(libs.json)
 }
