@@ -11,7 +11,12 @@ import org.json.JSONObject
 
 sealed class RpiMessage {
     data class Ack(val cmd: String, val ok: Boolean) : RpiMessage()
-    data class Status(val speed: Float, val roadType: String) : RpiMessage()
+    data class Status(
+        val speed: Float,
+        val distance: Float? = null,
+        val vibration: Float? = null,
+        val roadType: String? = null
+    ) : RpiMessage()
     data class Files(val files: List<String>) : RpiMessage()
     data class Error(val cmd: String, val message: String) : RpiMessage()
 }
@@ -22,11 +27,26 @@ class RpiProtocol(private val connector: BluetoothConnector) {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var listenJob: Job? = null
 
-    var onAck: ((String, Boolean) -> Unit)? = null
-    var onStatus: ((RpiMessage.Status) -> Unit)? = null
-    var onFiles: ((List<String>) -> Unit)? = null
-    var onError: ((String, String) -> Unit)? = null
-    var onDisconnected: (() -> Unit)? = null
+    private val ackListeners = mutableListOf<(String, Boolean) -> Unit>()
+    private val statusListeners = mutableListOf<(RpiMessage.Status) -> Unit>()
+    private val filesListeners = mutableListOf<(List<String>) -> Unit>()
+    private val errorListeners = mutableListOf<(String, String) -> Unit>()
+    private val disconnectedListeners = mutableListOf<() -> Unit>()
+
+    fun addAckListener(listener: (String, Boolean) -> Unit) { ackListeners.add(listener) }
+    fun removeAckListener(listener: (String, Boolean) -> Unit) { ackListeners.remove(listener) }
+
+    fun addStatusListener(listener: (RpiMessage.Status) -> Unit) { statusListeners.add(listener) }
+    fun removeStatusListener(listener: (RpiMessage.Status) -> Unit) { statusListeners.remove(listener) }
+
+    fun addFilesListener(listener: (List<String>) -> Unit) { filesListeners.add(listener) }
+    fun removeFilesListener(listener: (List<String>) -> Unit) { filesListeners.remove(listener) }
+
+    fun addErrorListener(listener: (String, String) -> Unit) { errorListeners.add(listener) }
+    fun removeErrorListener(listener: (String, String) -> Unit) { errorListeners.remove(listener) }
+
+    fun addDisconnectedListener(listener: () -> Unit) { disconnectedListeners.add(listener) }
+    fun removeDisconnectedListener(listener: () -> Unit) { disconnectedListeners.remove(listener) }
 
     fun startListening() {
         listenJob?.cancel()
@@ -34,14 +54,14 @@ class RpiProtocol(private val connector: BluetoothConnector) {
             while (isActive) {
                 val line = connector.readLine()
                 if (line == null) {
-                    onDisconnected?.invoke()
+                    disconnectedListeners.toList().forEach { it.invoke() }
                     break
                 }
                 when (val message = parseMessage(line)) {
-                    is RpiMessage.Ack -> onAck?.invoke(message.cmd, message.ok)
-                    is RpiMessage.Status -> onStatus?.invoke(message)
-                    is RpiMessage.Files -> onFiles?.invoke(message.files)
-                    is RpiMessage.Error -> onError?.invoke(message.cmd, message.message)
+                    is RpiMessage.Ack -> ackListeners.toList().forEach { it(message.cmd, message.ok) }
+                    is RpiMessage.Status -> statusListeners.toList().forEach { it(message) }
+                    is RpiMessage.Files -> filesListeners.toList().forEach { it(message.files) }
+                    is RpiMessage.Error -> errorListeners.toList().forEach { it(message.cmd, message.message) }
                     null -> {}
                 }
             }
@@ -87,8 +107,10 @@ class RpiProtocol(private val connector: BluetoothConnector) {
                 when (json.optString("type")) {
                     "ACK" -> RpiMessage.Ack(json.getString("cmd"), json.getBoolean("ok"))
                     "STATUS" -> RpiMessage.Status(
-                        json.getDouble("speed").toFloat(),
-                        json.getString("roadType")
+                        speed = json.getDouble("speed").toFloat(),
+                        distance = if (json.has("distance")) json.getDouble("distance").toFloat() else null,
+                        vibration = if (json.has("vibration")) json.getDouble("vibration").toFloat() else null,
+                        roadType = if (json.has("roadType")) json.getString("roadType") else null
                     )
                     "FILES" -> {
                         val arr = json.getJSONArray("files")

@@ -34,6 +34,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         onDeviceSelected = { device -> connectTo(device) }
     )
 
+    private val statusCallback: (RpiMessage.Status) -> Unit = { status -> updateStatusDisplay(status) }
+    private val disconnectedCallback: () -> Unit = { handleDisconnected() }
     private val onErrorCallback: (String, String) -> Unit = { cmd, message ->
         _binding?.let {
             Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
@@ -46,9 +48,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         settings = AppSettings(requireContext())
         rpiProtocol = (requireActivity() as MainActivity).rpiProtocol
 
-        rpiProtocol.onStatus = { status -> updateStatusDisplay(status) }
-        rpiProtocol.onDisconnected = { handleDisconnected() }
-        rpiProtocol.onError = onErrorCallback
+        rpiProtocol.addStatusListener(statusCallback)
+        rpiProtocol.addDisconnectedListener(disconnectedCallback)
+        rpiProtocol.addErrorListener(onErrorCallback)
 
         binding.btnConnect.setOnClickListener { devicePicker.requestPick() }
         binding.rgMode.setOnCheckedChangeListener { _, _ -> updateButtonStates() }
@@ -143,9 +145,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onDestroyView() {
         super.onDestroyView()
         timerJob?.cancel()
-        rpiProtocol.onStatus = null
-        rpiProtocol.onDisconnected = null
-        if (rpiProtocol.onError === onErrorCallback) rpiProtocol.onError = null
+        rpiProtocol.removeStatusListener(statusCallback)
+        rpiProtocol.removeDisconnectedListener(disconnectedCallback)
+        rpiProtocol.removeErrorListener(onErrorCallback)
         _binding = null
     }
 }

@@ -118,11 +118,34 @@ class RpiProtocolTest {
     }
 
     @Test
-    fun parseMessage_status() {
+    fun parseMessage_status_allFields() {
         val result = RpiProtocol.parseMessage(
-            """{"type":"STATUS","speed":15.3,"roadType":"아스팔트"}"""
+            """{"type":"STATUS","speed":15.3,"distance":123.4,"vibration":0.82,"roadType":"아스팔트"}"""
         )
-        assertEquals(RpiMessage.Status(15.3f, "아스팔트"), result)
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = 123.4f, vibration = 0.82f, roadType = "아스팔트"),
+            result
+        )
+    }
+
+    @Test
+    fun parseMessage_status_onlySpeed_optionalFieldsAreNull() {
+        val result = RpiProtocol.parseMessage("""{"type":"STATUS","speed":15.3}""")
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = null, vibration = null, roadType = null),
+            result
+        )
+    }
+
+    @Test
+    fun parseMessage_status_partialOptionalFields() {
+        val result = RpiProtocol.parseMessage(
+            """{"type":"STATUS","speed":15.3,"distance":50.0}"""
+        )
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = 50.0f, vibration = null, roadType = null),
+            result
+        )
     }
 
     @Test
