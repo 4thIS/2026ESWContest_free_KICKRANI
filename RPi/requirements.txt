@@ -1,0 +1,10 @@
+# 라즈베리파이 통합 소프트웨어 의존성
+# ── Pi(하드웨어)에서만 설치되는 패키지 (Windows 개발 시엔 목으로 대체) ──
+smbus2          # I2C (MPU-6050)
+gpiozero        # GPIO/PWM
+lgpio           # gpiozero 백엔드 (Pi 5)
+bluezero        # BLE GATT 서버
+# ── 공용 (Windows·Pi 모두) ──
+numpy           # 윈도우·특징 계산
+pytest          # 테스트
+# tflite-runtime  # 추론 단계에서 추가 (Pi)
