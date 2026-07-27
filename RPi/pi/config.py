@@ -26,3 +26,12 @@ GYRO_RANGE_DPS = 500           # ±500dps → 65.5 LSB/dps
 # ── 로깅 ──
 LOG_DIR = "data"               # CSV 저장 폴더
 LOG_SYNC_SEC = 1.0             # 주기적 fsync 간격(손실 ≤1초)
+
+# ── 노면 인지: 윈도우 (③ 샘플 → 윈도우) ──
+WINDOW_SAMPLES = 100           # 0.5초 @200Hz (1차 시간 윈도우)
+WINDOW_HOP = 50                # 50% 오버랩
+
+# ── 속도 정책 (노면별 목표 속도, m/s) — ⚠️ 미결정: 실측 튜닝값 ──
+SPEED_SAFE_MPS = 0.4           # 안전(아스팔트·자전거도로)
+SPEED_CAUTION_MPS = 0.25       # 주의(보도블럭·콘크리트)
+SPEED_DANGER_MPS = 0.1         # 위험(자갈길) + 불확실/미지 → fail-safe 감속
