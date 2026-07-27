@@ -8,7 +8,6 @@ IMU FIFO를 주기적으로 비우고(drain), 각 프레임에 엔코더 펄스 
 엔코더는 배치마다 `pulses()` 스냅샷 1회(200Hz보다 느리게 변해 OK).
 """
 import threading
-import time
 
 from pi import config
 from pi.contracts import Encoder, Sample

@@ -1,0 +1,5 @@
+# PC 분석용 의존성 (예비실험·학습 파이프라인) — Pi 런타임과 별개
+numpy
+scipy
+scikit-learn      # analyze_surfaces RandomForest 분류 (없으면 numpy 폴백)
+matplotlib        # 스펙트럼 플롯 (없으면 생략)
