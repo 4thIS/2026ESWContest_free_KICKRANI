@@ -35,7 +35,7 @@ def test_first_update_only_primes_timing():
     sc.set_target(config.TARGET_SPEED_MPS)
     clk.t += 0.02
     sc.update()
-    assert g.pwm_duty(config.PWMA) == 0.0
+    assert g.pwm_duty(config.ENA) == 0.0
 
 
 def test_update_commands_motor_when_below_target():
@@ -44,7 +44,7 @@ def test_update_commands_motor_when_below_target():
     sc.set_target(config.TARGET_SPEED_MPS)
     clk.t += 0.02; sc.update()   # prime
     clk.t += 0.02; sc.update()   # 속도 0 < 목표 → PID가 양의 듀티 명령
-    assert g.pwm_duty(config.PWMA) > 0.0
+    assert g.pwm_duty(config.ENA) > 0.0
 
 
 def test_stop_zeros_motor():
@@ -54,7 +54,7 @@ def test_stop_zeros_motor():
     clk.t += 0.02; sc.update()
     clk.t += 0.02; sc.update()
     sc.stop()
-    assert g.pwm_duty(config.PWMA) == 0.0
+    assert g.pwm_duty(config.ENA) == 0.0
 
 
 def test_stop_does_not_reset_shared_encoder_count():
