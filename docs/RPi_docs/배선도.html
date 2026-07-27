@@ -1,0 +1,366 @@
+<title>4WD 킥보드 RC카 배선도</title>
+<style>
+  :root {
+    --bg: #eef1f4;
+    --surface: #ffffff;
+    --surface-2: #e7ecf0;
+    --ink: #14181d;
+    --ink-muted: #57636f;
+    --border: #d3dce2;
+    --accent: #0e7c86;
+    --shadow: 0 1px 2px rgba(20,24,29,.06), 0 6px 20px rgba(20,24,29,.05);
+
+    /* wire colors — semantic, kept consistent across themes */
+    --w-33: #E0871F;   /* 3.3V */
+    --w-5:  #E23B40;   /* 5V / VM 모터전원 */
+    --w-gnd:#5a6672;   /* GND */
+    --w-i2c:#2F6FED;   /* SDA/SCL */
+    --w-pwm:#178F52;   /* PWM */
+    --w-dir:#8250DF;   /* 방향 AIN/BIN */
+    --w-stby:#C98A00;  /* STBY */
+    --w-hall:#0BAAA3;  /* 홀센서 DO */
+    --w-mot:#C2410C;   /* 모터 출력 */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1419;
+      --surface: #161c23;
+      --surface-2: #1e262e;
+      --ink: #e6edf3;
+      --ink-muted: #9aa7b3;
+      --border: #29323b;
+      --accent: #3fd0c9;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      --w-33: #F0A94A; --w-5: #FF6166; --w-gnd: #8a97a3; --w-i2c: #5B8DEF;
+      --w-pwm: #3FBE77; --w-dir: #A483F0; --w-stby: #E6B22E; --w-hall: #34CFC7; --w-mot: #F0863E;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#eef1f4; --surface:#fff; --surface-2:#e7ecf0; --ink:#14181d; --ink-muted:#57636f;
+    --border:#d3dce2; --accent:#0e7c86;
+    --w-33:#E0871F; --w-5:#E23B40; --w-gnd:#5a6672; --w-i2c:#2F6FED; --w-pwm:#178F52;
+    --w-dir:#8250DF; --w-stby:#C98A00; --w-hall:#0BAAA3; --w-mot:#C2410C;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0f1419; --surface:#161c23; --surface-2:#1e262e; --ink:#e6edf3; --ink-muted:#9aa7b3;
+    --border:#29323b; --accent:#3fd0c9;
+    --w-33:#F0A94A; --w-5:#FF6166; --w-gnd:#8a97a3; --w-i2c:#5B8DEF; --w-pwm:#3FBE77;
+    --w-dir:#A483F0; --w-stby:#E6B22E; --w-hall:#34CFC7; --w-mot:#F0863E;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 22px 80px; }
+  .mono { font-family: ui-monospace, "Cascadia Code", "Consolas", "SFMono-Regular", monospace; }
+
+  header.top { margin-bottom: 34px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(26px, 4.4vw, 40px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -.02em; text-wrap: balance; }
+  .lede { color: var(--ink-muted); font-size: 16px; max-width: 62ch; margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--ink);
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  section { margin-top: 44px; }
+  h2 {
+    font-size: 20px; letter-spacing: -.01em; margin: 0 0 4px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .num { font: 700 13px/1 ui-monospace, monospace; color: var(--accent); }
+  .sub { color: var(--ink-muted); font-size: 14px; margin: 0 0 18px; }
+
+  /* diagram card */
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 14px; box-shadow: var(--shadow); overflow-x: auto;
+  }
+  .diagram svg { display: block; width: 100%; min-width: 720px; height: auto; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px 20px; margin-top: 16px; padding: 0 4px; }
+  .legend .item { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted); }
+  .swatch { width: 20px; height: 4px; border-radius: 2px; flex: none; }
+
+  /* tables */
+  .tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .tcard {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .tcard h3 {
+    margin: 0; padding: 13px 16px; font-size: 14.5px; font-weight: 700;
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .tcard h3 .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  th { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td.pin { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-weight: 600; }
+  .phys { display: inline-block; min-width: 20px; padding: 1px 6px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); font: 600 11.5px/1.4 ui-monospace, monospace; color: var(--ink-muted); }
+  .wire { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .wire::before { content: ""; width: 16px; height: 4px; border-radius: 2px; background: var(--wc, var(--ink-muted)); flex: none; }
+  tr.span td { background: color-mix(in srgb, var(--accent) 8%, transparent); font-size: 12.5px; color: var(--ink-muted); }
+
+  /* notes */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .note {
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--nc, var(--accent));
+    border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .note h4 { margin: 0 0 6px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .note p { margin: 0; font-size: 13.5px; color: var(--ink-muted); }
+  .note .tag { font: 700 10px/1 ui-monospace, monospace; letter-spacing: .05em; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; background: color-mix(in srgb, var(--nc) 15%, transparent); color: var(--nc); }
+
+  .todo {
+    background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; padding: 16px 18px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .todo .mk { font-size: 20px; line-height: 1; }
+  .todo p { margin: 0; font-size: 13.5px; color: var(--ink-muted); }
+  .todo strong { color: var(--ink); }
+
+  footer { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--ink-muted); }
+  code.k { font-family: ui-monospace, Consolas, monospace; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; font-size: .92em; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">노면 감지 킥보드 · 구동부 (DJ)</p>
+    <h1>4WD RC카 배선도</h1>
+    <p class="lede">Raspberry Pi 5 한 대가 모터 구동·속도제어·진동감지를 담당하는 4륜구동 구성. 아래 다이어그램은 배선의 큰 흐름, 표는 핀 단위 정확한 연결을 담는다.</p>
+    <div class="chips">
+      <span class="chip">4WD · TB6612FNG 2채널</span>
+      <span class="chip">A3144 홀센서</span>
+      <span class="chip">MPU-6050 · I2C</span>
+      <span class="chip">핀 번호 = BCM</span>
+    </div>
+  </header>
+
+  <section aria-label="배선 개요도">
+    <h2><span class="num">◇</span> 배선 개요</h2>
+    <p class="sub">색이 곧 배선의 역할이다 — 전원·접지는 굵은 공통선(레일)으로 묶어 선을 정리한다.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 900 540" role="img" aria-label="RC카 배선 개요 다이어그램">
+        <defs>
+          <style>
+            .box { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; }
+            .box-hub { fill: color-mix(in srgb, var(--accent) 12%, var(--surface)); stroke: var(--accent); stroke-width: 2; }
+            .lbl { fill: var(--ink); font: 700 15px system-ui, sans-serif; }
+            .lbl-s { fill: var(--ink-muted); font: 500 11.5px ui-monospace, monospace; }
+            .cable { fill: none; stroke-width: 4; stroke-linecap: round; }
+            .cbl-lbl { font: 600 11px system-ui, sans-serif; }
+          </style>
+        </defs>
+
+        <!-- GND rail -->
+        <line x1="70" y1="500" x2="830" y2="500" stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round"/>
+        <text x="74" y="521" class="lbl-s" fill="var(--w-gnd)">GND 공통 레일 — 모든 부품의 GND를 여기에 묶는다</text>
+
+        <!-- cables (draw under boxes) -->
+        <!-- Pi -> MPU : I2C+power -->
+        <path class="cable" stroke="var(--w-i2c)" d="M225,215 C360,150 520,95 655,88"/>
+        <text x="360" y="128" class="cbl-lbl" fill="var(--w-i2c)">I2C (SDA·SCL) + 3.3V</text>
+        <!-- Pi -> Hall -->
+        <path class="cable" stroke="var(--w-hall)" d="M225,240 C400,235 520,215 655,208"/>
+        <text x="372" y="212" class="cbl-lbl" fill="var(--w-hall)">홀센서 신호 + 3.3V</text>
+        <!-- Pi -> TB6612 : 7 control lines -->
+        <path class="cable" stroke="var(--w-pwm)" d="M225,268 C280,272 300,285 345,290"/>
+        <text x="232" y="292" class="cbl-lbl" fill="var(--w-pwm)">제어 7선</text>
+        <!-- TB -> left motors -->
+        <path class="cable" stroke="var(--w-mot)" d="M520,285 C590,300 610,330 655,338"/>
+        <text x="527" y="316" class="cbl-lbl" fill="var(--w-mot)">A채널</text>
+        <!-- TB -> right motors -->
+        <path class="cable" stroke="var(--w-mot)" d="M520,300 C590,360 610,415 655,428"/>
+        <text x="527" y="392" class="cbl-lbl" fill="var(--w-mot)">B채널</text>
+        <!-- Battery -> TB VM -->
+        <path class="cable" stroke="var(--w-5)" d="M215,430 C280,410 300,330 345,310"/>
+        <text x="243" y="372" class="cbl-lbl" fill="var(--w-5)">모터전원 VM</text>
+        <!-- Battery(buck) -> Pi 5V -->
+        <path class="cable" stroke="var(--w-5)" d="M150,415 C150,380 150,360 150,340"/>
+        <text x="158" y="392" class="cbl-lbl" fill="var(--w-5)">5V</text>
+
+        <!-- GND drops -->
+        <path class="cable" stroke="var(--w-gnd)" stroke-width="2.5" d="M150,330 L150,500" opacity=".55"/>
+        <path class="cable" stroke="var(--w-gnd)" stroke-width="2.5" d="M430,320 L430,500" opacity=".55"/>
+        <path class="cable" stroke="var(--w-gnd)" stroke-width="2.5" d="M745,130 L745,500" opacity=".45"/>
+        <path class="cable" stroke="var(--w-gnd)" stroke-width="2.5" d="M215,470 L215,500" opacity=".55"/>
+
+        <!-- Boxes -->
+        <g>
+          <rect class="box-hub" x="70" y="170" width="160" height="110" rx="12"/>
+          <text x="150" y="212" text-anchor="middle" class="lbl">Raspberry Pi 5</text>
+          <text x="150" y="234" text-anchor="middle" class="lbl-s">제어 허브 · BCM 핀</text>
+        </g>
+        <g>
+          <rect class="box" x="345" y="230" width="175" height="90" rx="11"/>
+          <text x="432" y="270" text-anchor="middle" class="lbl">TB6612FNG</text>
+          <text x="432" y="291" text-anchor="middle" class="lbl-s">모터드라이버 2채널</text>
+        </g>
+        <g>
+          <rect class="box" x="655" y="48" width="180" height="80" rx="11"/>
+          <text x="745" y="84" text-anchor="middle" class="lbl">MPU-6050</text>
+          <text x="745" y="104" text-anchor="middle" class="lbl-s">진동 IMU</text>
+        </g>
+        <g>
+          <rect class="box" x="655" y="168" width="180" height="80" rx="11"/>
+          <text x="745" y="204" text-anchor="middle" class="lbl">A3144 홀센서</text>
+          <text x="745" y="224" text-anchor="middle" class="lbl-s">속도 · +자석</text>
+        </g>
+        <g>
+          <rect class="box" x="655" y="300" width="180" height="72" rx="11"/>
+          <text x="745" y="332" text-anchor="middle" class="lbl">좌측 모터 ×2</text>
+          <text x="745" y="352" text-anchor="middle" class="lbl-s">병렬 · AO1/AO2</text>
+        </g>
+        <g>
+          <rect class="box" x="655" y="392" width="180" height="72" rx="11"/>
+          <text x="745" y="424" text-anchor="middle" class="lbl">우측 모터 ×2</text>
+          <text x="745" y="444" text-anchor="middle" class="lbl-s">병렬 · BO1/BO2</text>
+        </g>
+        <g>
+          <rect class="box" x="70" y="392" width="175" height="78" rx="11"/>
+          <text x="157" y="426" text-anchor="middle" class="lbl">배터리 7.4V</text>
+          <text x="157" y="446" text-anchor="middle" class="lbl-s">+ 벅컨버터 5V</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="swatch" style="background:var(--w-33)"></span>3.3V</span>
+      <span class="item"><span class="swatch" style="background:var(--w-5)"></span>5V / VM 모터전원</span>
+      <span class="item"><span class="swatch" style="background:var(--w-gnd)"></span>GND 접지</span>
+      <span class="item"><span class="swatch" style="background:var(--w-i2c)"></span>I2C (SDA·SCL)</span>
+      <span class="item"><span class="swatch" style="background:var(--w-pwm)"></span>PWM 속도</span>
+      <span class="item"><span class="swatch" style="background:var(--w-dir)"></span>방향 (AIN·BIN)</span>
+      <span class="item"><span class="swatch" style="background:var(--w-stby)"></span>STBY 활성화</span>
+      <span class="item"><span class="swatch" style="background:var(--w-hall)"></span>홀센서 신호</span>
+      <span class="item"><span class="swatch" style="background:var(--w-mot)"></span>모터 출력</span>
+    </div>
+  </section>
+
+  <section aria-label="핀 연결표">
+    <h2><span class="num">▦</span> 핀 연결표</h2>
+    <p class="sub">이 표가 정확한 기준. 물리핀은 Pi 40핀 헤더의 실제 번호(꽂는 자리)다.</p>
+    <div class="tables">
+
+      <div class="tcard">
+        <h3><span class="dot" style="background:var(--w-pwm)"></span>Pi → TB6612FNG · 제어 7선</h3>
+        <table>
+          <thead><tr><th>Pi 핀 (BCM)</th><th>물리</th><th>→ TB6612</th><th>배선</th></tr></thead>
+          <tbody>
+            <tr><td class="pin">GPIO18</td><td><span class="phys">12</span></td><td class="pin">PWMA</td><td><span class="wire" style="--wc:var(--w-pwm)">PWM</span></td></tr>
+            <tr><td class="pin">GPIO23</td><td><span class="phys">16</span></td><td class="pin">AIN1</td><td><span class="wire" style="--wc:var(--w-dir)">방향</span></td></tr>
+            <tr><td class="pin">GPIO24</td><td><span class="phys">18</span></td><td class="pin">AIN2</td><td><span class="wire" style="--wc:var(--w-dir)">방향</span></td></tr>
+            <tr><td class="pin">GPIO13</td><td><span class="phys">33</span></td><td class="pin">PWMB</td><td><span class="wire" style="--wc:var(--w-pwm)">PWM</span></td></tr>
+            <tr><td class="pin">GPIO20</td><td><span class="phys">38</span></td><td class="pin">BIN1</td><td><span class="wire" style="--wc:var(--w-dir)">방향</span></td></tr>
+            <tr><td class="pin">GPIO21</td><td><span class="phys">40</span></td><td class="pin">BIN2</td><td><span class="wire" style="--wc:var(--w-dir)">방향</span></td></tr>
+            <tr><td class="pin">GPIO25</td><td><span class="phys">22</span></td><td class="pin">STBY</td><td><span class="wire" style="--wc:var(--w-stby)">활성화</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tcard">
+        <h3><span class="dot" style="background:var(--w-i2c)"></span>Pi → MPU-6050 · I2C</h3>
+        <table>
+          <thead><tr><th>Pi 핀 (BCM)</th><th>물리</th><th>→ MPU</th><th>배선</th></tr></thead>
+          <tbody>
+            <tr><td class="pin">3.3V</td><td><span class="phys">1</span></td><td class="pin">VCC</td><td><span class="wire" style="--wc:var(--w-33)">3.3V</span></td></tr>
+            <tr><td class="pin">GPIO2</td><td><span class="phys">3</span></td><td class="pin">SDA</td><td><span class="wire" style="--wc:var(--w-i2c)">I2C</span></td></tr>
+            <tr><td class="pin">GPIO3</td><td><span class="phys">5</span></td><td class="pin">SCL</td><td><span class="wire" style="--wc:var(--w-i2c)">I2C</span></td></tr>
+            <tr><td class="pin">GND</td><td><span class="phys">6</span></td><td class="pin">GND</td><td><span class="wire" style="--wc:var(--w-gnd)">GND</span></td></tr>
+            <tr class="span"><td colspan="4">AD0 → GND 연결 (I2C 주소 <span class="mono">0x68</span> 고정)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tcard">
+        <h3><span class="dot" style="background:var(--w-hall)"></span>Pi → A3144 홀센서</h3>
+        <table>
+          <thead><tr><th>Pi 핀 (BCM)</th><th>물리</th><th>→ 홀센서</th><th>배선</th></tr></thead>
+          <tbody>
+            <tr><td class="pin">3.3V</td><td><span class="phys">17</span></td><td class="pin">VCC</td><td><span class="wire" style="--wc:var(--w-33)">3.3V</span></td></tr>
+            <tr><td class="pin">GPIO17</td><td><span class="phys">11</span></td><td class="pin">DO (출력)</td><td><span class="wire" style="--wc:var(--w-hall)">신호</span></td></tr>
+            <tr><td class="pin">GND</td><td><span class="phys">9</span></td><td class="pin">GND</td><td><span class="wire" style="--wc:var(--w-gnd)">GND</span></td></tr>
+            <tr class="span"><td colspan="4">⚠ 10kΩ 풀업저항: DO ↔ VCC 사이 (개방컬렉터 출력)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tcard">
+        <h3><span class="dot" style="background:var(--w-mot)"></span>TB6612 → 모터 · 전원</h3>
+        <table>
+          <thead><tr><th>TB6612 핀</th><th>연결</th><th>배선</th></tr></thead>
+          <tbody>
+            <tr><td class="pin">VM</td><td>모터 배터리 + (7.4V)</td><td><span class="wire" style="--wc:var(--w-5)">전원</span></td></tr>
+            <tr><td class="pin">VCC</td><td>Pi 3.3V (로직)</td><td><span class="wire" style="--wc:var(--w-33)">3.3V</span></td></tr>
+            <tr><td class="pin">GND</td><td>공통 GND 레일</td><td><span class="wire" style="--wc:var(--w-gnd)">GND</span></td></tr>
+            <tr><td class="pin">AO1 / AO2</td><td>좌측 모터 2개 (병렬)</td><td><span class="wire" style="--wc:var(--w-mot)">출력</span></td></tr>
+            <tr><td class="pin">BO1 / BO2</td><td>우측 모터 2개 (병렬)</td><td><span class="wire" style="--wc:var(--w-mot)">출력</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tcard">
+        <h3><span class="dot" style="background:var(--w-5)"></span>전원 · 접지 배분</h3>
+        <table>
+          <thead><tr><th>출발</th><th>도착</th><th>배선</th></tr></thead>
+          <tbody>
+            <tr><td class="pin">배터리 7.4V +</td><td>TB6612 VM <span class="mono">＋</span> 벅컨버터 IN</td><td><span class="wire" style="--wc:var(--w-5)">전원</span></td></tr>
+            <tr><td class="pin">벅컨버터 5V OUT</td><td>Pi 5V (물리 2번) 또는 USB-C</td><td><span class="wire" style="--wc:var(--w-5)">5V</span></td></tr>
+            <tr><td class="pin">배터리 −</td><td>공통 GND 레일 (Pi·TB·센서 모두)</td><td><span class="wire" style="--wc:var(--w-gnd)">GND</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <section aria-label="주의사항">
+    <h2><span class="num">!</span> 반드시 지킬 것</h2>
+    <p class="sub">움직이는 차량 + 배선 실수는 부품을 태운다. 조립 전에 한 번씩 확인.</p>
+    <div class="notes">
+      <div class="note" style="--nc:var(--w-5)">
+        <h4><span class="tag">전원</span> 모터·Pi 전원 분리</h4>
+        <p>모터전원(VM)과 Pi 전원은 나눠서 공급하고 <strong>GND만 공통</strong>으로 묶는다. VM 라인에 470~1000µF 캐패시터를 걸면 모터 노이즈로 Pi가 리셋되는 걸 막는다.</p>
+      </div>
+      <div class="note" style="--nc:var(--w-hall)">
+        <h4><span class="tag">센서</span> 홀센서 풀업 + 자석</h4>
+        <p>A3144는 개방컬렉터라 <strong>DO–VCC 사이 10kΩ 풀업</strong>이 없으면 신호가 안 뜬다. 바퀴/축에 자석을 붙이고 극성(S/N)을 센서 방향에 맞춰야 감지된다.</p>
+      </div>
+      <div class="note" style="--nc:var(--w-mot)">
+        <h4><span class="tag">4WD</span> 채널당 전류 확인</h4>
+        <p>모터 4개를 채널당 2개씩 병렬로 물린다. TB6612 <strong>채널당 연속 1.2A</strong>(피크 3.2A)를 넘으면 드라이버를 채널당 하나씩 2개로 나눈다.</p>
+      </div>
+      <div class="note" style="--nc:var(--w-dir)">
+        <h4><span class="tag">방향</span> 좌우 회전 방향 일치</h4>
+        <p>직진은 <span class="mono">AIN1=H, AIN2=L</span>. 좌우 바퀴가 <strong>같은 방향</strong>으로 돌아야 직진이다. 반대로 돌면 그 쪽 모터 두 선을 바꿔 끼운다. 첫 테스트는 <strong>바퀴를 공중</strong>에 띄우고.</p>
+      </div>
+      <div class="note" style="--nc:var(--accent)">
+        <h4><span class="tag">배선</span> 브레드보드 없이 연결</h4>
+        <p>모듈 핀헤더에는 <strong>듀폰(Dupont) 커넥터</strong>로 직결, 헐거우면 납땜. 위 다이어그램의 <strong>3.3V·GND 공통 레일</strong>과 <strong>10kΩ 풀업</strong>은 물리적 집이 필요하니 작은 <strong>만능기판(perfboard)</strong> 한 장에 납땜해 분배 허브로 쓴다. 모터·배터리 굵은 선은 <strong>나사 단자대(터미널 블록)</strong>가 안전하다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="다음 단계">
+    <h2><span class="num">→</span> 남은 결정</h2>
+    <div class="todo">
+      <span class="mk">📐</span>
+      <p><strong>부품 크기·배치는 아직 미정.</strong> Pi 5·TB6612·배터리 크기와 놓을 위치, 홀센서+자석 장착점(바퀴 축 근처), MPU-6050 고정 위치(헐거우면 노면 진동이 왜곡됨)를 <strong>섀시 담당 명재(mj)</strong> 와 맞춰야 프린팅이 어긋나지 않는다. &nbsp;·&nbsp; 4WD 확정에 따라 <strong>설계명세서 §8 배선표에 B채널 추가 + 전원 담당 찬우(cw)에게 통지</strong> 필요.</p>
+    </div>
+  </section>
+
+  <footer>
+    핀 번호는 BCM 기준 · 물리핀은 40핀 헤더 실제 번호 · 코드 단일 출처: <code class="k">rc_car/pi/config.py</code> · 설계 기준: <code class="k">docs/RPi_docs/설계명세서.md §8</code>
+  </footer>
+</div>
