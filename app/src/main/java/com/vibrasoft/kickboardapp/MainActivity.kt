@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
         bluetoothConnector = BluetoothConnector(this)
         rpiProtocol = RpiProtocol(bluetoothConnector)
 
+        setSupportActionBar(binding.toolbar)
+
         val navHost = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
