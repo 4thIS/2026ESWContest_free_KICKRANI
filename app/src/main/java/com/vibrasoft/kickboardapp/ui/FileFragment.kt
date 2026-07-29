@@ -53,7 +53,11 @@ class FileFragment : Fragment(R.layout.fragment_file) {
         rpiProtocol.addDisconnectedListener(disconnectedCallback)
         rpiProtocol.addConnectedListener(connectedCallback)
 
-        binding.btnRefresh.setOnClickListener { loadFiles() }
+        binding.btnRefresh.setOnClickListener {
+            // 연타 재진입 차단: IO 대기 중 중복 클릭 방지
+            binding.btnRefresh.isEnabled = false
+            loadFiles()
+        }
     }
 
     override fun onResume() {
@@ -73,6 +77,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     private fun loadFiles() {
         viewLifecycleOwner.lifecycleScope.launch {
             rpiProtocol.sendCommand(RpiProtocol.buildListFilesCommand())
+            _binding?.let { it.btnRefresh.isEnabled = isConnected }
         }
     }
 

@@ -45,6 +45,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         rpiProtocol.addConnectedListener(connectedCallback)
 
         binding.btnSession.setOnClickListener {
+            // 연타 재진입 차단: IO 대기 중 중복 클릭 방지 (updateButtonStates가 상태 복원)
+            binding.btnSession.isEnabled = false
             if (isSessionRunning) stopSession() else startSession()
         }
     }

@@ -31,12 +31,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="수집모드"
+                android:enabled="false"
                 android:checked="true"/>
 
             <RadioButton android:id="@+id/rb_demo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="시연모드"
+                android:enabled="false"
                 android:layout_marginStart="16dp"/>
         </RadioGroup>
 
@@ -142,6 +144,7 @@
             android:id="@+id/btn_session"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="출발"/>
 
     </LinearLayout>
