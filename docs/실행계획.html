@@ -86,6 +86,7 @@
 
   <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
   <div class="meta">제24회 임베디드SW경진대회 자유공모 · 기준일 2026-08-10 · 근거: 설계명세서 / 구현.md / DJ_협의사항 / issue #10</div>
+  <div class="meta">📄 정본은 <b>실행계획.md</b> — 이 문서는 같은 내용의 뷰다. <b>수정은 항상 양쪽 같이.</b></div>
   <div class="dday">예선 마감 9/3 — 남은 기간 약 3.5주 (제출 목표 9/1)</div>
 
   <h2>👥 담당</h2>
@@ -129,9 +130,9 @@
     <div class="tasks">
       <div class="task b-cw crit"><span class="tid">A1</span><span class="star">⭐</span> 노면 진동 예비실험 (5종×3회 → 분석 판정)<span class="who w-cw">CW</span><span class="dep">의존 없음 — 프로젝트 성립 전제</span></div>
       <div class="task b-all crit"><span class="tid">A2</span><span class="star">⭐</span> issue #10 합의 (전송계층·포맷 7항목) → 공통계약 갱신<span class="who w-cw">CW</span><span class="who w-dh">DH</span><span class="dep">의존 없음 — 이번 주 회의에서 결정</span></div>
-      <div class="task b-dj crit"><span class="tid">A3</span><span class="star">⭐</span> 하드웨어 발주·조립 (전원부 5V 실측 → 배선 → 전원 격리)<span class="who w-dj">DJ</span><span class="dep">의존 없음 — 발주는 주초</span></div>
-      <div class="task b-dj"><span class="tid">A4</span> C-1 전원 재계산 (모터4·배터리·벅컨버터)<span class="who w-dj">DJ</span><span class="dep">→ CW 통지</span></div>
-      <div class="task b-dj"><span class="tid">A5</span> Pi 5 셋업 (OS·SSH·I2C·의존성·i2cdetect)<span class="who w-dj">DJ</span><span class="dep">의존 없음</span></div>
+      <div class="task b-dj crit"><span class="tid">A4</span><span class="star">⭐</span> C-1 전원 재계산 (모터4 전류·배터리·벅컨버터 정격 · L298N 채널당 모터 2개 여유)<span class="who w-dj">DJ</span><span class="dep">⚠️ <b>A3보다 먼저</b> — 이 계산이 "무엇을 살지"를 정한다. 정격 미달 시 Pi 브라운아웃/드라이버 재선정. 근거: 설계명세서 §8 · → CW 통지</span></div>
+      <div class="task b-dj crit"><span class="tid">A3</span><span class="star">⭐</span> 하드웨어 발주·조립 (전원부 5V 실측 → 배선 → 전원 격리)<span class="who w-dj">DJ</span><span class="dep">의존: <b>A4</b> · 발주목록에 <b>자석·10kΩ 풀업·470~1000µF 전해콘덴서·L298N 방열판</b> 누락분 추가</span></div>
+      <div class="task b-dj"><span class="tid">A5</span> Pi 5 셋업 (OS·SSH·I2C·의존성·i2cdetect) <b>+ lgpio·ENA/ENB PWM 실동작 확인</b><span class="who w-dj">DJ</span><span class="dep">의존 없음 · ⚠️ 실제 백엔드는 <code>lgpio.tx_pwm</code>(HW PWM 아님) — 1kHz 지터 확인. 지터는 ②PID 진동 + ③수집 오염으로 직결, B7 전에</span></div>
       <div class="task b-cw"><span class="tid">A6</span> ⑦ 통합 controller (TDD·목) — 상태머신+배선+워치독 훅<span class="who w-cw">CW</span><span class="dep">의존 없음 — 즉시 가능</span></div>
       <div class="task b-mj"><span class="tid">A7</span> 3D 섀시·마운트 설계 (IMU 리지드, DJ와 소통)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
       <div class="task b-all"><span class="tid">E1</span> 팀명 확정 (20B·영문 대문자)<span class="who w-all">ALL</span><span class="dep">늦어도 8/20</span></div>
@@ -142,12 +143,12 @@
     <div class="phase-head"><h3>Phase B — 통합·실측</h3><span class="period">W2 · 8/17 ~ 8/24</span></div>
     <div class="tasks">
       <div class="task b-cw crit"><span class="tid">B1</span><span class="star">⭐</span> 통합 main.py (3스레드+2큐, 단일 Encoder 주입)<span class="who w-cw">CW</span><span class="dep">의존: A6</span></div>
-      <div class="task b-cw"><span class="tid">B2</span> ⑧ 안전장치 (워치독·끊김→정지·SIGTERM 정리)<span class="who w-cw">CW</span><span class="dep">의존: B1</span></div>
+      <div class="task b-cw"><span class="tid">B2</span> ⑧ 안전장치 (워치독·끊김→정지·SIGTERM 정리)<span class="who w-cw">CW</span><span class="dep">의존: B1 · ⚠️ <b>SIGTERM/atexit 모터정지만은 B7보다 먼저</b>(B1과 무관하게 선반영 가능) — 현재 <code>run_real</code>의 <code>finally</code>는 SIGTERM·SSH 끊김에서 안 탄다</span></div>
       <div class="task b-cw crit"><span class="tid">B3</span><span class="star">⭐</span> 통신 transport 실구현 (GATT or RFCOMM)<span class="who w-cw">CW</span><span class="dep">의존: A2</span></div>
       <div class="task b-dh"><span class="tid">B4</span> 앱 수정 (#10 결정 반영)<span class="who w-dh">DH</span><span class="dep">의존: A2</span></div>
       <div class="task b-all crit"><span class="tid">B5</span><span class="star">⭐</span> Pi 실측 검증 (200Hz·FIFO 0·CSV gap 0·엔코더)<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">의존: A3·A5</span></div>
-      <div class="task b-dj"><span class="tid">B6</span> 엔코더 실측 보정 (자석 수·바퀴 둘레 → config)<span class="who w-dj">DJ</span><span class="dep">의존: A3</span></div>
-      <div class="task b-dj"><span class="tid">B7</span> PID 실물 튜닝 (수렴 확인)<span class="who w-dj">DJ</span><span class="dep">의존: A3·B6</span></div>
+      <div class="task b-dj crit"><span class="tid">B6</span><span class="star">⭐</span> 엔코더 실측 보정 (자석 수·바퀴 둘레 → config)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5</span></div>
+      <div class="task b-dj crit"><span class="tid">B7</span><span class="star">⭐</span> PID 실물 튜닝 (수렴 확인)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5·B6 · <b>C1의 선행조건</b> — 정속 없이 수집하면 안 됨</span></div>
       <div class="task b-all"><span class="tid">B8</span> D-1 속도 정책 수치 통일<span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">의존: B7</span></div>
       <div class="task b-all"><span class="tid">B9</span> 앱↔Pi 실연동 E2E<span class="who w-dh">DH</span><span class="who w-cw">CW</span><span class="dep">의존: B3·B4</span></div>
       <div class="task b-mj"><span class="tid">B10</span> 시연 노면 트랙 제작 (노면 샘플판)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
@@ -158,7 +159,7 @@
   <div class="phase">
     <div class="phase-head"><h3>Phase C — 데이터·모델</h3><span class="period">W2~W3 · 8/20 ~ 8/29</span></div>
     <div class="tasks">
-      <div class="task b-all crit"><span class="tid">C1</span><span class="star">⭐</span> 본 데이터 수집 (5종 × 5세션+ × 10~20초)<span class="who w-all">ALL</span><span class="dep">의존: B5 · A1</span></div>
+      <div class="task b-all crit"><span class="tid">C1</span><span class="star">⭐</span> 본 데이터 수집 (5종 × 5세션+ × 10~20초) — 목표속도 고정구간(0.3/0.4/0.5 m/s)을 라벨에 함께 기록<span class="who w-all">ALL</span><span class="dep">의존: B5 · A1 · <b>B6·B7(정속 확보)</b> — 진동 특징 주파수 ≈ 속도÷요철간격이라 속도가 섞이면 모델이 <b>노면 대신 속도를 학습</b>(shortcut). B7 없이는 오픈루프 duty라 노면이 속도를 바꿔 교란이 자동 발생 · "도메인 갭 0" 주장과도 배치</span></div>
       <div class="task b-cw crit"><span class="tid">C2</span><span class="star">⭐</span> 모델 학습 (RF 기준선 → CNN, 세션분리·혼동행렬)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
       <div class="task b-cw"><span class="tid">C3</span> 시간 vs 거리 윈도우 비교 실험 (보고서 어필)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
       <div class="task b-cw crit"><span class="tid">C4</span><span class="star">⭐</span> 모델 탑재 (TFLite → StubModel 교체 → DEMO 동작)<span class="who w-cw">CW</span><span class="dep">의존: C2·B1</span></div>
@@ -194,8 +195,8 @@
       <div><div class="bar w-cw">C2 학습 ⭐</div><div class="bar w-cw">C3 윈도우 비교</div><div class="bar w-cw">C4 탑재 ⭐</div><div class="bar w-cw">D2 안전 ⭐</div></div>
       <div><div class="bar w-cw">E2 레포</div><div class="bar w-cw">E5 제출 ⭐</div></div>
       <div class="rowlab">동제 DJ</div>
-      <div><div class="bar w-dj">A3 조립 ⭐</div><div class="bar w-dj">A4 전원계산</div><div class="bar w-dj">A5 Pi 셋업</div></div>
-      <div><div class="bar w-dj">B5 실측 ⭐</div><div class="bar w-dj">B6 엔코더 보정</div><div class="bar w-dj">B7 PID 튜닝</div><div class="bar w-dj">B8 정책값</div></div>
+      <div><div class="bar w-dj">A4 전원계산 ⭐</div><div class="bar w-dj">→ A3 발주·조립 ⭐</div><div class="bar w-dj">A5 Pi 셋업</div></div>
+      <div><div class="bar w-dj">B5 실측 ⭐</div><div class="bar w-dj">B6 엔코더 보정 ⭐</div><div class="bar w-dj">B7 PID 튜닝 ⭐</div><div class="bar w-dj">B8 정책값</div></div>
       <div><div class="bar w-dj">D2 안전 ⭐</div><div class="bar w-all">C1·D1·D3 공동</div></div>
       <div><div class="bar w-all">E3 보고서</div></div>
       <div class="rowlab">명재 MJ</div>
@@ -218,8 +219,10 @@
   <h2>🔗 크리티컬 패스 — 하나라도 밀리면 전체가 밀림</h2>
   <div class="cpath">
     <div class="cnode">A1<small>예비실험</small></div><span class="arrow">→</span>
+    <div class="cnode">A4<small>전원계산</small></div><span class="arrow">→</span>
     <div class="cnode">A3·A5<small>조립·Pi</small></div><span class="arrow">→</span>
     <div class="cnode">B5<small>실측검증</small></div><span class="arrow">→</span>
+    <div class="cnode">B6·B7<small>보정·정속</small></div><span class="arrow">→</span>
     <div class="cnode">C1<small>데이터수집</small></div><span class="arrow">→</span>
     <div class="cnode">C2<small>모델학습</small></div><span class="arrow">→</span>
     <div class="cnode">C4<small>탑재</small></div><span class="arrow">→</span>
@@ -233,7 +236,9 @@
   <table>
     <tr><th>리스크</th><th>영향</th><th>대비</th></tr>
     <tr><td>A1 판정 "구분 약함"</td><td>프로젝트 전제 흔들림</td><td>샘플레이트↑(500Hz)·센서위치 변경 후 재실험 → <b>W1에 반드시 수행</b></td></tr>
-    <tr><td>부품 배송 지연</td><td>B5 이후 전부 지연</td><td>A3 발주 <b>주초</b> / 대기 중 CW는 A6·B1·B2 선진행</td></tr>
+    <tr><td>부품 배송 지연</td><td>B5 이후 전부 지연</td><td><b>A4(반나절) 끝내고 곧바로 A3 발주</b> / 대기 중 CW는 A6·B1·B2 선진행</td></tr>
+    <tr><td><b>전원 재계산 없이 발주</b></td><td>정격 미달 → <b>재발주</b>(국내 2~3일·해외 1~2주) → 크리티컬 패스 통째로 지연</td><td>A4를 A3 앞에 고정. 계산 반나절 vs 재발주 1~2주 — <b>비용 비대칭</b></td></tr>
+    <tr><td><b>정속 미확보 상태로 C1 수집</b></td><td>모델이 노면 대신 <b>속도를 학습</b> → DEMO 실패. C1부터 <b>재수집</b>(공동작업·노면 재방문)</td><td>C1 의존에 B6·B7 명시. 순서만 지키면 <b>일정 추가 0</b></td></tr>
     <tr><td>TFLite 변환 난항</td><td>C4 지연</td><td>RandomForest 순수 파이썬 추론 폴백(속도 충분)</td></tr>
     <tr><td>#10 합의 지연</td><td>B3·B4·B9 지연</td><td>이번 주 결정. 권고: 앱이 이미 RFCOMM → <b>RFCOMM(SPP) 통일</b>이 최소 작업</td></tr>
     <tr><td>시간 부족</td><td>제출물 품질 저하</td><td>E3 보고서 <b>8/25부터 병행 작성</b> (완료 후 작성 금지)</td></tr>
