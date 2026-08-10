@@ -1,0 +1,176 @@
+package com.vibrasoft.kickboardapp
+
+import com.vibrasoft.kickboardapp.bluetooth.RpiMessage
+import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class RpiProtocolTest {
+
+    @Test
+    fun buildSetModeCommand_collect() {
+        assertEquals(
+            """{"cmd":"SET_MODE","mode":"COLLECT"}""",
+            RpiProtocol.buildSetModeCommand("COLLECT")
+        )
+    }
+
+    @Test
+    fun buildSetModeCommand_demo() {
+        assertEquals(
+            """{"cmd":"SET_MODE","mode":"DEMO"}""",
+            RpiProtocol.buildSetModeCommand("DEMO")
+        )
+    }
+
+    @Test
+    fun buildStartCommand() {
+        assertEquals("""{"cmd":"START"}""", RpiProtocol.buildStartCommand())
+    }
+
+    @Test
+    fun buildStopCommand() {
+        assertEquals("""{"cmd":"STOP"}""", RpiProtocol.buildStopCommand())
+    }
+
+    @Test
+    fun buildListFilesCommand() {
+        assertEquals("""{"cmd":"LIST_FILES"}""", RpiProtocol.buildListFilesCommand())
+    }
+
+    @Test
+    fun buildRenameCommand_plainNames() {
+        assertEquals(
+            """{"cmd":"RENAME","old":"old.csv","new":"new.csv"}""",
+            RpiProtocol.buildRenameCommand("old.csv", "new.csv")
+        )
+    }
+
+    @Test
+    fun buildRenameCommand_escapesQuote() {
+        assertEquals(
+            "{\"cmd\":\"RENAME\",\"old\":\"file\\\"1\\\".csv\",\"new\":\"file2.csv\"}",
+            RpiProtocol.buildRenameCommand("file\"1\".csv", "file2.csv")
+        )
+    }
+
+    @Test
+    fun buildMemoCommand_plainText() {
+        assertEquals(
+            """{"cmd":"MEMO","file":"road.csv","memo":"보도블럭 구간"}""",
+            RpiProtocol.buildMemoCommand("road.csv", "보도블럭 구간")
+        )
+    }
+
+    @Test
+    fun buildMemoCommand_escapesBackslash() {
+        assertEquals(
+            "{\"cmd\":\"MEMO\",\"file\":\"road.csv\",\"memo\":\"C:\\\\Users\\\\test\"}",
+            RpiProtocol.buildMemoCommand("road.csv", "C:\\Users\\test")
+        )
+    }
+
+    @Test
+    fun buildMemoCommand_escapesNewline() {
+        assertEquals(
+            "{\"cmd\":\"MEMO\",\"file\":\"road.csv\",\"memo\":\"line1\\nline2\"}",
+            RpiProtocol.buildMemoCommand("road.csv", "line1\nline2")
+        )
+    }
+
+    @Test
+    fun buildMemoCommand_escapesCarriageReturn() {
+        assertEquals(
+            "{\"cmd\":\"MEMO\",\"file\":\"road.csv\",\"memo\":\"line1\\rline2\"}",
+            RpiProtocol.buildMemoCommand("road.csv", "line1\rline2")
+        )
+    }
+
+    @Test
+    fun buildRenameCommand_escapesNewline() {
+        assertEquals(
+            "{\"cmd\":\"RENAME\",\"old\":\"old\\nname.csv\",\"new\":\"new\\nname.csv\"}",
+            RpiProtocol.buildRenameCommand("old\nname.csv", "new\nname.csv")
+        )
+    }
+
+    @Test
+    fun buildNewFileName_appendsTypeAndCondition() {
+        assertEquals(
+            "20260630_143022_아스팔트_불량.csv",
+            RpiProtocol.buildNewFileName("20260630_143022.csv", "아스팔트", "불량")
+        )
+    }
+
+    @Test
+    fun buildNewFileName_customType() {
+        assertEquals(
+            "20260630_143022_자갈길_불량.csv",
+            RpiProtocol.buildNewFileName("20260630_143022.csv", "자갈길", "불량")
+        )
+    }
+
+    @Test
+    fun parseMessage_ack() {
+        val result = RpiProtocol.parseMessage("""{"type":"ACK","cmd":"START","ok":true}""")
+        assertEquals(RpiMessage.Ack("START", true), result)
+    }
+
+    @Test
+    fun parseMessage_status_allFields() {
+        val result = RpiProtocol.parseMessage(
+            """{"type":"STATUS","speed":15.3,"distance":123.4,"vibration":0.82,"roadType":"아스팔트"}"""
+        )
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = 123.4f, vibration = 0.82f, roadType = "아스팔트"),
+            result
+        )
+    }
+
+    @Test
+    fun parseMessage_status_onlySpeed_optionalFieldsAreNull() {
+        val result = RpiProtocol.parseMessage("""{"type":"STATUS","speed":15.3}""")
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = null, vibration = null, roadType = null),
+            result
+        )
+    }
+
+    @Test
+    fun parseMessage_status_partialOptionalFields() {
+        val result = RpiProtocol.parseMessage(
+            """{"type":"STATUS","speed":15.3,"distance":50.0}"""
+        )
+        assertEquals(
+            RpiMessage.Status(speed = 15.3f, distance = 50.0f, vibration = null, roadType = null),
+            result
+        )
+    }
+
+    @Test
+    fun parseMessage_files() {
+        val result = RpiProtocol.parseMessage(
+            """{"type":"FILES","files":["a.csv","b.csv"]}"""
+        )
+        assertEquals(RpiMessage.Files(listOf("a.csv", "b.csv")), result)
+    }
+
+    @Test
+    fun parseMessage_error() {
+        val result = RpiProtocol.parseMessage(
+            """{"type":"ERROR","cmd":"RENAME","message":"file not found"}"""
+        )
+        assertEquals(RpiMessage.Error("RENAME", "file not found"), result)
+    }
+
+    @Test
+    fun parseMessage_malformedJson_returnsNull() {
+        assertNull(RpiProtocol.parseMessage("not json"))
+    }
+
+    @Test
+    fun parseMessage_unknownType_returnsNull() {
+        assertNull(RpiProtocol.parseMessage("""{"type":"UNKNOWN"}"""))
+    }
+}
