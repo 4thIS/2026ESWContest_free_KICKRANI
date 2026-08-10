@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>노면 감지 킥보드 — 실행 계획 (8/10~9/3)</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1e2430; --sub:#5b6472; --line:#e3e7ef;
+    --cw:#2563eb; --cw-bg:#eaf1fe;
+    --dj:#059669; --dj-bg:#e7f6f0;
+    --mj:#d97706; --mj-bg:#fdf1e0;
+    --dh:#7c3aed; --dh-bg:#f1eafe;
+    --all:#64748b; --all-bg:#eef1f5;
+    --crit:#dc2626; --crit-bg:#fdecec;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;padding:28px 16px 60px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:1.55rem;margin-bottom:4px}
+  h2{font-size:1.15rem;margin:38px 0 14px;padding-left:10px;border-left:5px solid var(--ink)}
+  .meta{color:var(--sub);font-size:.9rem;margin-bottom:6px}
+  .dday{display:inline-block;background:var(--crit);color:#fff;font-weight:700;border-radius:8px;padding:3px 12px;font-size:.95rem;margin-top:8px}
+
+  /* 담당 카드 */
+  .owners{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+  .owner{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .owner b{font-size:1rem}
+  .owner .tag{float:right;font-size:.75rem;padding:1px 8px;border-radius:99px;color:#fff}
+  .owner p{font-size:.82rem;color:var(--sub);margin-top:6px}
+
+  /* 상태 스냅샷 */
+  .snap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .snap .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .snap h3{font-size:.95rem;margin-bottom:8px}
+  .snap ul{list-style:none}
+  .snap li{font-size:.86rem;padding:3px 0 3px 22px;position:relative}
+  .snap .done li::before{content:"✅";position:absolute;left:0;font-size:.8rem}
+  .snap .todo li::before{content:"⬜";position:absolute;left:0;font-size:.8rem}
+
+  /* 페이즈 & 태스크 */
+  .phase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+  .phase-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .phase-head h3{font-size:1.02rem}
+  .phase-head .period{font-size:.8rem;color:#fff;background:var(--ink);border-radius:99px;padding:2px 10px}
+  .tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+  .task{border:1px solid var(--line);border-left-width:5px;border-radius:10px;padding:9px 11px;font-size:.85rem;background:#fff}
+  .task .tid{font-weight:700;margin-right:6px}
+  .task .star{color:var(--crit);font-weight:700}
+  .task .who{float:right;font-size:.72rem;padding:1px 8px;border-radius:99px;color:#fff;margin-left:6px}
+  .task .dep{display:block;margin-top:5px;font-size:.75rem;color:var(--sub)}
+  .b-cw{border-left-color:var(--cw)} .w-cw{background:var(--cw)}
+  .b-dj{border-left-color:var(--dj)} .w-dj{background:var(--dj)}
+  .b-mj{border-left-color:var(--mj)} .w-mj{background:var(--mj)}
+  .b-dh{border-left-color:var(--dh)} .w-dh{background:var(--dh)}
+  .b-all{border-left-color:var(--all)} .w-all{background:var(--all)}
+  .task.crit{background:var(--crit-bg)}
+
+  /* 타임라인 */
+  .timeline{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow-x:auto}
+  .tl-grid{display:grid;grid-template-columns:110px repeat(4,1fr);min-width:720px;font-size:.82rem}
+  .tl-grid>div{padding:8px 10px;border-bottom:1px solid var(--line)}
+  .tl-head{font-weight:700;background:var(--all-bg)}
+  .bar{border-radius:6px;color:#fff;padding:3px 8px;font-size:.75rem;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rowlab{font-weight:700}
+
+  /* 크리티컬 패스 */
+  .cpath{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .cnode{background:var(--crit-bg);border:1.5px solid var(--crit);color:var(--crit);font-weight:700;font-size:.8rem;border-radius:9px;padding:7px 11px;text-align:center}
+  .cnode small{display:block;font-weight:400;color:var(--ink);font-size:.72rem}
+  .arrow{color:var(--sub);font-size:1rem}
+
+  /* 리스크 & DoD */
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:.85rem}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--all-bg)}
+  .dod{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .dod li{font-size:.88rem;margin:6px 0 6px 4px;list-style:none;padding-left:26px;position:relative}
+  .dod li::before{content:"🏁";position:absolute;left:0}
+  .legend{font-size:.78rem;color:var(--sub);margin:8px 0 0}
+  .legend span{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
+  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 기준일 2026-08-10 · 근거: 설계명세서 / 구현.md / DJ_협의사항 / issue #10</div>
+  <div class="dday">예선 마감 9/3 — 남은 기간 약 3.5주 (제출 목표 9/1)</div>
+
+  <h2>👥 담당</h2>
+  <div class="owners">
+    <div class="owner"><b>찬우</b><span class="tag w-cw">CW · cw</span>
+      <p>⑦controller·main / BLE transport / 예비실험·데이터 파이프라인 / <b>ML(학습·탑재)</b></p></div>
+    <div class="owner"><b>동제</b><span class="tag w-dj">DJ · DJ</span>
+      <p>하드웨어 조립·배선·전원 / 엔코더 실측보정 / PID 튜닝 / Pi 셋업</p></div>
+    <div class="owner"><b>명재</b><span class="tag w-mj">MJ · mj</span>
+      <p>3D 섀시·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
+    <div class="owner"><b>도현</b><span class="tag w-dh">DH · dh</span>
+      <p>앱 수정(issue #10 반영) / 앱↔Pi 실연동</p></div>
+    <div class="owner"><b>공동</b><span class="tag w-all">ALL</span>
+      <p>#10 합의 / 본 데이터 수집 / E2E·안전 테스트 / 보고서·영상</p></div>
+  </div>
+
+  <h2>📌 현재 상태</h2>
+  <div class="snap">
+    <div class="col done"><h3>✅ 완료</h3><ul>
+      <li>RPi/pi 단일 트리 · <b>75 tests GREEN</b></li>
+      <li>①구동·②속도제어 (DJ, 목 검증)</li>
+      <li>③수집·④BLE서버·인지 (CW, 목 검증)</li>
+      <li>도현 앱 main 머지 (RFCOMM)</li>
+      <li>예비실험 도구 (수집·분석 스크립트)</li>
+      <li>문서 최신 (설계명세서·공통계약·핀맵)</li>
+    </ul></div>
+    <div class="col todo"><h3>⬜ 남음</h3><ul>
+      <li>앱↔Pi 규격 불일치 (issue #10)</li>
+      <li>⑦통합 controller·main / ⑧안전장치</li>
+      <li>하드웨어 조립·Pi 실측</li>
+      <li>노면 데이터·모델 학습·탑재</li>
+      <li>E2E·안전·실주행 검증</li>
+      <li>팀명·레포·보고서·영상·제출</li>
+    </ul></div>
+  </div>
+
+  <h2>🗂 태스크 (27개) — ⭐ = 크리티컬 패스</h2>
+
+  <div class="phase">
+    <div class="phase-head"><h3>Phase A — 블로커 해소</h3><span class="period">W1 · 8/10 ~ 8/17</span></div>
+    <div class="tasks">
+      <div class="task b-cw crit"><span class="tid">A1</span><span class="star">⭐</span> 노면 진동 예비실험 (5종×3회 → 분석 판정)<span class="who w-cw">CW</span><span class="dep">의존 없음 — 프로젝트 성립 전제</span></div>
+      <div class="task b-all crit"><span class="tid">A2</span><span class="star">⭐</span> issue #10 합의 (전송계층·포맷 7항목) → 공통계약 갱신<span class="who w-cw">CW</span><span class="who w-dh">DH</span><span class="dep">의존 없음 — 이번 주 회의에서 결정</span></div>
+      <div class="task b-dj crit"><span class="tid">A3</span><span class="star">⭐</span> 하드웨어 발주·조립 (전원부 5V 실측 → 배선 → 전원 격리)<span class="who w-dj">DJ</span><span class="dep">의존 없음 — 발주는 주초</span></div>
+      <div class="task b-dj"><span class="tid">A4</span> C-1 전원 재계산 (모터4·배터리·벅컨버터)<span class="who w-dj">DJ</span><span class="dep">→ CW 통지</span></div>
+      <div class="task b-dj"><span class="tid">A5</span> Pi 5 셋업 (OS·SSH·I2C·의존성·i2cdetect)<span class="who w-dj">DJ</span><span class="dep">의존 없음</span></div>
+      <div class="task b-cw"><span class="tid">A6</span> ⑦ 통합 controller (TDD·목) — 상태머신+배선+워치독 훅<span class="who w-cw">CW</span><span class="dep">의존 없음 — 즉시 가능</span></div>
+      <div class="task b-mj"><span class="tid">A7</span> 3D 섀시·마운트 설계 (IMU 리지드, DJ와 소통)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
+      <div class="task b-all"><span class="tid">E1</span> 팀명 확정 (20B·영문 대문자)<span class="who w-all">ALL</span><span class="dep">늦어도 8/20</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>Phase B — 통합·실측</h3><span class="period">W2 · 8/17 ~ 8/24</span></div>
+    <div class="tasks">
+      <div class="task b-cw crit"><span class="tid">B1</span><span class="star">⭐</span> 통합 main.py (3스레드+2큐, 단일 Encoder 주입)<span class="who w-cw">CW</span><span class="dep">의존: A6</span></div>
+      <div class="task b-cw"><span class="tid">B2</span> ⑧ 안전장치 (워치독·끊김→정지·SIGTERM 정리)<span class="who w-cw">CW</span><span class="dep">의존: B1</span></div>
+      <div class="task b-cw crit"><span class="tid">B3</span><span class="star">⭐</span> 통신 transport 실구현 (GATT or RFCOMM)<span class="who w-cw">CW</span><span class="dep">의존: A2</span></div>
+      <div class="task b-dh"><span class="tid">B4</span> 앱 수정 (#10 결정 반영)<span class="who w-dh">DH</span><span class="dep">의존: A2</span></div>
+      <div class="task b-all crit"><span class="tid">B5</span><span class="star">⭐</span> Pi 실측 검증 (200Hz·FIFO 0·CSV gap 0·엔코더)<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">의존: A3·A5</span></div>
+      <div class="task b-dj"><span class="tid">B6</span> 엔코더 실측 보정 (자석 수·바퀴 둘레 → config)<span class="who w-dj">DJ</span><span class="dep">의존: A3</span></div>
+      <div class="task b-dj"><span class="tid">B7</span> PID 실물 튜닝 (수렴 확인)<span class="who w-dj">DJ</span><span class="dep">의존: A3·B6</span></div>
+      <div class="task b-all"><span class="tid">B8</span> D-1 속도 정책 수치 통일<span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">의존: B7</span></div>
+      <div class="task b-all"><span class="tid">B9</span> 앱↔Pi 실연동 E2E<span class="who w-dh">DH</span><span class="who w-cw">CW</span><span class="dep">의존: B3·B4</span></div>
+      <div class="task b-mj"><span class="tid">B10</span> 시연 노면 트랙 제작 (노면 샘플판)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
+      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸 프린팅·조립<span class="who w-mj">MJ</span><span class="dep">의존: A7</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>Phase C — 데이터·모델</h3><span class="period">W2~W3 · 8/20 ~ 8/29</span></div>
+    <div class="tasks">
+      <div class="task b-all crit"><span class="tid">C1</span><span class="star">⭐</span> 본 데이터 수집 (5종 × 5세션+ × 10~20초)<span class="who w-all">ALL</span><span class="dep">의존: B5 · A1</span></div>
+      <div class="task b-cw crit"><span class="tid">C2</span><span class="star">⭐</span> 모델 학습 (RF 기준선 → CNN, 세션분리·혼동행렬)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
+      <div class="task b-cw"><span class="tid">C3</span> 시간 vs 거리 윈도우 비교 실험 (보고서 어필)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
+      <div class="task b-cw crit"><span class="tid">C4</span><span class="star">⭐</span> 모델 탑재 (TFLite → StubModel 교체 → DEMO 동작)<span class="who w-cw">CW</span><span class="dep">의존: C2·B1</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>Phase D — 검증·시연</h3><span class="period">W3 · 8/24 ~ 8/31</span></div>
+    <div class="tasks">
+      <div class="task b-all crit"><span class="tid">D1</span><span class="star">⭐</span> E2E 통합 테스트 (COLLECT gap 0 · DEMO 반응 &lt;1초)<span class="who w-all">ALL</span><span class="dep">의존: B9·C4</span></div>
+      <div class="task b-all crit"><span class="tid">D2</span><span class="star">⭐</span> 안전 시나리오 (끊김·워치독·SIGTERM·저신뢰 → 정지/감속)<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">의존: B2·D1</span></div>
+      <div class="task b-all crit"><span class="tid">D3</span><span class="star">⭐</span> 실주행 시연 리허설 (자갈 감속→아스팔트 복귀, 로그+영상)<span class="who w-all">ALL</span><span class="dep">의존: D1·B10·B11</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>Phase E — 제출물</h3><span class="period">8/25 ~ 9/3</span></div>
+    <div class="tasks">
+      <div class="task b-cw"><span class="tid">E2</span> 제출용 레포 <code>2026ESWContest_free_&lt;팀명&gt;</code> Public<span class="who w-cw">CW</span><span class="dep">의존: E1</span></div>
+      <div class="task b-all crit"><span class="tid">E3</span><span class="star">⭐</span> 개발완료보고서 PPT 20p (필수 7항목, 8/25 초안 시작)<span class="who w-all">ALL</span><span class="dep">초안 CW · 완성 공동</span></div>
+      <div class="task b-mj crit"><span class="tid">E4</span><span class="star">⭐</span> 시연영상 3분·720p → YouTube (제목 규격)<span class="who w-mj">MJ</span><span class="who w-all">ALL</span><span class="dep">의존: D3</span></div>
+      <div class="task b-cw crit"><span class="tid">E5</span><span class="star">⭐</span> 제출 (구글폼: 신청서+보고서+링크) — <b>9/1 목표</b><span class="who w-cw">CW</span><span class="dep">의존: E2·E3·E4</span></div>
+    </div>
+  </div>
+
+  <h2>📅 주차별 타임라인</h2>
+  <div class="timeline">
+    <div class="tl-grid">
+      <div class="tl-head">담당</div><div class="tl-head">W1 · 8/10~17<br><small>블로커 제거</small></div><div class="tl-head">W2 · 8/17~24<br><small>통합 완성</small></div><div class="tl-head">W3 · 8/24~31<br><small>모델·검증</small></div><div class="tl-head">마감주 · ~9/3<br><small>제출</small></div>
+      <div class="rowlab">찬우 CW</div>
+      <div><div class="bar w-cw">A1 예비실험 ⭐</div><div class="bar w-cw">A2 #10합의</div><div class="bar w-cw">A6 controller</div></div>
+      <div><div class="bar w-cw">B1 main ⭐</div><div class="bar w-cw">B2 안전장치</div><div class="bar w-cw">B3 transport ⭐</div><div class="bar w-cw">B5 실측 ⭐</div></div>
+      <div><div class="bar w-cw">C2 학습 ⭐</div><div class="bar w-cw">C3 윈도우 비교</div><div class="bar w-cw">C4 탑재 ⭐</div><div class="bar w-cw">D2 안전 ⭐</div></div>
+      <div><div class="bar w-cw">E2 레포</div><div class="bar w-cw">E5 제출 ⭐</div></div>
+      <div class="rowlab">동제 DJ</div>
+      <div><div class="bar w-dj">A3 조립 ⭐</div><div class="bar w-dj">A4 전원계산</div><div class="bar w-dj">A5 Pi 셋업</div></div>
+      <div><div class="bar w-dj">B5 실측 ⭐</div><div class="bar w-dj">B6 엔코더 보정</div><div class="bar w-dj">B7 PID 튜닝</div><div class="bar w-dj">B8 정책값</div></div>
+      <div><div class="bar w-dj">D2 안전 ⭐</div><div class="bar w-all">C1·D1·D3 공동</div></div>
+      <div><div class="bar w-all">E3 보고서</div></div>
+      <div class="rowlab">명재 MJ</div>
+      <div><div class="bar w-mj">A7 3D 설계</div></div>
+      <div><div class="bar w-mj">B10 시연 트랙</div><div class="bar w-mj">B11 외형 셸</div></div>
+      <div><div class="bar w-all">C1·D3 공동</div></div>
+      <div><div class="bar w-mj">E4 영상 ⭐</div></div>
+      <div class="rowlab">도현 DH</div>
+      <div><div class="bar w-dh">A2 #10합의</div></div>
+      <div><div class="bar w-dh">B4 앱 수정</div><div class="bar w-dh">B9 실연동</div></div>
+      <div><div class="bar w-all">D1 E2E 공동</div></div>
+      <div><div class="bar w-all">E3 보고서</div></div>
+    </div>
+    <div class="legend">색상:
+      <span style="background:var(--cw)"></span>찬우 <span style="background:var(--dj)"></span>동제
+      <span style="background:var(--mj)"></span>명재 <span style="background:var(--dh)"></span>도현
+      <span style="background:var(--all)"></span>공동 · ⭐ 크리티컬 패스</div>
+  </div>
+
+  <h2>🔗 크리티컬 패스 — 하나라도 밀리면 전체가 밀림</h2>
+  <div class="cpath">
+    <div class="cnode">A1<small>예비실험</small></div><span class="arrow">→</span>
+    <div class="cnode">A3·A5<small>조립·Pi</small></div><span class="arrow">→</span>
+    <div class="cnode">B5<small>실측검증</small></div><span class="arrow">→</span>
+    <div class="cnode">C1<small>데이터수집</small></div><span class="arrow">→</span>
+    <div class="cnode">C2<small>모델학습</small></div><span class="arrow">→</span>
+    <div class="cnode">C4<small>탑재</small></div><span class="arrow">→</span>
+    <div class="cnode">D1<small>E2E</small></div><span class="arrow">→</span>
+    <div class="cnode">D3<small>리허설</small></div><span class="arrow">→</span>
+    <div class="cnode">E4<small>영상</small></div><span class="arrow">→</span>
+    <div class="cnode">E5<small>제출 9/1</small></div>
+  </div>
+
+  <h2>⚠️ 리스크 & 대비</h2>
+  <table>
+    <tr><th>리스크</th><th>영향</th><th>대비</th></tr>
+    <tr><td>A1 판정 "구분 약함"</td><td>프로젝트 전제 흔들림</td><td>샘플레이트↑(500Hz)·센서위치 변경 후 재실험 → <b>W1에 반드시 수행</b></td></tr>
+    <tr><td>부품 배송 지연</td><td>B5 이후 전부 지연</td><td>A3 발주 <b>주초</b> / 대기 중 CW는 A6·B1·B2 선진행</td></tr>
+    <tr><td>TFLite 변환 난항</td><td>C4 지연</td><td>RandomForest 순수 파이썬 추론 폴백(속도 충분)</td></tr>
+    <tr><td>#10 합의 지연</td><td>B3·B4·B9 지연</td><td>이번 주 결정. 권고: 앱이 이미 RFCOMM → <b>RFCOMM(SPP) 통일</b>이 최소 작업</td></tr>
+    <tr><td>시간 부족</td><td>제출물 품질 저하</td><td>E3 보고서 <b>8/25부터 병행 작성</b> (완료 후 작성 금지)</td></tr>
+  </table>
+
+  <h2>🏁 완료 기준 (Definition of Done)</h2>
+  <div class="dod"><ul>
+    <li>앱 START → 정속주행 → <b>노면별 자동 감속</b> → STOP이 트랙에서 재현된다 (영상 확보)</li>
+    <li>COLLECT CSV 결측 없음 · 모델 세션단위 정확도 <b>≥70%</b></li>
+    <li>안전 시나리오 전 항목 통과 (끊김·워치독·SIGTERM 모두 모터 정지)</li>
+    <li>보고서 20p · 영상 3분 · Public 레포 — <b>9/1 제출 완료</b></li>
+  </ul></div>
+
+</div>
+</body>
+</html>
