@@ -3,25 +3,32 @@
 > RPi 코드가 두 트리(`RPi/pi/`·`rc_car/pi/`)로 갈려 있어 통합 전 맞출 것 정리.
 > 근거: [`설계명세서.md`](설계명세서.md) · [`공통계약.md`](공통계약.md) · [`구현.md`](구현.md)
 > 우선순위: 🔴시급 🟠중요 🟡세부 🟢일반
+>
+> 📌 **진행 갱신 (2026-08-10, DJ)** — A절(트리 통합) 전체와 C-2(A3144 상수)는 **PR #8로 해결 완료**.
+> 남은 미해결: **C-1**(4WD 전원 재계산) · **C-3**(핀맵 실배선 확인) · **D-1**(정책 수치) · **F-1/F-2**(예비실험·ML 담당).
+> 앱↔Pi 통신 규격은 별도 트래킹 → **issue #10**.
 
 ---
 
-## A. 트리·코드 통합 (가장 시급) 🔴
+## A. 트리·코드 통합 (가장 시급) — ✅ 완료 (2026-07-29, PR #8)
 
-### A-1. 두 개의 `pi/` 패키지 통합
+### A-1. 두 개의 `pi/` 패키지 통합 — ✅
 - 현재: 찬우 코드 `RPi/pi/`, DJ 코드 `rc_car/pi/` — 패키지가 둘로 갈림.
 - 문서(설계명세서·CLAUDE.md·README)는 **`RPi/pi/` 단일 트리** 전제.
 - **결정**: 정본을 `RPi/pi/`로 통일 → DJ의 `motor·encoder·pid·speed_controller·backend·sim·main`을 `RPi/pi/`로 이동. (남의 폴더 이동이라 DJ가 하거나 합의 후)
 - 딸린 것: `pytest.ini`·`requirements.txt`가 양쪽에 존재 → 하나로.
+- **결과**: `RPi/pi/` 단일 트리로 이동 완료, `rc_car/` 제거. `RPi/pytest.ini`·`requirements.txt` 하나로 통일. 75 tests green.
 
-### A-2. `config.py` 병합 + 상수 이름 통일 🔴
+### A-2. `config.py` 병합 + 상수 이름 통일 — ✅
 - 두 config가 내용도 이름도 다름:
   - 찬우: `MPU6050_ADDR`, `MOTOR_PWMA`, `SAMPLE_RATE_HZ`, 윈도우·정책 상수
   - DJ: `MPU_ADDR`, `PWMA`, `PWMB/BIN1/BIN2`(B채널), PID·엔코더·속도 상수
 - **결정**: 이름 규칙 통일(예: `MPU_ADDR`↔`MPU6050_ADDR`, `PWMA`↔`MOTOR_PWMA`) → **양쪽 코드 import도 함께 수정**. 병합 config엔 두 세트 다 포함.
+- **결과**: `RPi/pi/config.py` 하나로 병합. 모터 상수는 L298N 전환에 맞춰 `ENA`/`ENB`로 재정의(TB6612 `PWMA/BIN*`·`STBY` 폐기).
 
-### A-3. `contracts.py` 중복 제거
+### A-3. `contracts.py` 중복 제거 — ✅
 - 두 파일 **내용 완전 동일** ✅ → 하나만 남기면 됨(작업 최소).
+- **결과**: `RPi/pi/contracts.py` 하나만 유지.
 
 ## B. 인터페이스·계약 세부 확정 🟡
 
@@ -47,12 +54,15 @@
 ### C-1. 4WD 전원 재계산 (설계명세서 §8도 "찬우 통지·합의" 요구)
 - 모터 **4개** 확정 → 전류·배터리 용량·벅컨버터(5V) 정격 재계산. **모터·Pi 전원 격리**(별도 배터리/디커플링) 방식 확정.
 
-### C-2. A3144 확정에 따른 상수
+### C-2. A3144 확정에 따른 상수 — ✅ 반영 (실측 보정만 남음)
 - 광엔코더 폐기 → **A3144 홀센서+자석** 확정.
 - DJ config `ENCODER_PULSES_PER_REV=20`(광엔코더 예시) → **A3144 기준(바퀴당 자석 개수)으로 변경**. `WHEEL_CIRCUMFERENCE_M=0.204`도 실측 바퀴로 보정. → 속도 환산 정확도 직결.
+- **결과**: `config.py` → `ENCODER_PULSES_PER_REV=4`(자석 4개), `WHEEL_CIRCUMFERENCE_M=0.204`(지름 65mm). 속도 측정도 **펄스 주기 기반**으로 전환(저PPR 안정화) + `ENCODER_STOP_TIMEOUT_S`.
+- ⬜ 남음: 실제 자석 수·바퀴 지름 **실측 후 이 두 상수만** 보정.
 
-### C-3. 핀맵 최종 확인
-- §8 4WD 핀(PWMA18/AIN23·24, PWMB13/BIN20·21, STBY25, MPU SDA2/SCL3, ENC17) 실배선 충돌 없는지 최종 확인.
+### C-3. 핀맵 최종 확인 — ⬜ 실배선 대기
+- ~~§8 4WD 핀(PWMA18/AIN23·24, PWMB13/BIN20·21, STBY25)~~ → **L298N 전환으로 폐기**.
+- 현재 §8/[`핀맵.html`](핀맵.html): **ENA=GPIO18(좌) · ENB=GPIO13(우) · IN1~4 보드 +5V/GND 고정 · ENC=GPIO17 · MPU SDA2/SCL3**. 실배선 충돌 없는지 조립 시 최종 확인.
 
 ## D. 미결정 값 확정 🟡
 
@@ -80,12 +90,13 @@
 
 ---
 
-## 우선순위 요약
-1. 🔴 A. 트리 통합(RPi/pi) + config 병합/이름통일 + contracts 중복제거
-2. 🔴 F-1. 노면 진동 예비실험 / F-2. ML 담당 지정
-3. 🟠 C. 4WD 전원 재계산 + A3144 엔코더 상수
-4. 🟡 B. 엔코더 공유·제어주기·정책값 확정
-5. 🟢 E. 통합 main·프로세스
+## 우선순위 요약 (2026-08-10 갱신)
+1. ~~🔴 A. 트리 통합(RPi/pi) + config 병합/이름통일 + contracts 중복제거~~ → ✅ PR #8
+2. 🔴 F-1. 노면 진동 예비실험 / F-2. ML 담당 지정 — **미착수, 조립·발주 전 필요**
+3. 🔴 앱↔Pi 통신 규격 합의 → **issue #10** (CW·도현)
+4. 🟠 C-1. 4WD 전원 재계산 (~~C-2 A3144 상수~~ ✅) · C-3 실배선 확인
+5. 🟡 B. 엔코더 공유·제어주기 확정(합의됨, 통합 시 확인) / D-1 정책 수치 — 실측 튜닝 대기
+6. 🟢 E-1. 통합 main·controller (Phase 7, 미착수)
 
 ## 참고: 현재 찬우(CW) 진행 상황
 - ✅ ③ 데이터수집(imu·sampler·logger) · ⑤ 인지(windower·policy·model-stub) · ④ 앱통신(protocol·ble_server) — 전부 unit 테스트 GREEN
