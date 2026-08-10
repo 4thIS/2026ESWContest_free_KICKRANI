@@ -1,0 +1,156 @@
+<title>Pi 5 핀맵 · 4WD 킥보드 RC카</title>
+<style>
+  :root {
+    --bg:#eef1f4; --surface:#fff; --surface-2:#e7ecf0; --ink:#14181d; --ink-muted:#57636f;
+    --border:#d3dce2; --accent:#0e7c86;
+    --shadow:0 1px 2px rgba(20,24,29,.06), 0 6px 20px rgba(20,24,29,.05);
+    --w-33:#E0871F; --w-5:#E23B40; --w-gnd:#5a6672; --w-i2c:#2F6FED;
+    --w-pwm:#178F52; --w-hall:#0BAAA3;
+    --unused:#aab4bd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f1419; --surface:#161c23; --surface-2:#1e262e; --ink:#e6edf3; --ink-muted:#9aa7b3;
+      --border:#29323b; --accent:#3fd0c9;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      --w-33:#F0A94A; --w-5:#FF6166; --w-gnd:#8a97a3; --w-i2c:#5B8DEF;
+      --w-pwm:#3FBE77; --w-hall:#34CFC7; --unused:#4b5560;
+    }
+  }
+  :root[data-theme="light"]{--bg:#eef1f4;--surface:#fff;--surface-2:#e7ecf0;--ink:#14181d;--ink-muted:#57636f;--border:#d3dce2;--accent:#0e7c86;--w-33:#E0871F;--w-5:#E23B40;--w-gnd:#5a6672;--w-i2c:#2F6FED;--w-pwm:#178F52;--w-hall:#0BAAA3;--unused:#aab4bd;}
+  :root[data-theme="dark"]{--bg:#0f1419;--surface:#161c23;--surface-2:#1e262e;--ink:#e6edf3;--ink-muted:#9aa7b3;--border:#29323b;--accent:#3fd0c9;--w-33:#F0A94A;--w-5:#FF6166;--w-gnd:#8a97a3;--w-i2c:#5B8DEF;--w-pwm:#3FBE77;--w-hall:#34CFC7;--unused:#4b5560;}
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Malgun Gothic",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 22px 80px;}
+  .mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 10px;}
+  h1{font-size:clamp(24px,4vw,36px);line-height:1.1;margin:0 0 12px;letter-spacing:-.02em;}
+  .lede{color:var(--ink-muted);font-size:15.5px;max-width:60ch;margin:0;}
+
+  h2{font-size:19px;margin:40px 0 14px;letter-spacing:-.01em;}
+
+  /* header board */
+  .board{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);overflow-x:auto;}
+  .board-inner{min-width:520px;}
+  .hdr-title{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-muted);margin-bottom:10px;padding:0 6px;}
+  .rows{display:flex;flex-direction:column;gap:5px;}
+  .row{display:grid;grid-template-columns:1fr 34px 34px 1fr;align-items:center;gap:8px;}
+  .pin{display:flex;align-items:center;gap:8px;font-size:12.5px;min-width:0;}
+  .pin.right{flex-direction:row-reverse;text-align:right;}
+  .num{width:34px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;
+    border-radius:7px;font:700 12px/1 ui-monospace,monospace;background:var(--surface-2);border:1px solid var(--border);color:var(--ink-muted);}
+  .num.on{color:#fff;border-color:transparent;}
+  .lab{font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--unused);}
+  .row .use{font-size:11px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pin.on .lab{color:var(--ink);font-weight:600;}
+  .dotc{width:9px;height:9px;border-radius:50%;flex:none;background:var(--unused);}
+  .pin.on .dotc{background:var(--pc);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;padding:0 4px;}
+  .legend .item{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-muted);}
+  .sw{width:11px;height:11px;border-radius:50%;flex:none;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);}
+  th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-muted);font-weight:600;background:var(--surface-2);}
+  tr:last-child td{border-bottom:none;}
+  td.p{font-family:ui-monospace,Consolas,monospace;font-weight:600;}
+  .tag{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:6px;}
+  .phys{display:inline-block;min-width:20px;padding:1px 6px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);font:600 11.5px/1.4 ui-monospace,monospace;color:var(--ink-muted);}
+
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--ink-muted);}
+  code.k{font-family:ui-monospace,Consolas,monospace;background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:.92em;}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">노면 감지 킥보드 · 구동부 (DJ)</p>
+  <h1>Raspberry Pi 5 핀맵</h1>
+  <p class="lede">최종 부품(L298N · A3144 홀센서 · MPU-6050) 기준으로 40핀 헤더에서 <strong>실제 쓰는 핀만</strong> 표시. 색이 역할이다. 물리핀 번호 = 헤더에 꽂는 실제 자리.</p>
+
+  <h2>40핀 헤더 (실제 배치)</h2>
+  <div class="board">
+    <div class="board-inner">
+      <div class="hdr-title"><span>◀ 보드 안쪽 / USB 반대편</span><span>왼쪽=홀수핀 · 오른쪽=짝수핀</span></div>
+      <div class="rows" id="rows"></div>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="sw" style="background:var(--w-33)"></span>3.3V</span>
+      <span class="item"><span class="sw" style="background:var(--w-5)"></span>5V (전원입력)</span>
+      <span class="item"><span class="sw" style="background:var(--w-gnd)"></span>GND</span>
+      <span class="item"><span class="sw" style="background:var(--w-i2c)"></span>I2C</span>
+      <span class="item"><span class="sw" style="background:var(--w-pwm)"></span>모터 PWM</span>
+      <span class="item"><span class="sw" style="background:var(--w-hall)"></span>홀센서</span>
+      <span class="item"><span class="sw" style="background:var(--unused)"></span>미사용</span>
+    </div>
+  </div>
+
+  <h2>사용 핀 요약</h2>
+  <table>
+    <thead><tr><th>기능</th><th>BCM</th><th>물리</th><th>연결</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag" style="background:var(--w-33)"></span>3.3V</td><td class="p">3V3</td><td><span class="phys">1</span></td><td>MPU VCC · A3144 VCC · 10kΩ 풀업</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-5)"></span>5V 입력</td><td class="p">5V</td><td><span class="phys">2</span></td><td>벅컨버터 5V → Pi 급전 (또는 USB-C)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SDA</td><td class="p">GPIO2</td><td><span class="phys">3</span></td><td>MPU-6050 SDA</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SCL</td><td class="p">GPIO3</td><td><span class="phys">5</span></td><td>MPU-6050 SCL</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-hall)"></span>홀센서</td><td class="p">GPIO17</td><td><span class="phys">11</span></td><td>A3144 DO (풀업 인터럽트)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 좌</td><td class="p">GPIO18</td><td><span class="phys">12</span></td><td>L298N ENA (좌 속도 PWM)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 우</td><td class="p">GPIO13</td><td><span class="phys">33</span></td><td>L298N ENB (우 속도 PWM)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-gnd)"></span>GND</td><td class="p">GND</td><td><span class="phys">6·9</span></td><td>공통 접지 (L298N·MPU·홀센서·배터리−)</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--ink-muted);margin-top:10px;">※ L298N <span class="mono">IN1~IN4</span>는 Pi 핀을 안 쓰고 보드의 <span class="mono">+5V/GND</span>에 고정(전진). GND는 6·9번 외 14·20·25·30·34·39번도 공통으로 쓸 수 있다.</p>
+
+  <footer>
+    핀 = BCM · 물리핀 = 40핀 헤더 실제 번호 · 단일 출처 <code class="k">RPi/pi/config.py</code> · <code class="k">설계명세서 §8</code> · 구동 L298N(직진 전용)
+  </footer>
+</div>
+
+<script>
+  // 40핀 헤더 정의: [physical, label, roleColorVar | null]
+  const P = [
+    [1,"3V3","--w-33","3.3V"],        [2,"5V","--w-5","전원입력"],
+    [3,"GPIO2 · SDA","--w-i2c","MPU SDA"], [4,"5V",null,""],
+    [5,"GPIO3 · SCL","--w-i2c","MPU SCL"], [6,"GND","--w-gnd","공통"],
+    [7,"GPIO4",null,""],              [8,"GPIO14 · TXD",null,""],
+    [9,"GND","--w-gnd","홀센서"],      [10,"GPIO15 · RXD",null,""],
+    [11,"GPIO17","--w-hall","A3144 DO"],[12,"GPIO18","--w-pwm","ENA 좌"],
+    [13,"GPIO27",null,""],            [14,"GND",null,""],
+    [15,"GPIO22",null,""],            [16,"GPIO23",null,""],
+    [17,"3V3",null,""],              [18,"GPIO24",null,""],
+    [19,"GPIO10",null,""],            [20,"GND",null,""],
+    [21,"GPIO9",null,""],             [22,"GPIO25",null,""],
+    [23,"GPIO11",null,""],            [24,"GPIO8",null,""],
+    [25,"GND",null,""],              [26,"GPIO7",null,""],
+    [27,"GPIO0",null,""],             [28,"GPIO1",null,""],
+    [29,"GPIO5",null,""],             [30,"GND",null,""],
+    [31,"GPIO6",null,""],             [32,"GPIO12",null,""],
+    [33,"GPIO13","--w-pwm","ENB 우"], [34,"GND",null,""],
+    [35,"GPIO19",null,""],            [36,"GPIO16",null,""],
+    [37,"GPIO26",null,""],            [38,"GPIO20",null,""],
+    [39,"GND",null,""],              [40,"GPIO21",null,""],
+  ];
+  const rows = document.getElementById("rows");
+  for (let i=0;i<P.length;i+=2){
+    const L=P[i], R=P[i+1];
+    const row=document.createElement("div"); row.className="row";
+    const mk=(d,side)=>{
+      const on=d[2]!=null;
+      const col=on?`var(${d[2]})`:"";
+      return `<div class="pin ${side} ${on?'on':''}" style="${on?`--pc:${col}`:''}">
+                <span class="dotc"></span>
+                <span class="lab">${d[1]}</span>
+                ${on&&d[3]?`<span class="use">${d[3]}</span>`:''}
+              </div>`;
+    };
+    const numEl=(d)=>{
+      const on=d[2]!=null;
+      const bg=on?`background:var(${d[2]})`:'';
+      return `<div class="num ${on?'on':''}" style="${bg}">${d[0]}</div>`;
+    };
+    row.innerHTML = mk(L,"left") + numEl(L) + numEl(R) + mk(R,"right");
+    rows.appendChild(row);
+  }
+</script>

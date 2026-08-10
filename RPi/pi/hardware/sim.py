@@ -16,7 +16,7 @@ class MockPlant:
         self._g = gpio
         self.k = k
         self.tau = tau
-        self._pwm_pin = pwm_pin if pwm_pin is not None else config.PWMA
+        self._pwm_pin = pwm_pin if pwm_pin is not None else config.ENA
         self._enc_pin = encoder_pin if encoder_pin is not None else config.ENCODER_PIN
         self.speed = 0.0      # m/s
         self.distance = 0.0   # m
