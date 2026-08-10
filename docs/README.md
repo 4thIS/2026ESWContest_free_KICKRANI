@@ -18,6 +18,7 @@
 | [`RPi_docs/공통계약.md`](RPi_docs/공통계약.md) | ⚠️ **공통 자산** — `Sample` 스키마·인터페이스(`contracts.py`)·BLE 프로토콜·CSV 스키마. 변경 시 DJ·CW·도현 합의 필요 |
 | [`RPi_docs/구현.md`](RPi_docs/구현.md) | Phase 0~9 실행 계획·진행 체크리스트 (`- [x]`는 파일·테스트로 확인된 것만) |
 | [`RPi_docs/DJ_협의사항.md`](RPi_docs/DJ_협의사항.md) | DJ↔CW 통합 협의 항목 및 처리 현황 |
+| [`RPi_docs/전원계산.md`](RPi_docs/전원계산.md) | **A4 산출물** — 모터·배터리·L298N 채널 여유 계산, A3 발주 확정 사양 |
 | [`RPi_docs/핀맵.html`](RPi_docs/핀맵.html) | Pi 5 40핀 헤더 실배선 도면 (L298N·A3144·MPU-6050 기준) |
 
 ## 작성 예정
