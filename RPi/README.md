@@ -42,6 +42,36 @@ scripts/             collect_premise.py · analyze_surfaces.py
 - **Raspberry Pi 5**, Python 3
 - `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · `bluezero`(BLE) · `numpy` · `pytest`
 
+## Pi 5 셋업 (실행계획 A5)
+
+```bash
+# 1) OS — Raspberry Pi OS 64-bit(Bookworm). Imager에서 SSH·Wi-Fi·사용자 미리 설정
+# 2) I2C 활성화 → 재부팅
+sudo raspi-config      # Interface Options → I2C → Yes
+sudo apt install -y i2c-tools python3-lgpio
+
+# 3) 의존성 — Bookworm은 시스템 pip를 막는다(PEP 668) → venv 필수
+python3 -m venv --system-site-packages ~/venv     # apt로 깐 lgpio를 쓰려면 이 옵션
+source ~/venv/bin/activate
+pip install -r requirements.txt
+
+# 4) 검증 — A5 전 항목을 한 번에
+python scripts/setup_check.py
+```
+
+`setup_check.py`가 **플랫폼·패키지·I2C/MPU(0x68)·GPIO 권한**을 PASS/FAIL로 찍는다. 기본 실행은 읽기 전용이라 **모터가 돌지 않는다.**
+
+**B7(PID 실물 튜닝) 전에 반드시** 구동 경로까지 확인한다:
+
+```bash
+python scripts/setup_check.py --pwm       # ⚠️ 바퀴 공중. ENA/ENB 실제 출력
+python scripts/setup_check.py --jitter    # PWM 주기·듀티 실측 (ENA→GPIO27 점퍼 필요)
+```
+
+> ⚠️ `config.py`·설계명세서 §8은 GPIO18/13을 "HW PWM"이라 적었지만 실제 백엔드는 `lgpio.tx_pwm`이다.
+> 1kHz 지터가 크면 ②PID가 진동하고 그 진동이 IMU에 실려 **③ 수집 데이터를 오염**시킨다.
+> `--jitter`는 루프백으로 이걸 숫자로 확인한다.
+
 ## 문서
 
 설계·인터페이스 계약·개발 순서: [`../docs/RPi_docs/설계명세서.md`](../docs/RPi_docs/설계명세서.md)
