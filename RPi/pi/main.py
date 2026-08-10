@@ -6,19 +6,30 @@
     python -m pi.main --real     # lgpio 백엔드로 실제 모터 구동
 
 부품이 오면 --real 로 실행하면 backend가 lgpio를 자동 선택한다(코드 무수정).
-모드 상태머신(IDLE/COLLECT/DEMO)·통신(BLE/센서수집)은 통합 controller(Phase 7)에서.
+
+**통합 실행**(Phase 7 — 수집·인지·제어·앱통신 전부):
+    python -m pi.main --app          # 목 부품으로 통합 앱 기동
+    python -m pi.main --app --real   # 실물 Pi 5 (lgpio·I2C·BLE)
 """
 import argparse
+import atexit
+import queue
+import signal
 import sys
 import time
 
 from pi import config
+from pi.app import App
+from pi.collect.logger import CsvLogger
 from pi.hardware.backend import get_gpio
 from pi.hardware.sim import MockPlant
+from pi.infer.model import StubModel
+from pi.infer.windower import Windower
 from pi.motion.motor import Motor
 from pi.motion.pid import PID
 from pi.motion.speed_controller import SpeedController
 from pi.sensors.encoder import Encoder
+from pi.sensors.sampler import Sampler
 
 
 class _StepClock:
@@ -90,6 +101,97 @@ def run_real(duration_s=10.0):
         print("[실물] 정지 완료")
 
 
+# ─────────────────────────────────────────────────────────────
+# 통합 실행 (Phase 7) — 실제 부품 조립 + 안전 핸들러
+# ─────────────────────────────────────────────────────────────
+
+def make_imu():
+    """실물 MPU-6050 (Pi에서만 smbus2 import)."""
+    from smbus2 import SMBus
+    from pi.sensors.imu import Mpu6050
+    imu = Mpu6050(SMBus(config.I2C_BUS))
+    if not imu.begin():
+        raise RuntimeError("MPU-6050 초기화 실패 (배선·주소 0x68·i2cdetect 확인)")
+    return imu
+
+
+def make_ble():
+    """실물 BLE 서버. transport는 issue #10 결론 후 연결(B3)."""
+    raise NotImplementedError(
+        "BLE transport 미구현 — issue #10(전송계층 BLE GATT vs RFCOMM) 결정 후 B3에서 연결")
+
+
+class _NullImu:
+    """목 실행용 — 샘플 없음."""
+    def drain(self): return []
+
+
+class _NullBle:
+    """목 실행용 — 명령 없음, 텔레메트리 폐기."""
+    def on_command(self, cb): self._cb = cb
+    def send_telemetry(self, data): pass
+    def start(self): pass
+
+
+def build_app(force_mock=False):
+    """부품을 조립해 통합 App을 만든다. **엔코더는 ②·③이 공유**(공통계약 B-1)."""
+    gpio = get_gpio(force_mock=force_mock)
+    motor = Motor(gpio)
+    motor.stop()                                   # 시작 시퀀스: 모터 정지 확정(§5)
+
+    encoder = Encoder(gpio)                        # ★ 단일 인스턴스
+    pid = PID(config.PID_KP, config.PID_KI, config.PID_KD,
+              out_min=config.DUTY_MIN, out_max=config.DUTY_MAX)
+    speed = SpeedController(motor, encoder, pid)
+
+    sample_queue = queue.Queue()
+    imu = make_imu() if not force_mock else _NullImu()
+    sampler = Sampler(imu, encoder, sample_queue)  # ★ 같은 encoder 주입
+    ble = make_ble() if not force_mock else _NullBle()
+
+    return App(speed=speed, sampler=sampler, logger=CsvLogger(), ble=ble,
+               windower=Windower(), model=StubModel(), sample_queue=sample_queue)
+
+
+def install_safety_handlers(speed):
+    """SIGTERM/SIGINT·atexit에서 **모터 정지**.
+
+    ⚠️ `try/finally`만으로는 SIGTERM·SSH 끊김에서 모터가 계속 돈다(B2 선반영).
+    """
+    def _stop(*_):
+        try:
+            speed.stop()
+        except Exception:
+            pass
+
+    def _on_signal(signum, frame):
+        _stop()
+        raise SystemExit(0)
+
+    atexit.register(_stop)
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            signal.signal(sig, _on_signal)
+        except (ValueError, OSError):               # 메인 스레드가 아니면 무시
+            pass
+
+
+def run_app(force_mock=False):
+    """통합 앱 기동 → Ctrl-C/SIGTERM까지 대기 → 안전 종료."""
+    app = build_app(force_mock=force_mock)
+    install_safety_handlers(app.controller._speed)
+    app.start()
+    print("=== 통합 앱 기동 (IDLE) — 앱 명령 대기. Ctrl-C 종료 ===")
+    try:
+        while app.is_running():
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        app.stop()
+        print("=== 정지 완료 ===")
+
+
 def main():
     # Windows 콘솔(cp949)에서도 한글 출력이 깨지지 않도록. (Pi/Linux는 기본 UTF-8)
     try:
@@ -97,14 +199,18 @@ def main():
     except (AttributeError, ValueError):
         pass
 
-    parser = argparse.ArgumentParser(description="RC카 두뇌 ② 속도제어 (Pi 5)")
+    parser = argparse.ArgumentParser(description="RC카 두뇌 (Pi 5)")
+    parser.add_argument("--app", action="store_true",
+                        help="통합 앱 기동(수집·인지·제어·앱통신)")
     parser.add_argument("--real", action="store_true",
                         help="실물 라즈베리파이에서 실제 모터 구동")
     parser.add_argument("--duration", type=float, default=None,
                         help="주행/시뮬 시간(초)")
     args = parser.parse_args()
 
-    if args.real:
+    if args.app:
+        run_app(force_mock=not args.real)
+    elif args.real:
         run_real(duration_s=args.duration or 10.0)
     else:
         print("=== 목(mock) 시뮬레이션: 정속 주행 ===")
