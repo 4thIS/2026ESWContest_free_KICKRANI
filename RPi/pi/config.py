@@ -12,12 +12,13 @@ MPU6050_ADDR = 0x68            # AD0=GND/LOW. SDA=GPIO2 / SCL=GPIO3 (I2C-1 고�
 # 방향(IN1~IN4)은 보드에서 +5V/GND에 하드웨어 고정(항상 전진) → Pi GPIO 사용 안 함.
 # Pi는 속도(ENA·ENB PWM) 2선만 제어. 좌=ENA(OUT1/2), 우=ENB(OUT3/4).
 # ⚠️ ENA/ENB 점퍼캡을 제거해야 PWM이 먹는다(안 빼면 항상 최고속).
-ENA = 18               # 좌측 채널 속도 PWM (HW PWM 핀)
-ENB = 13               # 우측 채널 속도 PWM (HW PWM 핀)
+ENA = 18               # 좌측 채널 속도 PWM (물리 12) — HW PWM 가능 핀이나 현재 lgpio.tx_pwm(소프트)
+ENB = 13               # 우측 채널 속도 PWM (물리 33) — 〃
 PWM_FREQ_HZ = 1000     # 모터 PWM 주파수
 
 # ── 엔코더 (②속도제어·③수집 공유, DJ 소유) — A3144 홀센서 ──
-ENCODER_PIN = 17                 # A3144 DO → 인터럽트 (DO–VCC 10kΩ 풀업)
+# ⚠️ A3144는 정격 4.5~24V → VCC=5V(물리 4). 오픈컬렉터라 풀업만 3.3V로 하면 DO 하이가 3.3V.
+ENCODER_PIN = 17                 # A3144 DO → 인터럽트 (물리 11, DO–3.3V 10kΩ 풀업)
 # A3144 홀센서 + 자석 4개 → 1회전당 4펄스(90°마다 1). 바퀴 지름 65mm → 둘레 π×0.065.
 # 펄스당 거리 = 0.204/4 ≈ 0.051 m. ⚠️ 자석 수·바퀴 실측 시 이 두 값만 보정.
 ENCODER_PULSES_PER_REV = 4       # A3144 자석 4개(90°마다 1펄스)
