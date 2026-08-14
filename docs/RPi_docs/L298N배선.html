@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L298N 배선 가이드 — 노면 감지 킥보드 (4WD 직진 전용)</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#fff; --ink:#1e2430; --sub:#5b6472; --line:#e3e7ef;
+    --red:#dc2626; --red-bg:#fdecec; --grn:#059669; --grn-bg:#e7f6f0;
+    --blu:#2563eb; --blu-bg:#eaf1fe; --amb:#d97706; --amb-bg:#fdf1e0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding:28px 16px 60px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:1.5rem;margin-bottom:4px}
+  h2{font-size:1.12rem;margin:34px 0 12px;padding-left:10px;border-left:5px solid var(--ink)}
+  h3{font-size:.98rem;margin:16px 0 8px}
+  .meta{color:var(--sub);font-size:.88rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;font-size:.87rem;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef1f5}
+  code{background:#eef1f5;padding:1px 6px;border-radius:4px;font-size:.9em}
+  pre{background:#1e2430;color:#e6edf3;padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.5}
+  .warn{background:var(--red-bg);border-left:5px solid var(--red);border-radius:9px;padding:12px 15px;margin:10px 0;font-size:.9rem}
+  .ok{background:var(--grn-bg);border-left:5px solid var(--grn);border-radius:9px;padding:12px 15px;margin:10px 0;font-size:.9rem}
+  .info{background:var(--blu-bg);border-left:5px solid var(--blu);border-radius:9px;padding:12px 15px;margin:10px 0;font-size:.9rem}
+  .tip{background:var(--amb-bg);border-left:5px solid var(--amb);border-radius:9px;padding:12px 15px;margin:10px 0;font-size:.9rem}
+  .step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+  .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem}
+  .step-body{flex:1;font-size:.9rem}
+  .jump{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700;color:#fff}
+  .j-on{background:var(--grn)} .j-off{background:var(--red)}
+  ul{margin:6px 0 6px 20px} li{margin:3px 0;font-size:.9rem}
+  .chk{list-style:none;margin-left:0} .chk li{padding-left:26px;position:relative}
+  .chk li::before{content:"☐";position:absolute;left:0;font-size:1.05rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🔌 L298N 배선 가이드 — 4WD 직진 전용</h1>
+<div class="meta">노면 감지 킥보드 · 근거: <b>설계명세서 §8</b> · <b>전원계산.md</b> · 보드: LCKFB L298N (78M05 내장)</div>
+
+<div class="warn">
+<b>⚠️ 작업 전 필수</b><br>
+① <b>배터리를 분리한 상태</b>에서 모든 배선을 한다 · ② 배선 완료 후 <b>육안 재점검</b> → 그다음 전원 인가<br>
+③ 첫 구동은 반드시 <b>바퀴를 공중에 띄우고</b> 저속(30%)부터
+</div>
+
+<h2>1. 전체 결선 개요</h2>
+<div class="card">
+<pre>
+   [2S 18650 · 7.4V]                      [USB PD 보조배터리 5V/3A↑]
+        │  +                                        │
+        │  └──[1000µF]──┐                           │ USB-C
+        │  −            │                           ▼
+        ▼               ▼                    ┌─────────────┐
+   ┌──────────────────────────┐              │  라즈베리파이 5  │
+   │   L298N 모터 드라이버      │              │              │
+   │  VS  ← 배터리 +           │              │  GPIO18(12번)├──→ ENA
+   │  GND ← 배터리 − ──────────┼──── 공통 ────┤  GPIO13(33번)├──→ ENB
+   │  VSS → (5V 출력)          │     GND      │  GND (6번)   │
+   │                          │              └─────────────┘
+   │  IN1 ← VSS(5V)  ┐        │
+   │  IN2 ← GND      │ 전진   │   ⚠️ 이 4개는 L298N 보드 안에서
+   │  IN3 ← VSS(5V)  │ 고정   │      자체 점퍼선으로 연결
+   │  IN4 ← GND      ┘        │
+   │                          │
+   │  OUT1/OUT2 → 좌측 모터 2개 │
+   │  OUT3/OUT4 → 우측 모터 2개 │
+   └──────────────────────────┘
+</pre>
+</div>
+
+<div class="info">
+<b>왜 IN 핀을 고정하나?</b> 이 프로젝트는 <b>조향이 없고 직진/정지만</b> 한다(설계명세서 §8).
+방향을 하드웨어로 고정하면 Pi는 <b>속도(ENA·ENB PWM)만</b> 제어하면 되고, GPIO 4개를 아낀다.
+</div>
+
+<h2>2. 점퍼 설정 — 가장 많이 틀리는 부분</h2>
+<table>
+<tr><th>점퍼</th><th>설정</th><th>이유</th></tr>
+<tr>
+  <td><b>5V-EN</b><br>(5V 활성)</td>
+  <td><span class="jump j-on">꽂는다 (ON)</span></td>
+  <td>배터리 7.4V가 <b>7~12V 범위</b>라 보드의 78M05 레귤레이터가 5V를 만든다.<br>이 5V가 <code>VSS</code> 핀으로 나오고, 우리는 이걸 IN1·IN3에 쓴다.</td>
+</tr>
+<tr>
+  <td><b>ENA</b> 점퍼캡<br><b>ENB</b> 점퍼캡</td>
+  <td><span class="jump j-off">반드시 뺀다 (OFF)</span></td>
+  <td>꽂혀 있으면 ENA/ENB가 <b>5V에 직결</b>되어 <b>항상 최고속 고정</b>.<br>Pi의 PWM이 완전히 무시된다 → 속도제어 불가</td>
+</tr>
+</table>
+
+<div class="warn">
+<b>⚠️ 모터가 안 돌거나 / 전속력으로만 돈다면</b> 십중팔구 이 점퍼 문제다.<br>
+· 안 돎 → <code>5V-EN</code> 빠져 있어 VSS에 5V가 없음 (IN 핀에 신호 없음)<br>
+· 최고속 고정 → <code>ENA/ENB</code> 점퍼캡이 안 빠짐
+</div>
+
+<h2>3. 배선표</h2>
+
+<h3>3-1. 전원 (터미널 블록 — 나사 조임)</h3>
+<table>
+<tr><th>L298N 단자</th><th>연결 대상</th><th>비고</th></tr>
+<tr><td><b>VS</b> (VMS/12V)</td><td>2S 18650 <b>+</b> (7.4V)</td><td>+ 단자 옆에 <b>1000µF 전해콘덴서</b> 병렬(극성 주의)</td></tr>
+<tr><td><b>GND</b></td><td>2S 18650 <b>−</b><br><b>+ Pi GND</b></td><td>⚠️ <b>Pi GND와 반드시 공통</b> — 아래 §5 참고</td></tr>
+<tr><td><b>VSS</b> (5V)</td><td><b>출력</b> — IN1·IN3에 공급</td><td>❌ <b>Pi 전원으로 쓰지 말 것</b>(0.5A, 설계명세서 §8 금지)</td></tr>
+</table>
+
+<h3>3-2. 방향 고정 — L298N 보드 자체 점퍼선 4개</h3>
+<table>
+<tr><th>출발</th><th>도착</th><th>결과</th></tr>
+<tr><td>VSS (5V)</td><td><b>IN1</b></td><td rowspan="2">좌측 채널 <b>전진 고정</b></td></tr>
+<tr><td>GND</td><td><b>IN2</b></td></tr>
+<tr><td>VSS (5V)</td><td><b>IN3</b></td><td rowspan="2">우측 채널 <b>전진 고정</b></td></tr>
+<tr><td>GND</td><td><b>IN4</b></td></tr>
+</table>
+<div class="tip">
+바퀴가 <b>뒤로 돌면</b> 그 채널의 IN 두 개를 <b>서로 바꾼다</b>(예: IN1↔IN2).
+모터 출력선(OUT)을 바꿔도 되지만, IN 쪽이 더 쉽다.
+</div>
+
+<h3>3-3. Pi ↔ L298N 신호</h3>
+<table>
+<tr><th>Pi 물리핀</th><th>BCM</th><th>→ L298N</th><th>역할</th></tr>
+<tr><td><b>12번</b></td><td>GPIO18</td><td><b>ENA</b></td><td>좌측 속도 PWM (1kHz)</td></tr>
+<tr><td><b>33번</b></td><td>GPIO13</td><td><b>ENB</b></td><td>우측 속도 PWM (1kHz)</td></tr>
+<tr><td><b>6번</b> (또는 9·14·20…)</td><td>GND</td><td><b>GND</b></td><td>⚠️ 공통 접지 (필수)</td></tr>
+</table>
+<div class="info">핀 번호는 <code>RPi/pi/config.py</code>의 <code>ENA=18</code> / <code>ENB=13</code> 단일 출처를 따른다. 배선을 바꾸면 이 파일만 수정하면 된다.</div>
+
+<h3>3-4. 모터 출력</h3>
+<table>
+<tr><th>L298N</th><th>연결</th><th>비고</th></tr>
+<tr><td><b>OUT1 / OUT2</b></td><td>좌측 모터 <b>2개 병렬</b></td><td rowspan="2">4WD라 채널당 모터 2개.<br>같은 쪽 모터는 <b>같은 극성</b>으로 묶어야 같은 방향으로 돈다</td></tr>
+<tr><td><b>OUT3 / OUT4</b></td><td>우측 모터 <b>2개 병렬</b></td></tr>
+</table>
+
+<h2>4. 조립 순서</h2>
+<div class="card">
+  <div class="step"><div class="num">1</div><div class="step-body"><b>배터리 분리 확인</b> — 모든 배선은 무전원 상태에서</div></div>
+  <div class="step"><div class="num">2</div><div class="step-body"><b>점퍼 설정</b> — <code>5V-EN</code> 꽂기 / <code>ENA·ENB</code> 점퍼캡 빼기</div></div>
+  <div class="step"><div class="num">3</div><div class="step-body"><b>IN 고정 점퍼 4개</b> — VSS→IN1, GND→IN2, VSS→IN3, GND→IN4</div></div>
+  <div class="step"><div class="num">4</div><div class="step-body"><b>모터 4개</b>를 OUT1/2·OUT3/4에 연결 (좌우 2개씩)</div></div>
+  <div class="step"><div class="num">5</div><div class="step-body"><b>Pi 신호선 3개</b> — 물리 12→ENA, 33→ENB, 6→GND</div></div>
+  <div class="step"><div class="num">6</div><div class="step-body"><b>배터리 + 콘덴서</b>를 VS/GND에 (콘덴서 극성 확인!)</div></div>
+  <div class="step"><div class="num">7</div><div class="step-body"><b>Pi는 USB-C 보조배터리</b>로 별도 전원</div></div>
+  <div class="step"><div class="num">8</div><div class="step-body"><b>바퀴 공중</b>에 띄우고 → 테스트</div></div>
+</div>
+
+<h2>5. ⚠️ 전원 격리 ≠ 접지 분리</h2>
+<div class="warn">
+전원 레일(VS·USB)은 <b>분리</b>하되, <b>GND는 반드시 공통</b>으로 묶는다.<br><br>
+Pi의 GPIO18/13이 L298N ENA/ENB로 나가는데, <b>기준 전위가 다르면 이 신호가 의미를 잃는다.</b><br>
+"전원 격리"를 GND까지 끊는 것으로 오해하면 <b>아무것도 동작하지 않는다.</b>
+<br><br>보드 문서 원문: <i>"the microcontroller's GND must be connected to the module's GND"</i>
+</div>
+
+<h2>6. 발열·보호</h2>
+<table>
+<tr><th>항목</th><th>내용</th></tr>
+<tr><td><b>방열판</b></td><td><b>필수.</b> 정상 1.2W/채널, 스톨 시 순간 ~9W/채널 → 없으면 열보호 셧다운(주행 중 정지)</td></tr>
+<tr><td><b>DUTY_MAX</b></td><td><code>0.75</code> 권장 — 스톨 시 채널 2.4A로 연속정격(2A) 초과. 목표 듀티가 0.65~0.75라 <b>성능 손실 없음</b></td></tr>
+<tr><td><b>소프트스타트</b></td><td>듀티 0→목표를 0.3~0.5초 램프 → 기동 돌입전류 억제</td></tr>
+<tr><td><b>전압강하</b></td><td>L298N은 ~2V 강하 → 배터리 7.4V면 모터엔 <b>약 5.4V</b>. 정상이다</td></tr>
+</table>
+
+<h2>7. 배선 후 검증</h2>
+<div class="card">
+<h3>① 전원 인가 전 — 육안 체크</h3>
+<ul class="chk">
+  <li><code>5V-EN</code> 점퍼 꽂힘 / <code>ENA·ENB</code> 점퍼캡 빠짐</li>
+  <li>IN1·IN3 → VSS(5V) · IN2·IN4 → GND</li>
+  <li>Pi GND ↔ L298N GND 연결됨</li>
+  <li>1000µF 콘덴서 극성(− 줄무늬가 GND 쪽)</li>
+  <li>배터리 +/− 방향</li>
+</ul>
+
+<h3>② 전원 인가 후 — 무구동 확인</h3>
+<pre>ssh kick "pinctrl get 18,13"
+# 기대: 둘 다 미할당(none) 또는 lo — 모터가 돌면 안 됨</pre>
+
+<h3>③ 저속 구동 테스트 (⚠️ 바퀴 공중)</h3>
+<pre>ssh kick "cd ~/embedded_kickboard/RPi &amp;&amp; timeout 20 python3 -c \"
+from pi.hardware.backend import get_gpio
+from pi.motion.motor import Motor
+import time
+g=get_gpio(); m=Motor(g); m.stop()
+for d in (0.30, 0.50):
+    print(f'듀티 {d*100:.0f}%'); m.set_duty(d); time.sleep(2); m.stop(); time.sleep(1)
+m.stop(); g.cleanup(); print('종료')
+\""</pre>
+<div class="ok"><b>성공 기준</b> — 30%에서 천천히, 50%에서 더 빠르게, 네 바퀴가 <b>같은 방향</b>으로 회전. 명령 종료 시 즉시 정지.</div>
+</div>
+
+<h2>8. 문제 해결</h2>
+<table>
+<tr><th>증상</th><th>원인</th><th>조치</th></tr>
+<tr><td>전혀 안 돎</td><td>배터리 미연결 / <code>5V-EN</code> 빠짐 / IN 고정 안 됨</td><td>§2·§3-2 확인</td></tr>
+<tr><td><b>항상 최고속</b></td><td><code>ENA/ENB</code> 점퍼캡</td><td><b>빼기</b></td></tr>
+<tr><td>한쪽만 돎</td><td>해당 채널 IN 또는 OUT 배선</td><td>좌우 비교</td></tr>
+<tr><td>뒤로 돎</td><td>IN 극성</td><td>그 채널 IN 두 개 교체</td></tr>
+<tr><td>돌다가 멈춤·뜨거움</td><td>열보호 셧다운</td><td>방열판 · <code>DUTY_MAX=0.75</code></td></tr>
+<tr><td><b>Pi가 리셋됨</b></td><td>전원 공유 / GND 부실</td><td>Pi는 <b>USB-C 별도</b>, 콘덴서 추가</td></tr>
+<tr><td>약하게만 돎</td><td>배터리 전압 낮음</td><td><b>7.0V 이하면 충전</b>(그 이하는 목표속도 미달 → 수집 데이터 오염)</td></tr>
+</table>
+
+<div class="info" style="margin-top:26px">
+관련 문서: <b>설계명세서.md §8</b>(핀맵·배선) · <b>전원계산.md</b>(전류·배터리·보호대책) · <b>핀맵.html</b>(Pi 40핀 도면)
+</div>
+
+</div>
+</body>
+</html>
