@@ -82,9 +82,14 @@ def run_simulation(duration_s=20.0, quiet=False):
 
 
 def run_real(duration_s=10.0):
-    """실물 Pi 5에서 실제 모터를 정속으로 duration_s초 구동."""
+    """실물 Pi 5에서 실제 모터를 정속으로 duration_s초 구동.
+
+    ⚠️ `finally`만으로는 부족하다 — SIGTERM·SSH 끊김·`timeout` 강제종료는
+    `finally`를 타지 않아 **GPIO가 HIGH로 남고 모터가 계속 돈다**(실기 사고).
+    """
     gpio = get_gpio()  # lgpio 자동 선택
     sc = _build_controller(gpio, time.monotonic)
+    install_safety_handlers(sc)          # SIGTERM/SIGINT·atexit → 모터 정지
     dt = 1.0 / config.CONTROL_HZ
     steps = int(duration_s * config.CONTROL_HZ)
     print(f"[실물] {duration_s}초 정속 주행 시작 (목표 {config.TARGET_SPEED_MPS} m/s)")

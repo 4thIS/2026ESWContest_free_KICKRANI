@@ -43,6 +43,17 @@ def test_begin_false_when_who_am_i_wrong():
     assert imu.begin() is False
 
 
+def test_begin_accepts_clone_who_am_i_ids():
+    """클론 MPU-6050은 WHO_AM_I가 0x68이 아니다(실기 확인: 0x72).
+
+    정품만 받으면 클론 모듈에서 begin()이 거부돼 칩이 sleep에 머물고
+    읽기가 전부 0이 된다. 알려진 호환 ID는 허용해야 한다.
+    """
+    for who in (0x68, 0x70, 0x72, 0x73, 0x75, 0x98):
+        bus = FakeBus(regs={WHO_AM_I: who})
+        assert Mpu6050(bus).begin() is True, f"WHO_AM_I=0x{who:02X} 거부됨"
+
+
 def test_begin_configures_registers():
     bus = FakeBus(regs={WHO_AM_I: 0x68})
     imu = Mpu6050(bus)
