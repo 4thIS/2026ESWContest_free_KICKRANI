@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pi 5 핀맵 · 4WD 킥보드 RC카</title>
 <style>
   :root {
@@ -63,6 +65,38 @@
 
   footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--ink-muted);}
   code.k{font-family:ui-monospace,Consolas,monospace;background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:.92em;}
+
+  /* 배선 순서 */
+  ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+  ol.steps>li{counter-increment:s;position:relative;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:15px 18px 15px 54px;box-shadow:var(--shadow);}
+  ol.steps>li::before{content:counter(s);position:absolute;left:15px;top:15px;width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;border-radius:8px;
+    background:var(--accent);color:var(--surface);font:700 13px/1 ui-monospace,monospace;}
+  ol.steps>li.stop::before{background:var(--w-5);}
+  .steps h3{margin:0 0 9px;font-size:15px;letter-spacing:-.01em;}
+  .steps h3 .when{font-weight:400;font-size:12.5px;color:var(--ink-muted);margin-left:8px;}
+  .steps ul{margin:0;padding-left:17px;font-size:13.5px;}
+  .steps ul li+li{margin-top:5px;}
+  .chk{margin-top:10px;padding:8px 11px;border-radius:8px;background:var(--surface-2);
+    border-left:3px solid var(--w-pwm);font-size:12.5px;}
+  .chk b{font-weight:600;}
+  .stopbox{margin-top:10px;padding:8px 11px;border-radius:8px;background:var(--surface-2);
+    border-left:3px solid var(--w-5);font-size:12.5px;}
+  .never{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--w-5);
+    border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);font-size:13.5px;}
+  .never ul{margin:8px 0 0;padding-left:17px;}
+  .never li+li{margin-top:5px;}
+
+  /* 그림 */
+  figure{margin:0 0 16px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:16px 18px 12px;box-shadow:var(--shadow);overflow-x:auto;}
+  figure svg{display:block;height:auto;color:var(--ink);}
+  figcaption{margin-top:11px;padding-top:10px;border-top:1px solid var(--border);
+    font-size:12.5px;color:var(--ink-muted);line-height:1.55;}
+  figcaption b{color:var(--ink);font-weight:600;}
+  .steps figure{margin:12px 0 0;padding:13px 14px 10px;background:var(--surface-2);box-shadow:none;}
+  .steps figcaption{margin-top:9px;padding-top:8px;}
 </style>
 
 <div class="wrap">
@@ -83,6 +117,7 @@
       <span class="item"><span class="sw" style="background:var(--w-i2c)"></span>I2C</span>
       <span class="item"><span class="sw" style="background:var(--w-pwm)"></span>모터 PWM</span>
       <span class="item"><span class="sw" style="background:var(--w-hall)"></span>홀센서</span>
+      <span class="item"><span class="sw" style="background:var(--accent)"></span>지터 측정(임시)</span>
       <span class="item"><span class="sw" style="background:var(--unused)"></span>미사용</span>
     </div>
   </div>
@@ -91,33 +126,451 @@
   <table>
     <thead><tr><th>기능</th><th>BCM</th><th>물리</th><th>연결</th></tr></thead>
     <tbody>
-      <tr><td><span class="tag" style="background:var(--w-33)"></span>3.3V</td><td class="p">3V3</td><td><span class="phys">1</span></td><td>MPU VCC · A3144 VCC · 10kΩ 풀업</td></tr>
-      <tr><td><span class="tag" style="background:var(--w-5)"></span>5V 입력</td><td class="p">5V</td><td><span class="phys">2</span></td><td>벅컨버터 5V → Pi 급전 (또는 USB-C)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-33)"></span>3.3V</td><td class="p">3V3</td><td><span class="phys">1</span></td><td>MPU-6050 VCC · <strong>A3144 DO 풀업 10kΩ</strong></td></tr>
+      <tr><td><span class="tag" style="background:var(--w-5)"></span>5V 출력</td><td class="p">5V</td><td><span class="phys">4</span></td><td><strong>A3144 VCC</strong> — ⚠️ 3.3V로는 동작 안 함(정격 4.5V↑)</td></tr>
       <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SDA</td><td class="p">GPIO2</td><td><span class="phys">3</span></td><td>MPU-6050 SDA</td></tr>
       <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SCL</td><td class="p">GPIO3</td><td><span class="phys">5</span></td><td>MPU-6050 SCL</td></tr>
-      <tr><td><span class="tag" style="background:var(--w-hall)"></span>홀센서</td><td class="p">GPIO17</td><td><span class="phys">11</span></td><td>A3144 DO (풀업 인터럽트)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-hall)"></span>홀센서</td><td class="p">GPIO17</td><td><span class="phys">11</span></td><td>A3144 DO (오픈컬렉터 → <strong>3.3V로</strong> 풀업)</td></tr>
       <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 좌</td><td class="p">GPIO18</td><td><span class="phys">12</span></td><td>L298N ENA (좌 속도 PWM)</td></tr>
       <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 우</td><td class="p">GPIO13</td><td><span class="phys">33</span></td><td>L298N ENB (우 속도 PWM)</td></tr>
-      <tr><td><span class="tag" style="background:var(--w-gnd)"></span>GND</td><td class="p">GND</td><td><span class="phys">6·9</span></td><td>공통 접지 (L298N·MPU·홀센서·배터리−)</td></tr>
+      <tr><td><span class="tag" style="background:var(--accent)"></span>지터 측정</td><td class="p">GPIO27</td><td><span class="phys">13</span></td><td>임시 — <code class="k">setup_check.py --jitter</code> 때만 ENA에서 점퍼</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-gnd)"></span>GND</td><td class="p">GND</td><td><span class="phys">6</span>·<span class="phys">9</span>·<span class="phys">14</span></td><td>공통 접지 — <span class="phys">6</span> MPU · <span class="phys">9</span> A3144 · <span class="phys">14</span> L298N·배터리(−)</td></tr>
     </tbody>
   </table>
-  <p style="font-size:12.5px;color:var(--ink-muted);margin-top:10px;">※ L298N <span class="mono">IN1~IN4</span>는 Pi 핀을 안 쓰고 보드의 <span class="mono">+5V/GND</span>에 고정(전진). GND는 6·9번 외 14·20·25·30·34·39번도 공통으로 쓸 수 있다.</p>
+  <p style="font-size:12.5px;color:var(--ink-muted);margin-top:10px;">
+    ※ <strong>물리 2번(5V)은 쓰지 않는다.</strong> Pi 5는 <strong>USB-C PD 보조배터리</strong>로 급전한다(<span class="mono">전원계산.md §5</span>, 벅컨버터 폐기).
+    5V 핀 급전은 PMIC 보호를 우회하므로 <strong>USB-C와 동시에 넣지 말 것.</strong><br>
+    ※ L298N <span class="mono">IN1~IN4</span>는 Pi 핀을 안 쓰고 L298N 보드의 <span class="mono">+5V/GND</span>에 고정(전진).
+    GND는 6·9·14번 외 20·25·30·34·39번도 공통으로 쓸 수 있다.<br>
+    ※ GPIO18·13은 <em>하드웨어 PWM 가능 핀</em>이지만 현재 백엔드는 <span class="mono">lgpio.tx_pwm</span>(소프트 PWM)이다. 실제 안정도는 <span class="mono">--jitter</span>로 실측한다.
+  </p>
+
+  <h2>모듈 간 배선도</h2>
+  <table>
+    <thead><tr><th>구간</th><th>연결</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td class="p">2S 배터리 (+)</td><td>L298N <span class="mono">12V(VMS)</span> · 1000µF (+)</td><td>7.4~8.4V</td></tr>
+      <tr><td class="p">2S 배터리 (−)</td><td>L298N <span class="mono">GND</span> · 1000µF (−) · <strong>Pi GND</strong></td><td>⚠️ 공통 접지 필수</td></tr>
+      <tr><td class="p">L298N <span class="mono">5V EN</span> 점퍼</td><td><strong>꽂아둔다</strong> (온보드 레귤레이터로 로직 급전)</td><td>VMS 8.4V ≤ 12V라 안전</td></tr>
+      <tr><td class="p">L298N <span class="mono">ENA·ENB</span> 점퍼캡</td><td><strong>뺀다</strong></td><td>⚠️ 안 빼면 최고속 고정</td></tr>
+      <tr><td class="p">L298N <span class="mono">IN1 / IN2</span></td><td>보드 <span class="mono">+5V</span> / <span class="mono">GND</span> (좌 전진 고정)</td><td>반대로 돌면 둘을 맞바꾼다</td></tr>
+      <tr><td class="p">L298N <span class="mono">IN3 / IN4</span></td><td>보드 <span class="mono">+5V</span> / <span class="mono">GND</span> (우 전진 고정)</td><td>〃</td></tr>
+      <tr><td class="p">L298N <span class="mono">OUT1/OUT2</span></td><td>좌측 모터 2개 <strong>병렬</strong></td><td>채널당 2개 → 전류 합산</td></tr>
+      <tr><td class="p">L298N <span class="mono">OUT3/OUT4</span></td><td>우측 모터 2개 <strong>병렬</strong></td><td>〃</td></tr>
+      <tr><td class="p">L298N <span class="mono">ENA / ENB</span></td><td>Pi 물리 <span class="phys">12</span> / <span class="phys">33</span></td><td>Pi 3.3V로 L298 입력 구동 가능(V<sub>IH</sub> 2.3V)</td></tr>
+      <tr><td class="p">L298N <span class="mono">5V</span> 단자</td><td><strong>Pi에 연결 금지</strong></td><td>⚠️ 출력이라 Pi 5V와 충돌</td></tr>
+      <tr><td class="p">MPU-6050</td><td>VCC→<span class="phys">1</span> · GND→<span class="phys">6</span> · SDA→<span class="phys">3</span> · SCL→<span class="phys">5</span></td><td>AD0→GND (주소 0x68)</td></tr>
+      <tr><td class="p">A3144 홀센서</td><td>VCC→<span class="phys">4</span>(5V) · GND→<span class="phys">9</span> · DO→<span class="phys">11</span></td><td>DO–3.3V 사이 10kΩ 풀업</td></tr>
+      <tr><td class="p">자석 4개</td><td><strong>구동륜 1개</strong>에만 90°마다 부착</td><td>엔코더는 1채널 — 바퀴 지정 필요</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--ink-muted);margin-top:10px;">
+    ※ <strong>1000µF는 극성이 있다</strong> — 흰 띠(−)를 배터리 (−)쪽으로. L298N 전원 단자에 최대한 가깝게 붙인다.<br>
+    ※ L298N 방열판은 <strong>필수</strong>다(<span class="mono">전원계산.md §3</span>). 스톨 시 채널당 순간 ~9W.
+  </p>
+
+  <h2>그림 1 — 전원 두 계통, 접지 하나</h2>
+  <figure>
+    <svg role="img" aria-label="모터 전원과 Pi 전원은 별개 레일이지만 접지는 하나로 묶인다"
+         viewBox="0 0 720 340" style="width:100%;max-width:720px;min-width:600px">
+      <defs>
+        <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        <marker id="f1p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--w-pwm)"/></marker>
+      </defs>
+
+      <g fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5">
+        <rect x="40" y="36" width="140" height="64" rx="8"/>
+        <rect x="272" y="36" width="140" height="64" rx="8"/>
+        <rect x="504" y="36" width="140" height="64" rx="8"/>
+        <rect x="156" y="168" width="150" height="64" rx="8"/>
+        <rect x="396" y="168" width="140" height="64" rx="8"/>
+      </g>
+      <g fill="currentColor" text-anchor="middle">
+        <text x="110" y="64" font-size="13" font-weight="600">2S 18650</text>
+        <text x="110" y="82" font-size="11" opacity=".7">7.4~8.4V</text>
+        <text x="342" y="64" font-size="13" font-weight="600">L298N</text>
+        <text x="342" y="82" font-size="11" opacity=".7">+ 방열판</text>
+        <text x="574" y="64" font-size="13" font-weight="600">모터 4개</text>
+        <text x="574" y="82" font-size="11" opacity=".7">TT 1:48</text>
+        <text x="231" y="194" font-size="12" font-weight="600">USB PD 보조배터리</text>
+        <text x="231" y="212" font-size="11" opacity=".7">5V / 3A↑</text>
+        <text x="466" y="194" font-size="12" font-weight="600">Raspberry Pi 5</text>
+        <text x="466" y="212" font-size="11" opacity=".7">USB-C 급전</text>
+      </g>
+
+      <g stroke="currentColor" stroke-width="1.6" fill="none" marker-end="url(#f1a)">
+        <line x1="182" y1="68" x2="266" y2="68"/>
+        <line x1="414" y1="68" x2="498" y2="68"/>
+        <path d="M308 200 L322 200 A 8 8 0 0 1 338 200 L390 200"/>
+      </g>
+      <g fill="currentColor" font-size="11" text-anchor="middle" opacity=".85">
+        <text x="224" y="58">+7.4V</text>
+        <text x="456" y="58">OUT1~4</text>
+        <text x="349" y="190">USB-C 5V</text>
+      </g>
+
+      <g stroke="currentColor" stroke-width="1.6" fill="none">
+        <line x1="225" y1="68" x2="225" y2="110"/>
+        <line x1="212" y1="110" x2="238" y2="110"/>
+        <line x1="212" y1="118" x2="238" y2="118"/>
+        <path d="M225 118 L225 150 L330 150"/>
+      </g>
+      <circle cx="225" cy="68" r="3.5" fill="currentColor"/>
+      <g fill="currentColor">
+        <text x="206" y="118" font-size="11" text-anchor="end">1000µF</text>
+        <text x="243" y="106" font-size="10" opacity=".8">+</text>
+        <text x="243" y="129" font-size="10" opacity=".8">−</text>
+      </g>
+
+      <line x1="400" y1="166" x2="400" y2="104" stroke="var(--w-pwm)" stroke-width="1.8" marker-end="url(#f1p)"/>
+      <text x="410" y="132" font-size="11" font-weight="600" fill="var(--w-pwm)">ENA·ENB PWM</text>
+      <text x="410" y="146" font-size="10" fill="var(--w-pwm)" opacity=".85">3.3V 신호</text>
+
+      <g stroke="var(--w-gnd)" stroke-width="3" fill="none" stroke-linecap="round">
+        <line x1="75" y1="100" x2="75" y2="296"/>
+        <line x1="330" y1="100" x2="330" y2="296"/>
+        <line x1="500" y1="232" x2="500" y2="296"/>
+        <line x1="75" y1="296" x2="500" y2="296"/>
+      </g>
+      <g fill="var(--w-gnd)">
+        <circle cx="75" cy="296" r="4"/><circle cx="330" cy="296" r="4"/>
+        <circle cx="500" cy="296" r="4"/><circle cx="330" cy="150" r="4"/>
+      </g>
+      <text x="288" y="319" font-size="12" font-weight="600" fill="var(--w-gnd)" text-anchor="middle">공통 접지 — 반드시 하나로 묶는다</text>
+      <text x="706" y="319" font-size="10.5" fill="var(--w-5)" text-anchor="end">⚠ Pi 물리 2번(5V) 급전 금지</text>
+    </svg>
+    <figcaption>
+      <b>전원 레일은 둘, 접지는 하나.</b> 모터는 2S 배터리로, Pi는 USB PD 보조배터리로 완전히 분리해 모터 돌입전류가 Pi를 리셋시키지 못하게 한다.
+      그런데 <b>초록 화살표(ENA·ENB PWM)가 두 계통을 가로지른다</b> — 이 신호가 "3.3V"라는 뜻을 가지려면 양쪽이 같은 0V를 기준으로 삼아야 한다.
+      그래서 GND만은 회색 선처럼 하나로 묶는다. "전원 격리"를 GND까지 끊는 것으로 오해하면 아무것도 동작하지 않는다.
+    </figcaption>
+  </figure>
+
+  <h2>그림 2 — L298N 보드 단자 지도</h2>
+  <figure>
+    <svg role="img" aria-label="L298N 보드의 각 단자에 무엇을 연결하는지 표시한 배치도"
+         viewBox="0 0 720 440" style="width:100%;max-width:720px;min-width:620px">
+      <rect x="190" y="110" width="340" height="230" rx="10" fill="var(--surface-2)" stroke="currentColor" stroke-width="2"/>
+      <text x="342" y="243" font-size="17" font-weight="700" fill="currentColor" text-anchor="middle">L298N</text>
+      <text x="342" y="264" font-size="11" fill="currentColor" opacity=".7" text-anchor="middle">방열판 필수</text>
+
+      <rect x="240" y="86" width="140" height="24" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+      <g fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="272" cy="98" r="4.5"/><circle cx="310" cy="98" r="4.5"/><circle cx="348" cy="98" r="4.5"/>
+      </g>
+      <g fill="currentColor" font-size="11" font-weight="600" text-anchor="middle">
+        <text x="272" y="131">12V</text><text x="310" y="131">GND</text><text x="348" y="131">5V</text>
+      </g>
+      <g fill="none" stroke-width="1.4">
+        <path d="M272 86 L272 46 L216 46" stroke="var(--w-5)"/>
+        <path d="M310 86 L310 24 L216 24" stroke="var(--w-gnd)"/>
+        <path d="M348 86 L348 46 L420 46" stroke="currentColor"/>
+      </g>
+      <text x="210" y="50" font-size="11" fill="currentColor" text-anchor="end">배터리 (+) · 1000µF (+)</text>
+      <text x="210" y="28" font-size="11" fill="currentColor" text-anchor="end">배터리 (−) · Pi 물리 14 · 1000µF (−)</text>
+      <text x="426" y="42" font-size="11" fill="currentColor">출력 — IN1·IN3 급전용</text>
+      <text x="426" y="58" font-size="11" font-weight="600" fill="var(--w-5)">⚠ Pi에 연결 금지</text>
+
+      <rect x="430" y="120" width="30" height="14" rx="3" fill="var(--w-pwm)" fill-opacity=".3" stroke="var(--w-pwm)" stroke-width="1.4"/>
+      <text x="445" y="151" font-size="10" fill="currentColor" text-anchor="middle">5V EN</text>
+      <text x="445" y="165" font-size="10" font-weight="600" fill="var(--w-pwm)" text-anchor="middle">✓ 꽂아둔다</text>
+
+      <rect x="170" y="145" width="20" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="530" y="145" width="20" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+      <g fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="180" cy="163" r="4"/><circle cx="180" cy="199" r="4"/>
+        <circle cx="540" cy="163" r="4"/><circle cx="540" cy="199" r="4"/>
+      </g>
+      <g fill="currentColor" font-size="11.5" font-weight="600">
+        <text x="200" y="167">OUT1</text><text x="200" y="203">OUT2</text>
+        <text x="520" y="167" text-anchor="end">OUT3</text><text x="520" y="203" text-anchor="end">OUT4</text>
+      </g>
+      <g stroke="currentColor" stroke-width="1.4">
+        <line x1="170" y1="181" x2="124" y2="181"/><line x1="550" y1="181" x2="596" y2="181"/>
+      </g>
+      <text x="118" y="172" font-size="11.5" font-weight="600" fill="currentColor" text-anchor="end">좌측 모터 2개</text>
+      <text x="118" y="188" font-size="10.5" fill="currentColor" opacity=".75" text-anchor="end">병렬 → 그림 4</text>
+      <text x="602" y="172" font-size="11.5" font-weight="600" fill="currentColor">우측 모터 2개</text>
+      <text x="602" y="188" font-size="10.5" fill="currentColor" opacity=".75">병렬 → 그림 4</text>
+
+      <g fill="var(--surface)" stroke="currentColor" stroke-width="1.5">
+        <rect x="223" y="340" width="14" height="16" rx="2"/><rect x="268" y="340" width="14" height="16" rx="2"/>
+        <rect x="313" y="340" width="14" height="16" rx="2"/><rect x="358" y="340" width="14" height="16" rx="2"/>
+        <rect x="403" y="340" width="14" height="16" rx="2"/><rect x="448" y="340" width="14" height="16" rx="2"/>
+      </g>
+      <g fill="currentColor" font-size="11" font-weight="600" text-anchor="middle">
+        <text x="230" y="331">ENA</text><text x="275" y="331">IN1</text><text x="320" y="331">IN2</text>
+        <text x="365" y="331">IN3</text><text x="410" y="331">IN4</text><text x="455" y="331">ENB</text>
+      </g>
+      <g stroke="var(--w-5)" stroke-width="2.4" stroke-linecap="round">
+        <line x1="223" y1="299" x2="237" y2="313"/><line x1="237" y1="299" x2="223" y2="313"/>
+        <line x1="448" y1="299" x2="462" y2="313"/><line x1="462" y1="299" x2="448" y2="313"/>
+      </g>
+      <text x="342" y="310" font-size="11" font-weight="600" fill="var(--w-5)" text-anchor="middle">✕ = 점퍼캡 뺀다</text>
+
+      <g fill="none" stroke="var(--w-pwm)" stroke-width="1.6">
+        <path d="M230 356 L230 372 L150 372"/><path d="M455 356 L455 372 L562 372"/>
+      </g>
+      <text x="144" y="376" font-size="11" font-weight="600" fill="var(--w-pwm)" text-anchor="end">Pi 물리 12 (GPIO18)</text>
+      <text x="568" y="376" font-size="11" font-weight="600" fill="var(--w-pwm)">Pi 물리 33 (GPIO13)</text>
+
+      <path d="M268 384 L268 392 L417 392 L417 384" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="342" y="410" font-size="11" fill="currentColor" text-anchor="middle">IN1·IN3 → 보드 +5V  ·  IN2·IN4 → 보드 GND</text>
+      <text x="342" y="425" font-size="10.5" fill="currentColor" opacity=".7" text-anchor="middle">전진 고정 — Pi GPIO 안 씀</text>
+    </svg>
+    <figcaption>
+      <b>이 보드에서 Pi로 가는 선은 ENA·ENB 두 가닥뿐이다.</b> 방향(IN1~IN4)은 보드 자체의 <span class="mono">+5V/GND</span>에 물려 전진으로 고정하므로 Pi GPIO를 쓰지 않는다.
+      <span class="mono">5V</span> 단자는 <b>입력이 아니라 출력</b>이라는 점, <span class="mono">ENA·ENB</span> 점퍼캡은 <b>빼고</b> <span class="mono">5V EN</span> 점퍼는 <b>꽂는</b>다는 점 — 이 셋을 헷갈리면 배선이 다 맞아도 안 돈다.
+      ※ 보드 리비전마다 단자 위치가 조금씩 다르다. <b>실크스크린에 인쇄된 글자를 기준</b>으로 볼 것.
+    </figcaption>
+  </figure>
+
+  <h2>배선 순서 (A3 조립)</h2>
+  <p style="font-size:13.5px;color:var(--ink-muted);margin:0 0 14px;max-width:62ch;">
+    위 표가 <em>무엇을 어디에</em>라면, 아래는 <em>어떤 순서로</em>다. 순서에는 이유가 있다 —
+    <strong>접지 먼저 · 전원 다음 · 신호 마지막</strong>, 그리고 <strong>각 단계마다 검증하고 다음으로</strong>.
+    한 번에 다 꽂고 전원을 넣으면 뭐가 잘못됐는지 못 찾는다.
+    작업 중에는 <strong>그림 2</strong>(L298N 단자 지도)를 옆에 띄워두면 편하다.
+    준비물: <strong>멀티미터</strong>(도통·전압) · 점퍼선 · 납땜 도구 · 바퀴를 띄울 받침대.
+  </p>
+
+  <ol class="steps">
+    <li>
+      <h3>사전 작업 <span class="when">— 전원 전부 차단한 상태에서</span></h3>
+      <ul>
+        <li><strong>2S 배터리 분리 · Pi USB-C 분리.</strong> 9단계까지 전원은 들어가지 않는다.</li>
+        <li>L298N <span class="mono">ENA·ENB</span> 점퍼캡 <strong>뺀다</strong> · <span class="mono">5V EN</span> 점퍼는 <strong>꽂아둔다</strong>.</li>
+        <li>L298N 칩에 <strong>방열판 부착</strong>. 배선이 다 붙으면 손이 안 들어간다 — 지금 한다.</li>
+        <li><strong>구동륜 1개</strong>에만 자석 4개를 90°마다(<strong>그림 3</strong>). 4개 모두 <strong>같은 극이 바깥(센서 쪽)</strong>을 향해야 한다 — A3144는 단극성이라 극이 섞이면 펄스가 4개가 아니라 2개로 잡힌다.</li>
+        <li>차체를 받침대에 올려 <strong>바퀴를 공중에 띄운다.</strong> 이 상태를 끝까지 유지한다.</li>
+      </ul>
+      <figure>
+        <svg role="img" aria-label="구동륜 하나에 자석 4개를 90도 간격으로 붙이고 홀센서를 바퀴 옆 1~3밀리미터에 둔다"
+             viewBox="0 0 430 310" style="width:100%;max-width:430px;min-width:370px">
+          <circle cx="160" cy="155" r="95" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="160" cy="155" r="20" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+          <g stroke="currentColor" stroke-width="1" opacity=".3" stroke-dasharray="4 4">
+            <line x1="160" y1="135" x2="160" y2="70"/><line x1="180" y1="155" x2="245" y2="155"/>
+            <line x1="160" y1="175" x2="160" y2="240"/><line x1="140" y1="155" x2="75" y2="155"/>
+          </g>
+          <g fill="var(--accent)" fill-opacity=".28" stroke="var(--accent)" stroke-width="2">
+            <rect x="147" y="54" width="26" height="15" rx="2"/>
+            <rect x="247" y="142" width="15" height="26" rx="2"/>
+            <rect x="147" y="242" width="26" height="15" rx="2"/>
+            <rect x="57" y="142" width="15" height="26" rx="2"/>
+          </g>
+          <path d="M160 85 A 70 70 0 0 1 230 155" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>
+          <text x="212" y="112" font-size="11" font-weight="600" fill="currentColor" text-anchor="middle">90°</text>
+          <rect x="312" y="140" width="46" height="30" rx="4" fill="var(--surface)" stroke="var(--w-hall)" stroke-width="2"/>
+          <text x="335" y="160" font-size="10.5" font-weight="600" fill="currentColor" text-anchor="middle">A3144</text>
+          <line x1="266" y1="155" x2="308" y2="155" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="287" y="137" font-size="10" fill="currentColor" text-anchor="middle" opacity=".85">1~3mm</text>
+          <text x="205" y="292" font-size="11.5" fill="currentColor" text-anchor="middle">구동륜 <tspan font-weight="600">1개</tspan>에만 · 4개 모두 <tspan font-weight="600">같은 극</tspan>이 바깥으로</text>
+        </svg>
+        <figcaption>
+          자석 4개가 90°마다 = <b>1회전에 펄스 4개</b>(<span class="mono">ENCODER_PULSES_PER_REV=4</span>). 센서는 바퀴 옆에 고정해 자석이 정면을 스치게 한다.
+          극이 하나라도 뒤집혀 있으면 그 자석은 무시돼 펄스가 3개가 되고, 속도가 조용히 25% 낮게 측정된다.
+        </figcaption>
+      </figure>
+    </li>
+
+    <li>
+      <h3>공통 접지 <span class="when">— 제일 먼저 묶는다</span></h3>
+      <ul>
+        <li>2S 배터리 <span class="mono">(−)</span> ↔ L298N <span class="mono">GND</span> ↔ Pi <span class="phys">14</span> 를 하나로.</li>
+        <li>왜 먼저인가: 신호선을 먼저 꽂고 GND를 나중에 묶으면, 기준 전위가 없는 동안 <strong>전류가 신호선(GPIO)을 통해 흐른다.</strong> 이게 GPIO를 태우는 가장 흔한 경로다.</li>
+      </ul>
+      <div class="chk"><b>✅ 검증</b> — 멀티미터 도통 모드로 <span class="mono">Pi 14번 ↔ L298N GND ↔ 배터리 (−)</span>가 전부 삐 소리. 하나라도 안 울리면 다음으로 넘어가지 않는다.</div>
+    </li>
+
+    <li>
+      <h3>모터 전원부 <span class="when">— 배터리 → L298N</span></h3>
+      <ul>
+        <li><strong>1000µF 먼저.</strong> 흰 띠 쪽이 <span class="mono">(−)</span> → L298N <span class="mono">GND</span>, 반대쪽이 <span class="mono">(+)</span> → <span class="mono">12V(VMS)</span>. 전원 단자에 <strong>최대한 가깝게.</strong></li>
+        <li>배터리 <span class="mono">(+)</span> → L298N <span class="mono">12V(VMS)</span>. 전원선은 굵게.</li>
+        <li>⚠️ 전해콘덴서를 거꾸로 꽂으면 <strong>터진다.</strong> 배터리 물리기 전에 극성을 두 번 본다.</li>
+      </ul>
+      <div class="chk"><b>✅ 검증</b> — 배터리 연결 → L298N <span class="mono">5V</span> 단자와 <span class="mono">GND</span> 사이가 <strong>약 5V</strong>. 안 나오면 <span class="mono">5V EN</span> 점퍼가 빠진 것이다. 확인했으면 <strong>배터리를 다시 뺀다.</strong></div>
+    </li>
+
+    <li>
+      <h3>모터 4개 → OUT 단자</h3>
+      <ul>
+        <li>좌측 앞·뒤 모터 2개를 <strong>병렬</strong>로 묶어 <span class="mono">OUT1 / OUT2</span>.</li>
+        <li>우측 앞·뒤 모터 2개를 <strong>병렬</strong>로 묶어 <span class="mono">OUT3 / OUT4</span>.</li>
+        <li>같은 쪽 2개는 <strong>반드시 같은 방향</strong>으로 돌아야 한다. 좌우 모터는 서로 마주보게 장착되므로 한쪽은 배선을 뒤집게 되는 게 정상이다 — 실제 확인은 5단계에서 한다.</li>
+      </ul>
+      <figure>
+        <svg role="img" aria-label="같은 채널의 모터 두 개를 OUT1과 OUT2 같은 두 단자에 나란히 물리는 병렬 결선"
+             viewBox="0 0 520 300" style="width:100%;max-width:520px;min-width:420px">
+          <text x="90" y="42" font-size="12.5" font-weight="700" fill="var(--w-5)" text-anchor="middle">OUT1</text>
+          <text x="430" y="42" font-size="12.5" font-weight="700" fill="var(--w-gnd)" text-anchor="middle">OUT2</text>
+          <line x1="90" y1="56" x2="90" y2="250" stroke="var(--w-5)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="430" y1="56" x2="430" y2="250" stroke="var(--w-gnd)" stroke-width="2.5" stroke-linecap="round"/>
+
+          <g fill="var(--surface)" stroke="currentColor" stroke-width="1.6">
+            <rect x="170" y="84" width="180" height="56" rx="8"/>
+            <rect x="170" y="180" width="180" height="56" rx="8"/>
+          </g>
+          <g fill="currentColor" font-size="13" font-weight="600" text-anchor="middle">
+            <text x="260" y="118">좌 앞 모터</text><text x="260" y="214">좌 뒤 모터</text>
+          </g>
+
+          <g stroke="var(--w-5)" stroke-width="2">
+            <line x1="90" y1="112" x2="170" y2="112"/><line x1="90" y1="208" x2="170" y2="208"/>
+          </g>
+          <g stroke="var(--w-gnd)" stroke-width="2">
+            <line x1="350" y1="112" x2="430" y2="112"/><line x1="350" y1="208" x2="430" y2="208"/>
+          </g>
+          <g fill="var(--w-5)"><circle cx="90" cy="112" r="4.5"/><circle cx="90" cy="208" r="4.5"/></g>
+          <g fill="var(--w-gnd)"><circle cx="430" cy="112" r="4.5"/><circle cx="430" cy="208" r="4.5"/></g>
+
+          <text x="260" y="274" font-size="11.5" fill="currentColor" text-anchor="middle">두 모터가 <tspan font-weight="700">같은 두 단자</tspan>에 나란히 물린다 = 병렬</text>
+        </svg>
+        <figcaption>
+          <b>직렬로 줄줄이 잇는 게 아니다.</b> 앞·뒤 모터의 한쪽 선끼리 묶어 <span class="mono">OUT1</span>로, 나머지 한쪽 선끼리 묶어 <span class="mono">OUT2</span>로 보낸다.
+          우측(<span class="mono">OUT3/OUT4</span> + 우측 모터 2개)도 똑같다.
+          색은 구분용일 뿐 절대적인 극성이 아니다 — 한 바퀴만 거꾸로 돌면 <b>그 모터의 두 선만 맞바꾼다</b>(5단계).
+          병렬이라 <b>전류는 합산</b>된다: 채널당 스톨 2.4A — L298N 연속정격 2A를 넘기는 근거가 이 그림이다.
+        </figcaption>
+      </figure>
+    </li>
+
+    <li>
+      <h3>방향 고정 (IN1~IN4) + 회전 방향 검증</h3>
+      <ul>
+        <li><span class="mono">IN1 · IN3</span> → L298N 보드 <span class="mono">+5V</span> 단자.</li>
+        <li><span class="mono">IN2 · IN4</span> → L298N <span class="mono">GND</span>. (Pi GPIO는 안 쓴다 — 직진 전용)</li>
+        <li>⚠️ 지금 <span class="mono">ENA·ENB</span>는 아무 데도 안 물린 <strong>플로팅 상태</strong>라 동작이 정해져 있지 않다. <strong>바퀴 공중을 반드시 유지.</strong></li>
+      </ul>
+      <div class="chk"><b>✅ 검증</b> — 배터리 연결 → 점퍼선으로 <span class="mono">ENA</span>를 보드 <span class="mono">+5V</span>에 <strong>잠깐</strong> 댄다. 좌측 2바퀴가 <strong>함께 전진 방향</strong>으로 돌아야 한다. <span class="mono">ENB</span>도 동일.<br>
+        · 한 바퀴만 반대 → <strong>그 모터의 OUT 두 선</strong>을 맞바꾼다<br>
+        · 두 바퀴 다 반대 → <span class="mono">IN1↔IN2</span>(우측이면 <span class="mono">IN3↔IN4</span>)를 맞바꾼다<br>
+        확인 끝나면 <strong>배터리를 뺀다.</strong></div>
+    </li>
+
+    <li>
+      <h3>Pi → L298N 신호선 <span class="when">— 배터리 뺀 상태에서</span></h3>
+      <ul>
+        <li>Pi <span class="phys">12</span> (GPIO18) → L298N <span class="mono">ENA</span> (좌)</li>
+        <li>Pi <span class="phys">33</span> (GPIO13) → L298N <span class="mono">ENB</span> (우)</li>
+        <li>Pi의 3.3V로 L298N 입력을 구동할 수 있다(V<sub>IH</sub> 2.3V) — 레벨 시프터 불필요.</li>
+      </ul>
+      <div class="stopbox">⚠️ L298N <span class="mono">5V</span> 단자는 <strong>출력</strong>이다. Pi의 5V·3.3V 어디에도 연결하지 않는다. 두 전원이 맞붙는다.</div>
+    </li>
+
+    <li>
+      <h3>MPU-6050 (자이로·가속도)</h3>
+      <ul>
+        <li><span class="mono">VCC</span>→<span class="phys">1</span>(3.3V) · <span class="mono">GND</span>→<span class="phys">6</span> · <span class="mono">SDA</span>→<span class="phys">3</span> · <span class="mono">SCL</span>→<span class="phys">5</span> · <span class="mono">AD0</span>→<span class="mono">GND</span>(주소 0x68).</li>
+        <li><strong>차체에 리지드 마운트.</strong> 이 센서가 읽는 진동이 곧 노면 판별 입력이다 — 물렁한 양면테이프나 늘어진 배선에 매달면 진동이 뭉개져 <strong>C1 수집 데이터 자체가 못 쓰게 된다.</strong> 장착 위치·방향은 조립 후 고정하고 바꾸지 않는다(바꾸면 재수집).</li>
+      </ul>
+      <div class="chk"><b>✅ 검증</b> — Pi 켜고 <code class="k">i2cdetect -y 1</code> → <span class="mono">68</span>이 뜬다. 안 뜨면 SDA/SCL 뒤바뀜 또는 I2C 미활성(<code class="k">raspi-config</code>)을 먼저 의심.</div>
+    </li>
+
+    <li>
+      <h3>A3144 홀센서 + 10kΩ 풀업 <span class="when">— 가장 조심할 단계</span></h3>
+      <ul>
+        <li>핀 배열: <strong>마킹된 평평한 앞면을 보고 왼쪽부터 1=VCC · 2=GND · 3=OUT</strong> (구입품 데이터시트로 재확인할 것).</li>
+        <li><span class="mono">VCC</span>→<span class="phys">4</span>(<strong>5V</strong>) · <span class="mono">GND</span>→<span class="phys">9</span> · <span class="mono">OUT</span>→<span class="phys">11</span>(GPIO17).</li>
+        <li><strong>10kΩ을 <span class="mono">OUT</span> ↔ <span class="phys">1</span>(3.3V) 사이</strong>에 넣는다. 오픈컬렉터라 이 풀업이 없으면 신호가 아예 안 나온다.</li>
+        <li>센서와 자석 간격 <strong>1~3mm</strong>, 자석이 센서 정면을 스치도록 위치를 잡는다(<strong>그림 3</strong>).</li>
+      </ul>
+      <figure>
+        <svg role="img" aria-label="A3144는 5V로 급전하되 출력 풀업 저항은 3.3V에 물려야 GPIO가 안전하다"
+             viewBox="0 0 640 315" style="width:100%;max-width:640px;min-width:560px">
+          <defs>
+            <marker id="f5h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--w-hall)"/></marker>
+          </defs>
+
+          <line x1="170" y1="40" x2="470" y2="40" stroke="var(--w-5)" stroke-width="2" stroke-linecap="round"/>
+          <text x="480" y="44" font-size="11.5" font-weight="600" fill="var(--w-5)">Pi 물리 4 — 5V</text>
+          <line x1="340" y1="90" x2="470" y2="90" stroke="var(--w-33)" stroke-width="2" stroke-linecap="round"/>
+          <text x="480" y="94" font-size="11.5" font-weight="600" fill="var(--w-33)">Pi 물리 1 — 3.3V</text>
+          <line x1="170" y1="290" x2="470" y2="290" stroke="var(--w-gnd)" stroke-width="2" stroke-linecap="round"/>
+          <text x="480" y="294" font-size="11.5" font-weight="600" fill="var(--w-gnd)">Pi 물리 9 — GND</text>
+
+          <rect x="225" y="150" width="90" height="70" rx="6" fill="var(--surface)" stroke="currentColor" stroke-width="1.8"/>
+          <text x="270" y="180" font-size="13" font-weight="600" fill="currentColor" text-anchor="middle">A3144</text>
+          <text x="270" y="198" font-size="10" fill="currentColor" opacity=".7" text-anchor="middle">오픈컬렉터</text>
+
+          <line x1="270" y1="150" x2="270" y2="40" stroke="var(--w-5)" stroke-width="1.8"/>
+          <circle cx="270" cy="40" r="4" fill="var(--w-5)"/>
+          <text x="258" y="116" font-size="10.5" fill="currentColor" opacity=".8" text-anchor="end">VCC</text>
+          <line x1="270" y1="220" x2="270" y2="290" stroke="var(--w-gnd)" stroke-width="1.8"/>
+          <circle cx="270" cy="290" r="4" fill="var(--w-gnd)"/>
+          <text x="258" y="258" font-size="10.5" fill="currentColor" opacity=".8" text-anchor="end">GND</text>
+
+          <line x1="315" y1="185" x2="380" y2="185" stroke="var(--w-hall)" stroke-width="1.8"/>
+          <text x="330" y="176" font-size="10.5" fill="currentColor" opacity=".8">OUT</text>
+          <line x1="380" y1="185" x2="380" y2="150" stroke="var(--w-hall)" stroke-width="1.8"/>
+          <rect x="372" y="110" width="16" height="40" rx="2" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="380" y1="110" x2="380" y2="90" stroke="var(--w-33)" stroke-width="1.8"/>
+          <circle cx="380" cy="90" r="4" fill="var(--w-33)"/>
+          <circle cx="380" cy="185" r="4.5" fill="var(--w-hall)"/>
+          <text x="396" y="134" font-size="11" font-weight="600" fill="currentColor">10kΩ</text>
+          <line x1="380" y1="185" x2="466" y2="185" stroke="var(--w-hall)" stroke-width="1.8" marker-end="url(#f5h)"/>
+          <text x="480" y="189" font-size="11.5" font-weight="600" fill="var(--w-hall)">Pi 물리 11 — GPIO17</text>
+
+          <line x1="380" y1="90" x2="380" y2="48" stroke="var(--w-5)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".55"/>
+          <g stroke="var(--w-5)" stroke-width="2.4" stroke-linecap="round">
+            <line x1="373" y1="59" x2="387" y2="73"/><line x1="387" y1="59" x2="373" y2="73"/>
+          </g>
+          <text x="396" y="62" font-size="10.5" font-weight="600" fill="var(--w-5)">✕ 5V로 풀업 = GPIO 손상</text>
+
+          <rect x="128" y="170" width="46" height="30" rx="4" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="151" y="190" font-size="11" fill="currentColor" text-anchor="middle">자석</text>
+          <line x1="178" y1="185" x2="221" y2="185" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="199" y="176" font-size="10" fill="currentColor" opacity=".85" text-anchor="middle">1~3mm</text>
+        </svg>
+        <figcaption>
+          <b>이 부품에서 틀릴 수 있는 건 사실상 하나다: 풀업을 어디에 무느냐.</b>
+          A3144는 정격 4.5V부터라 <span class="mono">VCC</span>는 <b>5V</b>여야 한다. 하지만 출력은 오픈컬렉터 — 스스로 하이 전압을 만들지 못하고 <b>풀업이 올려주는 전압까지만</b> 올라간다.
+          그래서 풀업을 <b>3.3V</b>에 물리면 하이가 3.3V가 되어 Pi에 안전하고, 5V에 물리면(빨간 ✕) 하이가 5V로 나와 GPIO가 죽는다.
+          동작: 자석 접근 → 소자가 <span class="mono">OUT</span>을 GND로 당김 → <b>0</b> / 자석 없음 → 풀업이 3.3V로 올림 → <b>1</b>.
+        </figcaption>
+      </figure>
+      <div class="stopbox">⚠️ <strong>풀업을 5V에 물리면 안 된다.</strong> DO 하이가 5V로 나와 <strong>Pi GPIO가 손상</strong>된다. VCC만 5V, 풀업은 3.3V — 이게 이 부품의 전부다. 같은 이유로 <strong>풀업 내장 3핀 모듈은 쓰지 않는다</strong>(<span class="mono">전원계산.md §7-7</span>).</div>
+      <div class="chk"><b>✅ 검증</b> — GPIO17을 읽으면서 자석을 갖다 대면 <strong>0</strong>, 떼면 <strong>1</strong>. 반응이 없으면 <strong>자석을 뒤집어</strong> 다시 시도(A3144는 한쪽 극에만 반응). 바퀴를 손으로 한 바퀴 돌려 <strong>펄스 4개</strong>가 세어지는지까지 확인 → 그대로 B6(엔코더 실측 보정)로 이어진다.</div>
+    </li>
+
+    <li class="stop">
+      <h3>첫 통전 — 넣는 순서 · 끄는 순서</h3>
+      <ul>
+        <li><strong>넣기:</strong> ① 바퀴 공중 재확인 → ② Pi USB-C 연결 → ③ <code class="k">setup_check.py</code>(기본 실행은 모터 안 돎) → ④ 모터 배터리 연결 → ⑤ <code class="k">setup_check.py --pwm</code> → ⑥ <code class="k">--jitter</code>(ENA→GPIO27 점퍼).</li>
+        <li><strong>끄기는 역순:</strong> 모터 배터리 <strong>먼저</strong> 분리 → 그다음 Pi <code class="k">sudo shutdown -h now</code>. Pi를 먼저 끄면 PWM 핀이 뜨면서 모터가 어떻게 될지 모른다.</li>
+      </ul>
+      <div class="stopbox">⚠️ <strong>지금 코드는 <span class="mono">DUTY_MAX=1.0</span>이고 소프트스타트·스톨감지가 없다</strong>(<span class="mono">전원계산.md §3</span>가 요구한 4중 대응 중 2개 미구현). 스톨 시 채널당 2.4A로 L298N 연속정격(2A)을 넘긴다.<br>
+        → 첫 통전에서는 <strong>짧게·저듀티로만</strong> 돌리고, 바퀴가 막힌 채로 듀티를 물고 있지 않는다. 지면 주행(B7)은 이 3개가 코드에 들어간 뒤에 한다.</div>
+    </li>
+  </ol>
+
+  <h2>절대 하지 말 것</h2>
+  <div class="never">
+    <ul>
+      <li><strong>Pi 물리 <span class="phys">2</span>번(5V)에 급전 금지.</strong> Pi는 USB-C PD로만 급전한다. 5V 핀 급전은 PMIC 보호를 우회하며, USB-C와 동시에 넣으면 두 전원이 맞붙는다.</li>
+      <li><strong>L298N <span class="mono">5V</span> 단자를 Pi에 연결 금지.</strong> 그건 출력이다.</li>
+      <li><strong>A3144 풀업을 5V로 금지</strong>, <strong>3핀 풀업내장 모듈 금지.</strong> 둘 다 결과는 GPIO 손상.</li>
+      <li><strong>전원 넣은 채 배선 변경 금지.</strong> GND는 <strong>맨 처음 꽂고 맨 마지막에 뺀다.</strong></li>
+      <li><strong>바퀴를 땅에 댄 채로 첫 통전 금지.</strong> 방향이 반대면 그대로 튀어나간다.</li>
+    </ul>
+  </div>
 
   <footer>
-    핀 = BCM · 물리핀 = 40핀 헤더 실제 번호 · 단일 출처 <code class="k">RPi/pi/config.py</code> · <code class="k">설계명세서 §8</code> · 구동 L298N(직진 전용)
+    핀 = BCM · 물리핀 = 40핀 헤더 실제 번호 · 단일 출처 <code class="k">RPi/pi/config.py</code> · <code class="k">설계명세서 §8</code> · <code class="k">전원계산.md</code> · 구동 L298N(직진 전용)
   </footer>
 </div>
 
 <script>
   // 40핀 헤더 정의: [physical, label, roleColorVar | null]
   const P = [
-    [1,"3V3","--w-33","3.3V"],        [2,"5V","--w-5","전원입력"],
-    [3,"GPIO2 · SDA","--w-i2c","MPU SDA"], [4,"5V",null,""],
-    [5,"GPIO3 · SCL","--w-i2c","MPU SCL"], [6,"GND","--w-gnd","공통"],
+    [1,"3V3","--w-33","MPU VCC·풀업"], [2,"5V",null,""],
+    [3,"GPIO2 · SDA","--w-i2c","MPU SDA"], [4,"5V","--w-5","A3144 VCC"],
+    [5,"GPIO3 · SCL","--w-i2c","MPU SCL"], [6,"GND","--w-gnd","MPU GND"],
     [7,"GPIO4",null,""],              [8,"GPIO14 · TXD",null,""],
     [9,"GND","--w-gnd","홀센서"],      [10,"GPIO15 · RXD",null,""],
     [11,"GPIO17","--w-hall","A3144 DO"],[12,"GPIO18","--w-pwm","ENA 좌"],
-    [13,"GPIO27",null,""],            [14,"GND",null,""],
+    [13,"GPIO27","--accent","지터 측정(임시)"], [14,"GND","--w-gnd","L298N·배터리−"],
     [15,"GPIO22",null,""],            [16,"GPIO23",null,""],
     [17,"3V3",null,""],              [18,"GPIO24",null,""],
     [19,"GPIO10",null,""],            [20,"GND",null,""],
