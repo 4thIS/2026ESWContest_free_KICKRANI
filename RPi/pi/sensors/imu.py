@@ -19,7 +19,17 @@ _INT_STATUS = 0x3A
 _FIFO_COUNTH = 0x72
 _FIFO_R_W = 0x74
 
-_WHO_AM_I_VAL = 0x68
+# WHO_AM_I 허용값 — 정품 MPU-6050은 0x68이지만 시중 클론 모듈은 다른 값을 낸다.
+# (실기: GY-521 클론이 0x72 반환 → 정품만 받으면 begin()이 거부해 칩이 sleep에
+#  머물고 읽기가 전부 0이 된다.) 레지스터 맵이 호환되는 알려진 ID를 함께 허용한다.
+_WHO_AM_I_VALID = frozenset({
+    0x68,  # MPU-6050 (정품)
+    0x70,  # MPU-6500
+    0x72,  # 클론 (실기 확인)
+    0x73,  # MPU-9250 계열
+    0x75,  # 클론
+    0x98,  # 클론
+})
 _FIFO_ACCEL_GYRO = 0x78     # FIFO_EN: ACCEL(0x08)+GYRO XYZ(0x70) → 프레임 12바이트
 _USER_CTRL_FIFO = 0x44      # FIFO_EN(0x40) + FIFO_RESET(0x04)
 _INT_FIFO_OFLOW = 0x10
@@ -39,8 +49,9 @@ class Mpu6050:
         self._addr = addr
 
     def begin(self) -> bool:
-        """WHO_AM_I 확인 후 설정. 미연결/오배선이면 False."""
-        if self._bus.read_byte_data(self._addr, _WHO_AM_I) != _WHO_AM_I_VAL:
+        """WHO_AM_I 확인 후 설정. 미연결/오배선/미지원 칩이면 False."""
+        self.who_am_i = self._bus.read_byte_data(self._addr, _WHO_AM_I)
+        if self.who_am_i not in _WHO_AM_I_VALID:
             return False
         self._bus.write_byte_data(self._addr, _PWR_MGMT_1, 0x01)      # wake, PLL X gyro
         self._bus.write_byte_data(self._addr, _CONFIG, 0x02)         # DLPF 94Hz
