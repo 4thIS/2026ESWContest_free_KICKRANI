@@ -5,6 +5,9 @@
 """
 import numpy as np
 
+# 특징 벡터 순서(학습·추론 공통 — 모델 JSON에도 기록되어 불일치 시 로드 거부)
+FEATURE_KEYS = ("rms", "var", "ptp", "zcr", "dom_freq", "e_0_20", "e_20_50", "e_50_100")
+
 # 대역 에너지 경계(Hz)
 _BANDS = [(0, 20, "e_0_20"), (20, 50, "e_20_50"), (50, 100, "e_50_100")]
 
@@ -44,3 +47,9 @@ def extract_features(window, sample_rate_hz: int) -> dict:
             feats[name] = float(np.sum(mag[(freqs >= lo) & (freqs < hi)])) / total
 
     return feats
+
+
+def feature_vector(window, sample_rate_hz: int, keys=FEATURE_KEYS):
+    """window → 고정 순서 특징 리스트(모델 입력)."""
+    f = extract_features(window, sample_rate_hz)
+    return [f[k] for k in keys]

@@ -75,3 +75,16 @@ python scripts/setup_check.py --jitter    # PWM 주기·듀티 실측 (ENA→GPI
 ## 문서
 
 설계·인터페이스 계약·개발 순서: [`../docs/RPi_docs/설계명세서.md`](../docs/RPi_docs/설계명세서.md)
+
+## 스크립트 (`scripts/`)
+
+| 스크립트 | 용도 |
+| --- | --- |
+| `setup_check.py [--pwm --jitter]` | Pi 셋업 점검(I2C·패키지·RFCOMM 소켓·PWM) |
+| `estop.py` | **비상정지** — ENA/ENB LOW |
+| `rfcomm_setup.sh` | 앱 접속 준비(SDP 등록·discoverable), 부팅마다 1회 |
+| `calibrate_encoder.py --rev 5 --diameter 0.065` | B6 엔코더 펄스/회전 보정(손 회전, 모터 미구동) |
+| `pid_tune.py [--real] --kp --ki --kd --csv` | B7 PID 스텝 응답(상승·오버슈트·정상오차) |
+| `collect_premise.py --label gravel` | A1 예비 수집 |
+| `analyze_surfaces.py data/` | 예비실험 성립성 분석 |
+| `train.py data/ --out models/road_rf.json [--window distance]` | C2 학습 → JSON 모델(세션 CV·혼동행렬). Pi는 `models/road_rf.json`만 있으면 자동 로드 |

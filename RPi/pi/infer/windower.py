@@ -21,3 +21,29 @@ class Windower:
             self._buf = self._buf[self._hop:]      # hop만큼 슬라이드
             return window
         return None
+
+
+class DistanceWindower:
+    """거리 윈도우(C3): `wheel_pulse`가 `pulses`만큼 늘 때마다 윈도우 반환, `hop_pulses`만큼 슬라이드.
+
+    속도가 느리면 샘플 수가 늘고 빠르면 줄어 **노면 길이는 일정**. 정지 시엔 윈도우가 안 나오며,
+    버퍼는 `max_samples`로 상한(정지 상태 무한 누적 방지).
+    """
+    def __init__(self, pulses: int, hop_pulses: int | None = None, max_samples: int = 2000):
+        self._pulses = pulses
+        self._hop = hop_pulses if hop_pulses is not None else pulses
+        self._max = max_samples
+        self._buf: list[Sample] = []
+
+    def add(self, s: Sample):
+        self._buf.append(s)
+        if len(self._buf) > self._max:
+            del self._buf[: len(self._buf) - self._max]
+        start = self._buf[0]["wheel_pulse"]
+        if s["wheel_pulse"] - start >= self._pulses:
+            window = list(self._buf)
+            cut = start + self._hop
+            idx = next((i for i, x in enumerate(self._buf) if x["wheel_pulse"] >= cut), len(self._buf))
+            self._buf = self._buf[idx:]
+            return window
+        return None
