@@ -58,9 +58,10 @@ class Model(Protocol):              # 인지 (CW)
     def predict(self, window) -> RoadClass: ...
 
 
-class BleServer(Protocol):          # ④ (CW)
-    def on_command(self, cb: Callable[[dict], None]) -> None: ...
-    def send_telemetry(self, data: dict) -> None: ...
+class BleServer(Protocol):          # ④ (CW) — 구현: pi/comm/rfcomm_server.RfcommServer (RFCOMM, 계약 2)
+    def on_command(self, cb: Callable[[dict], bool]) -> None: ...   # cb 반환 True=ACK / False=ERROR
+    def on_disconnect(self, cb: Callable[[], None]) -> None: ...    # 끊김 → 모터 정지(§6)
+    def send_telemetry(self, data: dict) -> None: ...               # → STATUS(speed·distance·vibration·roadType)
     def start(self) -> None: ...
 
 
