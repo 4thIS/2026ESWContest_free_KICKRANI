@@ -1,3 +1,4 @@
+import pytest
 """main.py 통합 실행 경로 — 조립·안전정지 (하드웨어 없이)."""
 import pi.main as main
 
@@ -100,3 +101,26 @@ def test_build_app_wraps_motor_with_soft_start(monkeypatch):
     monkeypatch.setattr(main, "make_ble", lambda: _NullBle())
     main.build_app(force_mock=True)
     assert isinstance(seen["motor"], SoftStartMotor)
+
+
+def test_build_app_loads_forest_model_when_file_exists(tmp_path, monkeypatch):
+    """C4: models/road_rf.json 있으면 ForestModel, 없으면 StubModel."""
+    pytest.importorskip("sklearn")
+    import numpy as np
+    from sklearn.ensemble import RandomForestClassifier
+    from pi.infer.forest import export_sklearn_forest
+    from pi.infer.features import FEATURE_KEYS
+    from pi.infer.model import ForestModel, StubModel
+    from pi import config
+
+    monkeypatch.setattr(main, "make_imu", lambda: object())
+    monkeypatch.setattr(main, "make_ble", lambda: _NullBle())
+    monkeypatch.setattr(config, "MODEL_PATH", str(tmp_path / "none.json"))
+    assert isinstance(main.build_app(force_mock=True).controller._model, StubModel)
+
+    X = np.random.default_rng(0).normal(size=(40, len(FEATURE_KEYS)))
+    y = np.where(X[:, 0] > 0, "gravel", "asphalt")
+    rf = RandomForestClassifier(n_estimators=2, random_state=0).fit(X, y)
+    export_sklearn_forest(rf, list(FEATURE_KEYS), tmp_path / "rf.json")
+    monkeypatch.setattr(config, "MODEL_PATH", str(tmp_path / "rf.json"))
+    assert isinstance(main.build_app(force_mock=True).controller._model, ForestModel)

@@ -96,7 +96,7 @@
     <div class="owner"><b>동제</b><span class="tag w-dj">DJ · DJ</span>
       <p>하드웨어 조립·배선·전원 / 엔코더 실측보정 / PID 튜닝 / Pi 셋업</p></div>
     <div class="owner"><b>명재</b><span class="tag w-mj">MJ · mj</span>
-      <p>3D 섀시·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
+      <p>섀시(아크릴 RC카 모형 채택)·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
     <div class="owner"><b>도현</b><span class="tag w-dh">DH · dh</span>
       <p>앱 수정(issue #10 반영) / 앱↔Pi 실연동</p></div>
     <div class="owner"><b>공동</b><span class="tag w-all">ALL</span>
@@ -115,9 +115,9 @@
       <li>A4 전원계산 · 핀맵 9단계·결선그림 · L298N배선·배선표</li>
     </ul></div>
     <div class="col todo"><h3>⬜ 남음</h3><ul>
-      <li>🔧 <b>섀시 조립 중</b> — 바퀴·모터 장착 → 배터리만 연결하면 주행</li>
+      <li>🔧 <b>섀시 확정: 기성 RC카 아크릴 모형</b>(08-24, 3D 프린팅 대체) — 부품 고정·배선 연결 진행 중</li>
       <li>🔴 <b>홀센서(A3144) 연결</b> — B5 나머지·B6 엔코더 보정의 전제</li>
-      <li>✅ <b>B6a 안전 3종 코드 완료</b>(08-24, 160 tests) — DUTY_MAX 0.75·소프트스타트·스톨감지. ⬜ 실측 보정(홀센서 후) · <b>DJ 합의</b>(스톨감지=controller, config 상수)</li>
+      <li>✅ <b>B6a 안전 3종 코드</b>(08-24) · <b>B6/B7 도구·B8·C2/C3/C4 파이프라인</b>(188 tests) · <b>E3 보고서 원고</b>(공식 양식) — DUTY_MAX 0.75·소프트스타트·스톨감지. ⬜ 실측 보정(홀센서 후) · <b>DJ 합의</b>(스톨감지=controller, config 상수)</li>
       <li>🔴 <b>A1 예비실험</b> — 이제 RC카로 직접 굴려 수집 가능</li>
       <li>✅ <b>A2 issue #10 종결</b> → ✅ <b>B3 RFCOMM 서버 구현 완료</b>(08-24, 149 tests) — 남은 건 B4(앱 자전거도로)·B9(실연동)</li>
       <li>데이터·모델 · E2E·실주행 · 팀명·레포·보고서·영상·제출</li>
@@ -125,7 +125,7 @@
   </div>
   <div class="cpath" style="margin-top:10px;padding:12px 16px;font-size:.85rem;display:block">
     ⚡ <b>조립 끝나면 바로 할 순서</b> — 홀센서 연결(B5) → <code>setup_check.py --pwm --jitter</code> → B6 엔코더 보정 → <b>B6a 안전 3종</b> → B7 PID(바퀴 공중→지면) → <b>A1 예비실험</b>.
-    CW 코드 B3 ✅·B6a ✅ → 다음은 <b>실기</b>(홀센서→B5→B6→B6a 실측→B7). 통신은 Pi 켜지면 <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind 확인 → B9.
+    CW 코드 B3·B6a·B8·C2/C3/C4·B6/B7 도구 <b>전부 ✅(188 tests)</b> → 남은 건 <b>실기</b>(홀센서→B5→B6→B6a 실측→B7). 통신은 Pi 켜지면 <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind 확인 → B9.
   </div>
 
   <h2>🗂 태스크 (27개) — ⭐ = 크리티컬 패스</h2>
@@ -136,11 +136,11 @@
       <div class="task b-cw crit"><span class="tid">A1</span><span class="star">⭐</span> 노면 진동 예비실험 (5종×3회 → 분석 판정)<span class="who w-cw">CW</span><span class="dep">의존 없음 — 프로젝트 성립 전제</span></div>
       <div class="task b-all" style="background:#eef7f2"><span class="tid">A2 ✅</span> issue #10 합의 — <b>완료 2026-08-14</b><span class="who w-cw">CW</span><span class="who w-dh">DH</span><span class="dep"><b>앱 완성본 기준으로 Pi가 맞춤.</b> ①파일관리 Pi 지원 ②라벨링=수집 후 RENAME ③<b>자전거도로 추가</b> ④단위 환산은 앱<br>자동 확정: RFCOMM · <code>type</code> 필드 · 대문자 SET_MODE · ACK/ERROR → 공통계약 계약 2</span></div>
       <div class="task b-dj" style="background:#eef7f2;border-left-color:var(--dj)"><span class="tid">A4 ✅</span> C-1 전원 재계산 — <b>완료 2026-08-10</b><span class="who w-dj">DJ</span><span class="dep">→ <b>전원계산.md</b> · CW 확인 대기 · 모터 <b>TT 1:48</b> / 배터리 <b>2S 18650</b>(컷오프 7.0V) / Pi는 <b>USB PD 보조배터리 별도</b> → <b>벅컨버터 발주 불필요</b><br>⚠️ L298N 조건부 유지 — 스톨 시 채널당 2.4A로 연속정격(2A) 초과 → <code>DUTY_MAX=0.75</code>·소프트스타트·스톨감지·방열판 <b>4개가 전제</b></span></div>
-      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A3 ✅</span> 하드웨어 배선 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">MPU·L298N·모터 4개·전원 분리 <b>실측 확인</b>(모터 30~100% 회전·정지, throttled=0x0) · 🔧 <b>섀시 조립 진행 중</b> → 완료 시 주행 가능<br>⬜ 남음: <b>홀센서(A3144) 연결</b> · 1000µF 콘덴서 · 방열판</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A3 ✅</span> 하드웨어 배선 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">MPU·L298N·모터 4개·전원 분리 <b>실측 확인</b>(모터 30~100% 회전·정지, throttled=0x0) · 🔧 <b>섀시=아크릴 RC카 모형 확정(08-24)</b>, 고정·배선 진행 중 → 완료 시 주행 가능<br>⬜ 남음: <b>홀센서(A3144) 연결</b> · 1000µF 콘덴서 · 방열판</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">A5 ✅</span> Pi 5 셋업 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">SSH 키(<code>ssh kick</code>) · I2C · 패키지(~~bluezero~~ 폐기) · <code>setup_check.py</code> 소프트웨어 <b>전부 PASS</b> · <b>Pi에서 128 tests GREEN</b><br>⬜ <code>--pwm</code>/<code>--jitter</code> 실측은 B7 전에 (⚠️ 실제 백엔드 <code>lgpio.tx_pwm</code> — 지터 확인)</span></div>
       <div class="task b-cw" style="background:#eaf1fe"><span class="tid">A6 ✅</span> ⑦ 통합 controller — <b>완료 2026-08-10</b> (PR #15)<span class="who w-cw">CW</span><span class="dep"><code>pi/controller.py</code> · 21 tests · 상태머신(§5 전이표) + 모드 배선(COLLECT→Logger / DEMO→Windower→Model→policy→②)<br>안전 정지 경로 일원화 <code>_safe_stop</code>(<b>모터 먼저→파일→IDLE</b>) · 추론 실패 → fail-safe 감속</span></div>
-      <div class="task b-mj"><span class="tid">A7</span> 3D 섀시·마운트 설계 (IMU 리지드, DJ와 소통)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
-      <div class="task b-all"><span class="tid">E1</span> 팀명 확정 (20B·영문 대문자)<span class="who w-all">ALL</span><span class="dep">늦어도 8/20</span></div>
+      <div class="task b-mj" style="background:#eef7f2"><span class="tid">A7 ✅</span> 섀시 — <b>기성 RC카 아크릴 모형 채택 08-24</b><span class="who w-mj">MJ</span><span class="dep">3D 프린팅 폐기 · 마운트 원칙 유지(IMU 리지드·배터리 바닥) · 🔧 고정·배선 진행 중</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">E1 ✅</span> 팀명 <b>"킥라니"</b> — 08-24<span class="who w-all">ALL</span><span class="dep">한글 가능 확인</span></div>
     </div>
   </div>
 
@@ -153,12 +153,12 @@
       <div class="task b-dh"><span class="tid">B4</span> 앱 수정 — <b>최소</b>: roadTypes에 "자전거도로" 추가 · 단위 표시 확인<span class="who w-dh">DH</span><span class="dep">의존: A2 ✅ · 프로토콜은 Pi가 맞추므로 앱 무변경</span></div>
       <div class="task b-all crit"><span class="tid">B5 🔶</span><span class="star">⭐</span> Pi 실측 검증 — <b>일부 완료</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">✅ MPU 감지·중력 −0.95g / ✅ 모터 회전·정지 / ✅ 저전압 없음<br>⬜ <b>홀센서 펄스</b>(연결 대기) · 200Hz 실측 · FIFO 오버플로 0 · CSV gap</span></div>
       <div class="task b-all" style="background:#eaf1fe"><span class="tid">B6a ✅</span> <b>B7 전 필수 코드 3종</b> — <b>코드 완료 2026-08-24</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">① <code>DUTY_MAX=0.75</code> ② <code>SoftStartMotor</code>(듀티 상승 램프 0.4s, 하강·stop 즉시, 속도데모에도 적용) ③ <code>StallDetector</code>(START arm → tick에서 1.5s 무펄스 → on_error→_safe_stop) · 11 tests(전체 160)<br>⚠️ <b>DJ 합의</b>: 스톨감지 위치=controller · config 상수 3개 · test_sim 기대값 · ⬜ 실측 보정(홀센서 후, 저속 오탐 확인)</span></div>
-      <div class="task b-dj crit"><span class="tid">B6</span><span class="star">⭐</span> 엔코더 실측 보정 (자석 수·바퀴 둘레 → config)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5</span></div>
-      <div class="task b-dj crit"><span class="tid">B7</span><span class="star">⭐</span> PID 실물 튜닝 (<b>바퀴 공중 → 지면</b>)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5·B6·<b>B6a</b> · <b>C1의 선행조건</b> — 정속 없이 수집하면 안 됨</span></div>
-      <div class="task b-all"><span class="tid">B8</span> D-1 속도 정책 수치 통일<span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">의존: B7</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B6 🔧</span> 엔코더 보정 — <b>도구 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/calibrate_encoder.py</code> 손 회전 → 펄스/회전·둘레 → config 제안 · ⬜ 실측은 홀센서 후</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B7 🔧</span> PID 튜닝 — <b>도구 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/pid_tune.py [--real]</code> 상승·오버슈트·정상오차·CSV · 소프트스타트/SIGTERM 자동 · ⬜ 실측 공중→지면 (C1 선행조건)</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B8 ✅</span> 속도 정책 통일 — <b>08-24</b><span class="who w-cw">CW</span><span class="dep"><code>TARGET_SPEED_MPS = SPEED_SAFE_MPS</code> · 값 0.4/0.25/0.1 유지, B7 후 조정</span></div>
       <div class="task b-all"><span class="tid">B9</span> 앱↔Pi 실연동 E2E<span class="who w-dh">DH</span><span class="who w-cw">CW</span><span class="dep">의존: B3·B4</span></div>
       <div class="task b-mj"><span class="tid">B10</span> 시연 노면 트랙 제작 (노면 샘플판)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
-      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸 프린팅·조립<span class="who w-mj">MJ</span><span class="dep">의존: A7</span></div>
+      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸(선택·시연 연출)<span class="who w-mj">MJ</span><span class="dep">아크릴 섀시 치수 기준 · 의존: A7 ✅</span></div>
     </div>
   </div>
 
@@ -166,9 +166,9 @@
     <div class="phase-head"><h3>Phase C — 데이터·모델</h3><span class="period">W2~W3 · 8/20 ~ 8/29</span></div>
     <div class="tasks">
       <div class="task b-all crit"><span class="tid">C1</span><span class="star">⭐</span> 본 데이터 수집 (5종 × 5세션+ × 10~20초) — 목표속도 고정구간(0.3/0.4/0.5 m/s)을 라벨에 함께 기록<span class="who w-all">ALL</span><span class="dep">의존: B5 · A1 · <b>B6·B7(정속 확보)</b> — 진동 특징 주파수 ≈ 속도÷요철간격이라 속도가 섞이면 모델이 <b>노면 대신 속도를 학습</b>(shortcut). B7 없이는 오픈루프 duty라 노면이 속도를 바꿔 교란이 자동 발생 · "도메인 갭 0" 주장과도 배치</span></div>
-      <div class="task b-cw crit"><span class="tid">C2</span><span class="star">⭐</span> 모델 학습 (RF 기준선 → CNN, 세션분리·혼동행렬)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
-      <div class="task b-cw"><span class="tid">C3</span> 시간 vs 거리 윈도우 비교 실험 (보고서 어필)<span class="who w-cw">CW</span><span class="dep">의존: C1</span></div>
-      <div class="task b-cw crit"><span class="tid">C4</span><span class="star">⭐</span> 모델 탑재 (TFLite → StubModel 교체 → DEMO 동작)<span class="who w-cw">CW</span><span class="dep">의존: C2·B1</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C2 🔧</span> 모델 학습 — <b>파이프라인 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/train.py</code> 파일명→라벨 · 세션 GroupKFold · RF · 혼동행렬 · JSON export · ⬜ 실데이터(C1)</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C3 🔧</span> 시간 vs 거리 윈도우 — <b>코드 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>DistanceWindower</code> + <code>train.py --window distance</code> · ⬜ 실데이터 비교</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C4 🔧</span> 모델 탑재 — <b>코드 완료 08-24</b><span class="who w-cw">CW</span><span class="dep">~~TFLite~~ → <b>RF→JSON→numpy</b>(의존성 0) · <code>ForestModel</code> 저신뢰→unknown 감속 · <code>load_model()</code> 자동 · ⬜ 실모델 배치</span></div>
     </div>
   </div>
 
@@ -184,8 +184,8 @@
   <div class="phase">
     <div class="phase-head"><h3>Phase E — 제출물</h3><span class="period">8/25 ~ 9/3</span></div>
     <div class="tasks">
-      <div class="task b-cw"><span class="tid">E2</span> 제출용 레포 <code>2026ESWContest_free_&lt;팀명&gt;</code> Public<span class="who w-cw">CW</span><span class="dep">의존: E1</span></div>
-      <div class="task b-all crit"><span class="tid">E3</span><span class="star">⭐</span> 개발완료보고서 PPT 20p (필수 7항목, 8/25 초안 시작)<span class="who w-all">ALL</span><span class="dep">초안 CW · 완성 공동</span></div>
+      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">E2 ✅</span> 레포 rename — 08-24<span class="who w-cw">CW</span><span class="dep"><code>4thIS/2026ESWContest_free_KICKRANI</code> · 히스토리 유지 · 팀원 remote 갱신</span></div>
+      <div class="task b-all crit"><span class="tid">E3 📝</span><span class="star">⭐</span> 개발완료보고서 — <b>원고 완료 08-24</b>, PPT 제작 남음<span class="who w-all">ALL</span><span class="dep"><code>docs/보고서/개발완료보고서_초안.md</code> 공식 가이드 양식(7항목·[1]~[19] 슬라이드·개요표·간트/분장·배점 매핑·제출 체크리스트)<br>⬜ PPT화 + 🟨 실측값(정확도·PID 그래프·앱 캡처·영상 링크·팀번호)</span></div>
       <div class="task b-mj crit"><span class="tid">E4</span><span class="star">⭐</span> 시연영상 3분·720p → YouTube (제목 규격)<span class="who w-mj">MJ</span><span class="who w-all">ALL</span><span class="dep">의존: D3</span></div>
       <div class="task b-cw crit"><span class="tid">E5</span><span class="star">⭐</span> 제출 (구글폼: 신청서+보고서+링크) — <b>9/1 목표</b><span class="who w-cw">CW</span><span class="dep">의존: E2·E3·E4</span></div>
     </div>
@@ -198,7 +198,7 @@
       <div class="rowlab">찬우 CW</div>
       <div><div class="bar w-cw">A1 예비실험 ⭐</div><div class="bar w-cw">A2 #10합의</div><div class="bar w-cw" style="opacity:.55">A6 controller ✅</div><div class="bar w-cw" style="opacity:.55">B1 main ✅</div><div class="bar w-cw" style="opacity:.55">B2 안전장치 ✅</div></div>
       <div><div class="bar w-cw">B5 실측 ⭐</div><div class="bar w-cw" style="opacity:.55">B6a 안전3종 ✅</div><div class="bar w-cw" style="opacity:.55">B3 RFCOMM ✅</div></div>
-      <div><div class="bar w-cw">C2 학습 ⭐</div><div class="bar w-cw">C3 윈도우 비교</div><div class="bar w-cw">C4 탑재 ⭐</div><div class="bar w-cw">D2 안전 ⭐</div></div>
+      <div><div class="bar w-cw" style="opacity:.7">C2/C3/C4 코드 ✅→실데이터</div><div class="bar w-cw">D2 안전 ⭐</div></div>
       <div><div class="bar w-cw">E2 레포</div><div class="bar w-cw">E5 제출 ⭐</div></div>
       <div class="rowlab">동제 DJ</div>
       <div><div class="bar w-dj" style="opacity:.55">A4 전원계산 ✅</div><div class="bar w-dj" style="opacity:.55">A3 배선 ✅</div><div class="bar w-dj" style="opacity:.55">A5 Pi 셋업 ✅</div><div class="bar w-dj">섀시 조립 🔧</div></div>
@@ -206,7 +206,7 @@
       <div><div class="bar w-dj">D2 안전 ⭐</div><div class="bar w-all">C1·D1·D3 공동</div></div>
       <div><div class="bar w-all">E3 보고서</div></div>
       <div class="rowlab">명재 MJ</div>
-      <div><div class="bar w-mj">A7 3D 설계</div></div>
+      <div><div class="bar w-mj" style="opacity:.55">A7 아크릴 채택 ✅</div></div>
       <div><div class="bar w-mj">B10 시연 트랙</div><div class="bar w-mj">B11 외형 셸</div></div>
       <div><div class="bar w-all">C1·D3 공동</div></div>
       <div><div class="bar w-mj">E4 영상 ⭐</div></div>

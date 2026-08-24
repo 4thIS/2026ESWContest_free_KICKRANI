@@ -4,7 +4,7 @@
 
 ## 프로젝트 개요
 
-**임베디드 소프트웨어 공모전 - 노면 감지 킥보드** (제24회 임베디드SW경진대회 자유공모, 예선 마감 2026-09-03)
+**임베디드 소프트웨어 공모전 - 노면 감지 킥보드** (제24회 임베디드SW경진대회 자유공모, 예선 마감 2026-09-03) — 팀 **킥라니**, 제출 레포 `4thIS/2026ESWContest_free_KICKRANI`
 
 진동(IMU)으로 주행 중 **노면 재질을 실시간 판별**해, 위험한 노면이면 자동 **감속**, 안전한 노면이면 정상 속도로
 달리는 **적응형 속도제어 킥보드**. 데이터 수집과 시연을 모두 동일한 RC카(킥보드 모형)로 수행 → **학습=배포 환경 일치(도메인 갭 0)**.
@@ -20,7 +20,7 @@
 | --- | --- | --- | --- |
 | `RPi/` | 구동·속도제어(**동제**) / 데이터수집·앱통신·인지(**찬우**) | 동제·찬우 | `dj` · `cw` |
 | `app/` | 스마트폰 앱(Bluetooth RFCOMM 컨트롤러) | 도현 | `dh` |
-| `sash/` | RC카 틀(섀시) 3D 프린팅 파일 (회로·보드 배치는 RPi 담당과 소통) | 명재 | `mj` |
+| `sash/` | RC카 섀시 관련 자료 — **기성 아크릴 모형 채택(2026-08-24)**, 외형 셸·마운트 (회로·보드 배치는 RPi 담당과 소통) | 명재 | `mj` |
 | `docs/` | 전체 프로젝트 문서 + 파트별 문서(RPi_docs / app_docs) | 공통 | — |
 
 ## 아키텍처 (Pi 통합, 독립 모듈 → 통합)
@@ -44,8 +44,8 @@
 
 ## 기술 스택
 
-- **RPi**: Python 3 · `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · 표준 `socket`(RFCOMM) · `numpy` · `pytest`
-- **학습**: PC(오프라인) — 세션 단위 train/test 분리, TFLite로 변환해 Pi에서 추론만
+- **RPi**: Python 3 · `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `numpy`(RF 추론) · 표준 `socket`(RFCOMM) · `numpy` · `pytest`
+- **학습**: PC(오프라인, `RPi/scripts/train.py` sklearn RF) — 세션 단위 train/test 분리, **RF→JSON→numpy 추론**(`pi/infer/forest.py`, Pi에 sklearn/TF 불필요)
 - **샘플링**: 200Hz(MPU FIFO로 지터 흡수) — 노면 고주파 정보를 담기 위한 나이퀴스트 근거
 
 ---

@@ -33,8 +33,8 @@ PID_KI = 0.4
 PID_KD = 0.0
 
 # ── 주행 제어 (② 속도제어, DJ) ──
-# TARGET_SPEED_MPS = 순항(안전) 목표. 아래 SPEED_SAFE_MPS와 같은 값 → D-1에서 하나로 통일 예정.
-TARGET_SPEED_MPS = 0.4         # 수집/시연 순항 목표 속도
+# 순항(수집·시연 시작) 목표 = 안전 노면 속도와 동일 — B8에서 통일(아래 SPEED_SAFE_MPS 참조)
+TARGET_SPEED_MPS = 0.4         # == SPEED_SAFE_MPS (아래에서 재대입)
 MIN_MOVING_SPEED_MPS = 0.05    # 이 이하는 '정지'로 간주
 DUTY_MIN = 0.0                 # PWM 듀티 하한
 DUTY_MAX = 0.75                # PWM 듀티 상한 — B6a①: L298N 채널 2A 연속정격 여유(전원계산 §3). 1.0 금지
@@ -60,3 +60,8 @@ WINDOW_HOP = 50                # 50% 오버랩
 SPEED_SAFE_MPS = 0.4           # 안전(아스팔트·자전거도로)
 SPEED_CAUTION_MPS = 0.25       # 주의(보도블럭·콘크리트)
 SPEED_DANGER_MPS = 0.1         # 위험(자갈길) + 불확실/미지 → fail-safe 감속
+TARGET_SPEED_MPS = SPEED_SAFE_MPS   # B8: 순항 목표 = 안전 속도 (단일 출처)
+
+# ── 노면 인지 모델(C4) ──
+MODEL_PATH = "models/road_rf.json"   # scripts/train.py 산출물. 없으면 StubModel(asphalt)로 기동
+MODEL_MIN_CONFIDENCE = 0.5           # 최다 클래스 확률이 이 미만이면 unknown(→ fail-safe 감속)

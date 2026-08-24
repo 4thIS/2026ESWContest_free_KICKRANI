@@ -25,7 +25,7 @@ from pi.comm.files import FileManager
 from pi.comm.rfcomm_server import RfcommServer, make_rfcomm_listener
 from pi.hardware.backend import get_gpio
 from pi.hardware.sim import MockPlant
-from pi.infer.model import StubModel
+from pi.infer.model import load_model
 from pi.infer.windower import Windower
 from pi.motion.motor import Motor
 from pi.motion.pid import PID
@@ -160,7 +160,7 @@ def build_app(force_mock=False):
     ble = make_ble() if not force_mock else _NullBle()
 
     return App(speed=speed, sampler=sampler, logger=CsvLogger(), ble=ble,
-               windower=Windower(), model=StubModel(), sample_queue=sample_queue,
+               windower=Windower(), model=load_model(), sample_queue=sample_queue,   # C4: 모델 파일 있으면 ForestModel
                encoder=encoder)                    # ★ STATUS.distance도 같은 encoder
 
 
