@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>노면 감지 킥보드 — 실행 계획 (8/10~9/3)</title>
+<title>노면 감지 킥보드 — 실행 계획 (D-10)</title>
 <style>
   :root{
     --bg:#f6f7fb; --card:#ffffff; --ink:#1e2430; --sub:#5b6472; --line:#e3e7ef;
@@ -13,6 +13,7 @@
     --dh:#7c3aed; --dh-bg:#f1eafe;
     --all:#64748b; --all-bg:#eef1f5;
     --crit:#dc2626; --crit-bg:#fdecec;
+    --done:#eef7f2;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;padding:28px 16px 60px}
@@ -21,24 +22,19 @@
   h2{font-size:1.15rem;margin:38px 0 14px;padding-left:10px;border-left:5px solid var(--ink)}
   .meta{color:var(--sub);font-size:.9rem;margin-bottom:6px}
   .dday{display:inline-block;background:var(--crit);color:#fff;font-weight:700;border-radius:8px;padding:3px 12px;font-size:.95rem;margin-top:8px}
+  .oneline{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--cw);border-radius:12px;padding:13px 16px;margin-top:14px;font-size:.92rem}
 
-  /* 담당 카드 */
   .owners{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
   .owner{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .owner b{font-size:1rem}
   .owner .tag{float:right;font-size:.75rem;padding:1px 8px;border-radius:99px;color:#fff}
   .owner p{font-size:.82rem;color:var(--sub);margin-top:6px}
 
-  /* 상태 스냅샷 */
-  .snap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .snap .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .snap h3{font-size:.95rem;margin-bottom:8px}
-  .snap ul{list-style:none}
-  .snap li{font-size:.86rem;padding:3px 0 3px 22px;position:relative}
-  .snap .done li::before{content:"✅";position:absolute;left:0;font-size:.8rem}
-  .snap .todo li::before{content:"⬜";position:absolute;left:0;font-size:.8rem}
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:.85rem}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--all-bg)}
+  .st{font-weight:700;white-space:nowrap}
 
-  /* 페이즈 & 태스크 */
   .phase{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
   .phase-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
   .phase-head h3{font-size:1.02rem}
@@ -56,208 +52,206 @@
   .b-all{border-left-color:var(--all)} .w-all{background:var(--all)}
   .task.crit{background:var(--crit-bg)}
 
-  /* 타임라인 */
-  .timeline{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow-x:auto}
-  .tl-grid{display:grid;grid-template-columns:110px repeat(4,1fr);min-width:720px;font-size:.82rem}
-  .tl-grid>div{padding:8px 10px;border-bottom:1px solid var(--line)}
-  .tl-head{font-weight:700;background:var(--all-bg)}
-  .bar{border-radius:6px;color:#fff;padding:3px 8px;font-size:.75rem;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rowlab{font-weight:700}
-
-  /* 크리티컬 패스 */
-  .cpath{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .cpath{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;font-size:.85rem}
+  .cflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}
   .cnode{background:var(--crit-bg);border:1.5px solid var(--crit);color:var(--crit);font-weight:700;font-size:.8rem;border-radius:9px;padding:7px 11px;text-align:center}
   .cnode small{display:block;font-weight:400;color:var(--ink);font-size:.72rem}
+  .pnode{background:var(--cw-bg);border:1.5px solid var(--cw);color:var(--cw);font-weight:700;font-size:.8rem;border-radius:9px;padding:7px 11px}
   .arrow{color:var(--sub);font-size:1rem}
 
-  /* 리스크 & DoD */
-  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:.85rem}
-  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
-  th{background:var(--all-bg)}
   .dod{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
   .dod li{font-size:.88rem;margin:6px 0 6px 4px;list-style:none;padding-left:26px;position:relative}
   .dod li::before{content:"🏁";position:absolute;left:0}
-  .legend{font-size:.78rem;color:var(--sub);margin:8px 0 0}
-  .legend span{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 10px}
+  pre{background:#0f172a;color:#d7e2f2;border-radius:12px;padding:14px 16px;font-size:.78rem;overflow-x:auto;line-height:1.5}
+  .note{font-size:.8rem;color:var(--sub);margin-top:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
-  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 기준일 2026-08-24(최초 08-10) · 근거: 설계명세서 / 구현.md / DJ_협의사항 / issue #10</div>
+  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-08-24 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
   <div class="meta">📄 정본은 <b>실행계획.md</b> — 이 문서는 같은 내용의 뷰다. <b>수정은 항상 양쪽 같이.</b></div>
-  <div class="dday">예선 마감 9/3 — 남은 기간 약 3.5주 (제출 목표 9/1)</div>
+  <div class="dday">D-10 · 예선 마감 9/3(목) · 제출 목표 9/1(화)</div>
 
-  <h2>👥 담당</h2>
+  <div class="oneline">💡 <b>소프트웨어는 전 모듈 완성(188 tests GREEN), 제출물 준비 절반 완료.</b> 남은 것은 전부 "실물" —
+  섀시 배선 마무리 → 실측 체인(B5→B6→B6a→B7) → 데이터(A1→C1) → 학습·탑재(당일) → 검증·영상 → 제출.</div>
+
   <div class="owners">
-    <div class="owner"><b>찬우</b><span class="tag w-cw">CW · cw</span>
-      <p>⑦controller·main / BLE transport / 예비실험·데이터 파이프라인 / <b>ML(학습·탑재)</b></p></div>
-    <div class="owner"><b>동제</b><span class="tag w-dj">DJ · DJ</span>
-      <p>하드웨어 조립·배선·전원 / 엔코더 실측보정 / PID 튜닝 / Pi 셋업</p></div>
-    <div class="owner"><b>명재</b><span class="tag w-mj">MJ · mj</span>
-      <p>섀시(아크릴 RC카 모형 채택)·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
-    <div class="owner"><b>도현</b><span class="tag w-dh">DH · dh</span>
-      <p>앱 수정(issue #10 반영) / 앱↔Pi 실연동</p></div>
-    <div class="owner"><b>공동</b><span class="tag w-all">ALL</span>
-      <p>#10 합의 / 본 데이터 수집 / E2E·안전 테스트 / 보고서·영상</p></div>
+    <div class="owner"><b>찬우</b><span class="tag w-cw">CW</span><p>수집·통신·인지·통합·ML·안전 + <b>DJ 코드 몫 대행</b>(배선 제외)</p></div>
+    <div class="owner"><b>동제</b><span class="tag w-dj">DJ</span><p>하드웨어 배선·전원 / <b>PR #22·#23 리뷰</b></p></div>
+    <div class="owner"><b>도현</b><span class="tag w-dh">DH</span><p>Android 앱 — 남은 건 <b>B4 한 줄</b>("자전거도로")</p></div>
+    <div class="owner"><b>명재</b><span class="tag w-mj">MJ</span><p>섀시(아크릴 채택)·외형 셸·<b>시연 트랙</b>·촬영</p></div>
   </div>
 
-  <h2>📌 현재 상태</h2>
-  <div class="snap">
-    <div class="col done"><h3>✅ 완료</h3><ul>
-      <li>RPi/pi 단일 트리 · <b>128 tests GREEN</b> (Pi에서도 통과)</li>
-      <li>①구동·②속도제어 (DJ) / ③수집·④BLE서버·인지 (CW)</li>
-      <li>⑦통합 controller·main·⑧안전장치 (A6·B1·B2)</li>
-      <li><b>🔌 배선 완료</b> — MPU(중력 −0.95g)·L298N·모터 4개(<b>회전·정지 실측</b>)·Pi 전원 분리</li>
-      <li><b>Pi 셋업</b> — SSH키·I2C·패키지·setup_check PASS (A5)</li>
-      <li><b>안전 보강</b> — 실기 사고 후 SIGTERM 정지·<code>estop.py</code> Pi 검증</li>
-      <li>A4 전원계산 · 핀맵 9단계·결선그림 · L298N배선·배선표</li>
-    </ul></div>
-    <div class="col todo"><h3>⬜ 남음</h3><ul>
-      <li>🔧 <b>섀시 확정: 기성 RC카 아크릴 모형</b>(08-24, 3D 프린팅 대체) — 부품 고정·배선 연결 진행 중</li>
-      <li>🔴 <b>홀센서(A3144) 연결</b> — B5 나머지·B6 엔코더 보정의 전제</li>
-      <li>✅ <b>B6a 안전 3종 코드</b>(08-24) · <b>B6/B7 도구·B8·C2/C3/C4 파이프라인</b>(188 tests) · <b>E3 보고서 원고</b>(공식 양식) — DUTY_MAX 0.75·소프트스타트·스톨감지. ⬜ 실측 보정(홀센서 후) · <b>DJ 합의</b>(스톨감지=controller, config 상수)</li>
-      <li>🔴 <b>A1 예비실험</b> — 이제 RC카로 직접 굴려 수집 가능</li>
-      <li>✅ <b>A2 issue #10 종결</b> → ✅ <b>B3 RFCOMM 서버 구현 완료</b>(08-24, 149 tests) — 남은 건 B4(앱 자전거도로)·B9(실연동)</li>
-      <li>데이터·모델 · E2E·실주행 · 팀명·레포·보고서·영상·제출</li>
-    </ul></div>
-  </div>
-  <div class="cpath" style="margin-top:10px;padding:12px 16px;font-size:.85rem;display:block">
-    ⚡ <b>조립 끝나면 바로 할 순서</b> — 홀센서 연결(B5) → <code>setup_check.py --pwm --jitter</code> → B6 엔코더 보정 → <b>B6a 안전 3종</b> → B7 PID(바퀴 공중→지면) → <b>A1 예비실험</b>.
-    CW 코드 B3·B6a·B8·C2/C3/C4·B6/B7 도구 <b>전부 ✅(188 tests)</b> → 남은 건 <b>실기</b>(홀센서→B5→B6→B6a 실측→B7). 통신은 Pi 켜지면 <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind 확인 → B9.
-  </div>
-
-  <h2>🗂 태스크 (27개) — ⭐ = 크리티컬 패스</h2>
-
-  <div class="phase">
-    <div class="phase-head"><h3>Phase A — 블로커 해소</h3><span class="period">W1 · 8/10 ~ 8/17</span></div>
-    <div class="tasks">
-      <div class="task b-cw crit"><span class="tid">A1</span><span class="star">⭐</span> 노면 진동 예비실험 (5종×3회 → 분석 판정)<span class="who w-cw">CW</span><span class="dep">의존 없음 — 프로젝트 성립 전제</span></div>
-      <div class="task b-all" style="background:#eef7f2"><span class="tid">A2 ✅</span> issue #10 합의 — <b>완료 2026-08-14</b><span class="who w-cw">CW</span><span class="who w-dh">DH</span><span class="dep"><b>앱 완성본 기준으로 Pi가 맞춤.</b> ①파일관리 Pi 지원 ②라벨링=수집 후 RENAME ③<b>자전거도로 추가</b> ④단위 환산은 앱<br>자동 확정: RFCOMM · <code>type</code> 필드 · 대문자 SET_MODE · ACK/ERROR → 공통계약 계약 2</span></div>
-      <div class="task b-dj" style="background:#eef7f2;border-left-color:var(--dj)"><span class="tid">A4 ✅</span> C-1 전원 재계산 — <b>완료 2026-08-10</b><span class="who w-dj">DJ</span><span class="dep">→ <b>전원계산.md</b> · CW 확인 대기 · 모터 <b>TT 1:48</b> / 배터리 <b>2S 18650</b>(컷오프 7.0V) / Pi는 <b>USB PD 보조배터리 별도</b> → <b>벅컨버터 발주 불필요</b><br>⚠️ L298N 조건부 유지 — 스톨 시 채널당 2.4A로 연속정격(2A) 초과 → <code>DUTY_MAX=0.75</code>·소프트스타트·스톨감지·방열판 <b>4개가 전제</b></span></div>
-      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A3 ✅</span> 하드웨어 배선 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">MPU·L298N·모터 4개·전원 분리 <b>실측 확인</b>(모터 30~100% 회전·정지, throttled=0x0) · 🔧 <b>섀시=아크릴 RC카 모형 확정(08-24)</b>, 고정·배선 진행 중 → 완료 시 주행 가능<br>⬜ 남음: <b>홀센서(A3144) 연결</b> · 1000µF 콘덴서 · 방열판</span></div>
-      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A5 ✅</span> Pi 5 셋업 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">SSH 키(<code>ssh kick</code>) · I2C · 패키지(~~bluezero~~ 폐기) · <code>setup_check.py</code> 소프트웨어 <b>전부 PASS</b> · <b>Pi에서 128 tests GREEN</b><br>⬜ <code>--pwm</code>/<code>--jitter</code> 실측은 B7 전에 (⚠️ 실제 백엔드 <code>lgpio.tx_pwm</code> — 지터 확인)</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">A6 ✅</span> ⑦ 통합 controller — <b>완료 2026-08-10</b> (PR #15)<span class="who w-cw">CW</span><span class="dep"><code>pi/controller.py</code> · 21 tests · 상태머신(§5 전이표) + 모드 배선(COLLECT→Logger / DEMO→Windower→Model→policy→②)<br>안전 정지 경로 일원화 <code>_safe_stop</code>(<b>모터 먼저→파일→IDLE</b>) · 추론 실패 → fail-safe 감속</span></div>
-      <div class="task b-mj" style="background:#eef7f2"><span class="tid">A7 ✅</span> 섀시 — <b>기성 RC카 아크릴 모형 채택 08-24</b><span class="who w-mj">MJ</span><span class="dep">3D 프린팅 폐기 · 마운트 원칙 유지(IMU 리지드·배터리 바닥) · 🔧 고정·배선 진행 중</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">E1 ✅</span> 팀명 <b>"킥라니"</b> — 08-24<span class="who w-all">ALL</span><span class="dep">한글 가능 확인</span></div>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-head"><h3>Phase B — 통합·실측</h3><span class="period">W2 · 8/17 ~ 8/24</span></div>
-    <div class="tasks">
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B1 ✅</span> 통합 main.py — <b>완료 2026-08-10</b> (PR #15)<span class="who w-cw">CW</span><span class="dep"><code>pi/app.py</code> 신규 + <code>main.py</code> 확장 · 8 tests · 3스레드+2큐, 50Hz 제어·5Hz 텔레메트리<br><b>엔코더 단일 인스턴스를 ②·③에 공유 주입</b>(공통계약 B-1, 테스트로 강제) · 시작 시퀀스에 <b>모터 정지 확정</b><br><code>--app</code> 추가, DJ 속도데모 보존 · <code>make_ble()</code>은 #10 대기(NotImplementedError)</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B2 ✅</span> ⑧ 안전장치 — <b>완료 2026-08-10</b> (PR #15)<span class="who w-cw">CW</span><span class="dep"><code>pi/safety.py</code> 신규 · 9 tests · <b>워치독</b>(별도 스레드 감시 — 루프가 죽어도 계속) 500ms 무응답 → 모터 정지<br>실동작: 제어 스레드 강제 종료 → <b>0.8초 내 DEMO→IDLE 자동 정지</b> ✅<br><b>SIGTERM/atexit 정지 B7보다 먼저 선반영 완료</b> · 앱 끊김 훅(B3에서 실연결 ✅) · ⬜ IMU I2C 재시도→SAFE는 실HW 단계</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B3 ✅</span> <b>RFCOMM 서버</b> — <b>완료 2026-08-24</b> (PR #21)<span class="who w-cw">CW</span><span class="dep"><code>pi/comm/{protocol,files,rfcomm_server}.py</code> · 31 tests(전체 149) · 표준 socket RFCOMM 채널 1 · 앱 규격(type·ACK/ERROR·대문자 모드) · 파일관리 LIST/RENAME/MEMO(메모 사이드카) · STATUS(speed·distance·vibration·roadType 한글) · <code>handle_command</code> bool→ACK/ERROR · SET_LABEL·bluezero 삭제 · <code>scripts/rfcomm_setup.sh</code>(SDP)<br>⬜ Pi 실기 bind 확인(오프라인) → B9</span></div>
-      <div class="task b-dh"><span class="tid">B4</span> 앱 수정 — <b>최소</b>: roadTypes에 "자전거도로" 추가 · 단위 표시 확인<span class="who w-dh">DH</span><span class="dep">의존: A2 ✅ · 프로토콜은 Pi가 맞추므로 앱 무변경</span></div>
-      <div class="task b-all crit"><span class="tid">B5 🔶</span><span class="star">⭐</span> Pi 실측 검증 — <b>일부 완료</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">✅ MPU 감지·중력 −0.95g / ✅ 모터 회전·정지 / ✅ 저전압 없음<br>⬜ <b>홀센서 펄스</b>(연결 대기) · 200Hz 실측 · FIFO 오버플로 0 · CSV gap</span></div>
-      <div class="task b-all" style="background:#eaf1fe"><span class="tid">B6a ✅</span> <b>B7 전 필수 코드 3종</b> — <b>코드 완료 2026-08-24</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">① <code>DUTY_MAX=0.75</code> ② <code>SoftStartMotor</code>(듀티 상승 램프 0.4s, 하강·stop 즉시, 속도데모에도 적용) ③ <code>StallDetector</code>(START arm → tick에서 1.5s 무펄스 → on_error→_safe_stop) · 11 tests(전체 160)<br>⚠️ <b>DJ 합의</b>: 스톨감지 위치=controller · config 상수 3개 · test_sim 기대값 · ⬜ 실측 보정(홀센서 후, 저속 오탐 확인)</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B6 🔧</span> 엔코더 보정 — <b>도구 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/calibrate_encoder.py</code> 손 회전 → 펄스/회전·둘레 → config 제안 · ⬜ 실측은 홀센서 후</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B7 🔧</span> PID 튜닝 — <b>도구 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/pid_tune.py [--real]</code> 상승·오버슈트·정상오차·CSV · 소프트스타트/SIGTERM 자동 · ⬜ 실측 공중→지면 (C1 선행조건)</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B8 ✅</span> 속도 정책 통일 — <b>08-24</b><span class="who w-cw">CW</span><span class="dep"><code>TARGET_SPEED_MPS = SPEED_SAFE_MPS</code> · 값 0.4/0.25/0.1 유지, B7 후 조정</span></div>
-      <div class="task b-all"><span class="tid">B9</span> 앱↔Pi 실연동 E2E<span class="who w-dh">DH</span><span class="who w-cw">CW</span><span class="dep">의존: B3·B4</span></div>
-      <div class="task b-mj"><span class="tid">B10</span> 시연 노면 트랙 제작 (노면 샘플판)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
-      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸(선택·시연 연출)<span class="who w-mj">MJ</span><span class="dep">아크릴 섀시 치수 기준 · 의존: A7 ✅</span></div>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-head"><h3>Phase C — 데이터·모델</h3><span class="period">W2~W3 · 8/20 ~ 8/29</span></div>
-    <div class="tasks">
-      <div class="task b-all crit"><span class="tid">C1</span><span class="star">⭐</span> 본 데이터 수집 (5종 × 5세션+ × 10~20초) — 목표속도 고정구간(0.3/0.4/0.5 m/s)을 라벨에 함께 기록<span class="who w-all">ALL</span><span class="dep">의존: B5 · A1 · <b>B6·B7(정속 확보)</b> — 진동 특징 주파수 ≈ 속도÷요철간격이라 속도가 섞이면 모델이 <b>노면 대신 속도를 학습</b>(shortcut). B7 없이는 오픈루프 duty라 노면이 속도를 바꿔 교란이 자동 발생 · "도메인 갭 0" 주장과도 배치</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C2 🔧</span> 모델 학습 — <b>파이프라인 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>scripts/train.py</code> 파일명→라벨 · 세션 GroupKFold · RF · 혼동행렬 · JSON export · ⬜ 실데이터(C1)</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C3 🔧</span> 시간 vs 거리 윈도우 — <b>코드 완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><code>DistanceWindower</code> + <code>train.py --window distance</code> · ⬜ 실데이터 비교</span></div>
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">C4 🔧</span> 모델 탑재 — <b>코드 완료 08-24</b><span class="who w-cw">CW</span><span class="dep">~~TFLite~~ → <b>RF→JSON→numpy</b>(의존성 0) · <code>ForestModel</code> 저신뢰→unknown 감속 · <code>load_model()</code> 자동 · ⬜ 실모델 배치</span></div>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-head"><h3>Phase D — 검증·시연</h3><span class="period">W3 · 8/24 ~ 8/31</span></div>
-    <div class="tasks">
-      <div class="task b-all crit"><span class="tid">D1</span><span class="star">⭐</span> E2E 통합 테스트 (COLLECT gap 0 · DEMO 반응 &lt;1초)<span class="who w-all">ALL</span><span class="dep">의존: B9·C4</span></div>
-      <div class="task b-all crit"><span class="tid">D2</span><span class="star">⭐</span> 안전 시나리오 (끊김·워치독·SIGTERM·저신뢰 → 정지/감속)<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">의존: B2·D1</span></div>
-      <div class="task b-all crit"><span class="tid">D3</span><span class="star">⭐</span> 실주행 시연 리허설 (자갈 감속→아스팔트 복귀, 로그+영상)<span class="who w-all">ALL</span><span class="dep">의존: D1·B10·B11</span></div>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-head"><h3>Phase E — 제출물</h3><span class="period">8/25 ~ 9/3</span></div>
-    <div class="tasks">
-      <div class="task b-cw" style="background:#eaf1fe"><span class="tid">E2 ✅</span> 레포 rename — 08-24<span class="who w-cw">CW</span><span class="dep"><code>4thIS/2026ESWContest_free_KICKRANI</code> · 히스토리 유지 · 팀원 remote 갱신</span></div>
-      <div class="task b-all crit"><span class="tid">E3 📝</span><span class="star">⭐</span> 개발완료보고서 — <b>원고 완료 08-24</b>, PPT 제작 남음<span class="who w-all">ALL</span><span class="dep"><code>docs/보고서/개발완료보고서_초안.md</code> 공식 가이드 양식(7항목·[1]~[19] 슬라이드·개요표·간트/분장·배점 매핑·제출 체크리스트)<br>⬜ PPT화 + 🟨 실측값(정확도·PID 그래프·앱 캡처·영상 링크·팀번호)</span></div>
-      <div class="task b-mj crit"><span class="tid">E4</span><span class="star">⭐</span> 시연영상 3분·720p → YouTube (제목 규격)<span class="who w-mj">MJ</span><span class="who w-all">ALL</span><span class="dep">의존: D3</span></div>
-      <div class="task b-cw crit"><span class="tid">E5</span><span class="star">⭐</span> 제출 (구글폼: 신청서+보고서+링크) — <b>9/1 목표</b><span class="who w-cw">CW</span><span class="dep">의존: E2·E3·E4</span></div>
-    </div>
-  </div>
-
-  <h2>📅 주차별 타임라인</h2>
-  <div class="timeline">
-    <div class="tl-grid">
-      <div class="tl-head">담당</div><div class="tl-head">W1 · 8/10~17<br><small>블로커 제거</small></div><div class="tl-head">W2 · 8/17~24<br><small>통합 완성</small></div><div class="tl-head">W3 · 8/24~31<br><small>모델·검증</small></div><div class="tl-head">마감주 · ~9/3<br><small>제출</small></div>
-      <div class="rowlab">찬우 CW</div>
-      <div><div class="bar w-cw">A1 예비실험 ⭐</div><div class="bar w-cw">A2 #10합의</div><div class="bar w-cw" style="opacity:.55">A6 controller ✅</div><div class="bar w-cw" style="opacity:.55">B1 main ✅</div><div class="bar w-cw" style="opacity:.55">B2 안전장치 ✅</div></div>
-      <div><div class="bar w-cw">B5 실측 ⭐</div><div class="bar w-cw" style="opacity:.55">B6a 안전3종 ✅</div><div class="bar w-cw" style="opacity:.55">B3 RFCOMM ✅</div></div>
-      <div><div class="bar w-cw" style="opacity:.7">C2/C3/C4 코드 ✅→실데이터</div><div class="bar w-cw">D2 안전 ⭐</div></div>
-      <div><div class="bar w-cw">E2 레포</div><div class="bar w-cw">E5 제출 ⭐</div></div>
-      <div class="rowlab">동제 DJ</div>
-      <div><div class="bar w-dj" style="opacity:.55">A4 전원계산 ✅</div><div class="bar w-dj" style="opacity:.55">A3 배선 ✅</div><div class="bar w-dj" style="opacity:.55">A5 Pi 셋업 ✅</div><div class="bar w-dj">섀시 조립 🔧</div></div>
-      <div><div class="bar w-dj">B5 홀센서 ⭐</div><div class="bar w-dj">B6 엔코더 보정 ⭐</div><div class="bar w-dj">B6a 안전3종 ⭐</div><div class="bar w-dj">B7 PID 튜닝 ⭐</div><div class="bar w-dj">B8 정책값</div></div>
-      <div><div class="bar w-dj">D2 안전 ⭐</div><div class="bar w-all">C1·D1·D3 공동</div></div>
-      <div><div class="bar w-all">E3 보고서</div></div>
-      <div class="rowlab">명재 MJ</div>
-      <div><div class="bar w-mj" style="opacity:.55">A7 아크릴 채택 ✅</div></div>
-      <div><div class="bar w-mj">B10 시연 트랙</div><div class="bar w-mj">B11 외형 셸</div></div>
-      <div><div class="bar w-all">C1·D3 공동</div></div>
-      <div><div class="bar w-mj">E4 영상 ⭐</div></div>
-      <div class="rowlab">도현 DH</div>
-      <div><div class="bar w-dh">A2 #10합의</div></div>
-      <div><div class="bar w-dh">B4 앱 수정</div><div class="bar w-dh">B9 실연동</div></div>
-      <div><div class="bar w-all">D1 E2E 공동</div></div>
-      <div><div class="bar w-all">E3 보고서</div></div>
-    </div>
-    <div class="legend">색상:
-      <span style="background:var(--cw)"></span>찬우 <span style="background:var(--dj)"></span>동제
-      <span style="background:var(--mj)"></span>명재 <span style="background:var(--dh)"></span>도현
-      <span style="background:var(--all)"></span>공동 · ⭐ 크리티컬 패스</div>
-  </div>
-
-  <h2>🔗 크리티컬 패스 — 하나라도 밀리면 전체가 밀림</h2>
-  <div class="cpath">
-    <div class="cnode">A1<small>예비실험</small></div><span class="arrow">→</span>
-    <div class="cnode" style="opacity:.5;border-style:dashed">A4 ✅<small>전원계산</small></div><span class="arrow">→</span>
-    <div class="cnode" style="opacity:.55">A4 ✅<small>전원계산</small></div><span class="arrow">→</span>
-    <div class="cnode" style="opacity:.5;border-style:dashed">A3·A5 ✅<small>배선·Pi</small></div><span class="arrow">→</span>
-    <div class="cnode">B5<small>실측검증</small></div><span class="arrow">→</span>
-    <div class="cnode">B6·B6a·B7<small>보정·안전·정속</small></div><span class="arrow">→</span>
-    <div class="cnode">C1<small>데이터수집</small></div><span class="arrow">→</span>
-    <div class="cnode">C2<small>모델학습</small></div><span class="arrow">→</span>
-    <div class="cnode">C4<small>탑재</small></div><span class="arrow">→</span>
-    <div class="cnode">D1<small>E2E</small></div><span class="arrow">→</span>
-    <div class="cnode">D3<small>리허설</small></div><span class="arrow">→</span>
-    <div class="cnode">E4<small>영상</small></div><span class="arrow">→</span>
-    <div class="cnode">E5<small>제출 9/1</small></div>
-  </div>
-
-  <h2>⚠️ 리스크 & 대비</h2>
+  <h2>0. 현재 상태 (2026-08-24 전면 갱신)</h2>
   <table>
-    <tr><th>리스크</th><th>영향</th><th>대비</th></tr>
-    <tr><td>A1 판정 "구분 약함"</td><td>프로젝트 전제 흔들림</td><td>샘플레이트↑(500Hz)·센서위치 변경 후 재실험 → <b>W1에 반드시 수행</b></td></tr>
-    <tr><td>~~부품 배송 지연~~ → <b>홀센서 미연결</b></td><td>B5·B6·B6a·B7이 줄줄이 대기</td><td>섀시 조립 직후 <b>A3144 연결</b>(VCC=5V·풀업=3.3V, 배선표 29~32행) — 그 전엔 A1 예비실험 병행</td></tr>
-    <tr><td><b>전원 재계산 없이 발주</b></td><td>정격 미달 → <b>재발주</b>(국내 2~3일·해외 1~2주) → 크리티컬 패스 통째로 지연</td><td>A4를 A3 앞에 고정. 계산 반나절 vs 재발주 1~2주 — <b>비용 비대칭</b></td></tr>
-    <tr><td><b>정속 미확보 상태로 C1 수집</b></td><td>모델이 노면 대신 <b>속도를 학습</b> → DEMO 실패. C1부터 <b>재수집</b>(공동작업·노면 재방문)</td><td>C1 의존에 B6·B7 명시. 순서만 지키면 <b>일정 추가 0</b></td></tr>
-    <tr><td>TFLite 변환 난항</td><td>C4 지연</td><td>RandomForest 순수 파이썬 추론 폴백(속도 충분)</td></tr>
-    <tr><td>~~#10 합의 지연~~ ✅ 종결</td><td>—</td><td>앱 기준 RFCOMM 확정. Pi 교체 완료(B3 ✅)</td></tr>
-    <tr><td>시간 부족</td><td>제출물 품질 저하</td><td>E3 보고서 <b>8/25부터 병행 작성</b> (완료 후 작성 금지)</td></tr>
+    <tr><th style="width:130px">영역</th><th>상태</th></tr>
+    <tr><td class="st">RPi 코드</td><td>✅ <b>전 모듈 구현 완료</b> — ①~④·인지·⑦통합·⑧안전(워치독+SIGTERM+<b>안전 3종</b>)·학습/탑재/보정/튜닝 도구. <b>pytest 188 GREEN</b>, TDD</td></tr>
+    <tr><td class="st">하드웨어</td><td>✅ 배선 실측 완료(MPU −0.95g · 모터 회전·정지 · 전원 분리) · ✅ <b>섀시 = 기성 RC카 아크릴 모형</b>(08-24) · 🔧 고정·배선 진행 중 · ⬜ 홀센서·1000µF·방열판</td></tr>
+    <tr><td class="st">Pi 5</td><td>✅ 셋업 완료(SSH·I2C·패키지) — ⚠️ <b>현재 오프라인</b>. 켜지면 pull → tests → RFCOMM bind</td></tr>
+    <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) — 남은 앱 작업 = <b>B4 한 줄</b></td></tr>
+    <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
+    <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
+    <tr><td class="st">PR</td><td>✅ #21 머지 · 🔍 <b>#22(B6a)·#23(파이프라인) OPEN — DJ 리뷰 대기</b></td></tr>
   </table>
 
-  <h2>🏁 완료 기준 (Definition of Done)</h2>
+  <h2>결정 로그 (프로젝트 방향)</h2>
+  <table>
+    <tr><th style="width:70px">날짜</th><th>결정</th><th>이유·결과</th></tr>
+    <tr><td>~08-01</td><td>ESP32 폐기 → <b>Pi 5 단일 보드 통합</b></td><td>부품 감소 + <b>수집=시연 환경 일치(도메인 갭 0)</b> — 핵심 논리로 승격</td></tr>
+    <tr><td>08-14</td><td>통신 = <b>앱 완성본 기준 RFCOMM</b>(#10 종결)</td><td>파일관리 Pi 지원 · 라벨링=RENAME · 자전거도로 추가 · 단위 환산은 앱</td></tr>
+    <tr><td>08-14</td><td>L298N 유지 조건 = <b>안전 3종</b></td><td>스톨 2.4A &gt; 정격 2A → DUTY_MAX 0.75·소프트스타트·스톨감지 (08-24 코드 ✅)</td></tr>
+    <tr><td>08-24</td><td>탑재 = ~~TFLite~~ → <b>RF→JSON→numpy</b></td><td>Pi 의존성 0 · &lt;1ms · sklearn과 예측 일치 검증 · MCU 이식 가능 = 차별성</td></tr>
+    <tr><td>08-24</td><td><b>DJ 코드 몫 CW 대행</b>(배선 제외)</td><td>B6·B7 도구·B8·B6a 코드 CW 작성, DJ는 리뷰·하드웨어</td></tr>
+    <tr><td>08-24</td><td>팀명 <b>킥라니</b> · 레포 <b>KICKRANI</b></td><td>GitHub 레포명 한글 불가 → 영문 표기. 히스토리·PR 유지 rename</td></tr>
+    <tr><td>08-24</td><td>섀시 = <b>기성 RC카 아크릴 모형</b></td><td>3D 프린팅 폐기(시간 절약). IMU 리지드 고정 원칙 유지</td></tr>
+  </table>
+
+  <h2>1. 완료 로그 (압축)</h2>
+  <table>
+    <tr><th>완료일</th><th>내용</th></tr>
+    <tr><td>08-10</td><td>A4 전원계산 · A6 통합 controller · B1 통합 main(3스레드+2큐) · B2 안전장치(워치독·SIGTERM — <b>실기 모터 미정지 사고 후 보강</b>) (PR #15)</td></tr>
+    <tr><td>08-14</td><td>A2 issue #10 통신 합의 · A3 배선 실측 · A5 Pi 셋업(Pi에서 전체 tests GREEN)</td></tr>
+    <tr><td>08-24</td><td><b>B3 RFCOMM 서버</b>(앱 규격·파일관리·STATUS·끊김 훅, PR #21 머지) · <b>B6a 안전 3종 코드</b>(PR #22) · B8 속도 통일 · <b>B6/B7 도구</b>(calibrate_encoder·pid_tune) · <b>C2~C4 파이프라인</b>(train.py→JSON→ForestModel 자동 로드, DistanceWindower) (PR #23) · A7 아크릴 섀시 채택 · E1 팀명 · E2 레포 rename · <b>E3 보고서 원고</b>(공식 7항목 양식)</td></tr>
+  </table>
+  <p class="note"><b>CW 코드 작업 전부 소진</b> — 이제부터는 실기·데이터·팀 협업·제출물.</p>
+
+  <h2>2. 남은 작업 (실행 순서)</h2>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R1 — 하드웨어 마무리 ⭐</h3><span class="period">🔧 진행 중 · 8/25~26</span></div>
+    <div class="tasks">
+      <div class="task b-dj crit"><span class="tid">R1-1</span> 섀시(아크릴) 부품 고정 — <b>IMU 리지드 마운트</b><span class="who w-dj">DJ</span><span class="dep">유격·공진 시 노면 신호 오염 — 볼트 고정, 테이프 금지</span></div>
+      <div class="task b-dj crit"><span class="tid">R1-2</span> 배선 재연결 (배선표.csv, GND 공통)<span class="who w-dj">DJ</span><span class="dep">금지 행 38·39 주의</span></div>
+      <div class="task b-dj crit"><span class="tid">R1-3</span> <b>홀센서(A3144) 연결</b> — R2 전체의 관문<span class="who w-dj">DJ</span><span class="dep">VCC=5V(물리4)·DO=GPIO17(물리11)·풀업 10kΩ→3.3V·자석 4개</span></div>
+      <div class="task b-dj"><span class="tid">R1-4</span> 1000µF 콘덴서·방열판 (지면 주행 전)<span class="who w-dj">DJ</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">도구 준비 완료 — 반나절 코스 · 8/26~27</span></div>
+    <div class="tasks">
+      <div class="task b-cw crit"><span class="tid">R2-1</span> (B5) 홀센서 펄스 + <code>setup_check.py --pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">지터 크면 PID 진동 → 수집 데이터 오염</span></div>
+      <div class="task b-cw crit"><span class="tid">R2-2</span> (B6) <code>calibrate_encoder.py --rev 5</code> → config 확정<span class="who w-cw">CW</span></div>
+      <div class="task b-cw crit"><span class="tid">R2-3</span> (B6a) 안전 3종 실측 — 램프·<b>저속 스톨 오탐</b>·걸림 정지<span class="who w-cw">CW</span><span class="dep">4펄스/회전 → 0.1 m/s에서 펄스 간격 실측 → STALL_TIMEOUT_S 조정</span></div>
+      <div class="task b-cw crit"><span class="tid">R2-4</span> (B7) <code>pid_tune.py --real</code> — <b>바퀴 공중→지면</b>, 0.4 m/s 수렴<span class="who w-cw">CW</span><span class="dep">C1의 선행조건</span></div>
+      <div class="task b-cw"><span class="tid">R2-5</span> (B5) 수집 무결성 — 200Hz·FIFO 0·CSV gap 0<span class="who w-cw">CW</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">8/26~28</span></div>
+    <div class="tasks">
+      <div class="task b-cw crit"><span class="tid">R3-1</span> (A1) <b>예비실험 — 성립성 관문</b>: 2~3종 수집 → <code>analyze_surfaces.py</code><span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
+      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 5종 × 세션 5+ × 10~20초, 앱 RENAME 라벨링<span class="who w-all">ALL</span><span class="dep">⚠️ <b>정속(B7) 없이 수집 금지</b> — 모델이 속도를 학습(shortcut). 목표속도 0.3/0.4/0.5 구간을 라벨에 병기</span></div>
+      <div class="task b-cw crit"><span class="tid">R3-3</span> (C2) <code>train.py</code> — 세션 CV 정확도·혼동행렬 (목표 ≥70%)<span class="who w-cw">CW</span></div>
+      <div class="task b-cw"><span class="tid">R3-4</span> (C3) 시간 vs 거리 윈도우 비교 → 보고서 수치<span class="who w-cw">CW</span></div>
+      <div class="task b-cw crit"><span class="tid">R3-5</span> (C4) <code>models/road_rf.json</code> 배치 → DEMO 감속 확인<span class="who w-cw">CW</span><span class="dep">코드 완료라 당일 가능</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R4 — 통신 실연동 (병렬)</h3><span class="period">Pi만 켜지면 · 8/25~29</span></div>
+    <div class="tasks">
+      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 188 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
+      <div class="task b-dh"><span class="tid">R4-2</span> (B4) 앱 한 줄 — <code>roadTypes</code>에 <b>"자전거도로"</b><span class="who w-dh">DH</span></div>
+      <div class="task b-all"><span class="tid">R4-3</span> (B9) 앱↔Pi E2E — 접속·명령·STATUS·파일탭 (책상 위)<span class="who w-dh">DH</span><span class="who w-cw">CW</span></div>
+      <div class="task b-dj"><span class="tid">R4-4</span> PR <b>#22·#23 리뷰·머지</b><span class="who w-dj">DJ</span><span class="dep">contracts·setup_check·config 상수·스톨감지=controller 결정</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R5 — 검증·시연 ⭐</h3><span class="period">8/29~31</span></div>
+    <div class="tasks">
+      <div class="task b-all crit"><span class="tid">R5-1</span> (D1) E2E 통합 — START→정속→수집/시연→STOP, DEMO 반응 &lt;1초<span class="who w-all">ALL</span></div>
+      <div class="task b-all crit"><span class="tid">R5-2</span> (D2) 안전 시나리오 5종 표 — 끊김·워치독·SIGTERM·스톨·저신뢰<span class="who w-cw">CW</span><span class="who w-dj">DJ</span></div>
+      <div class="task b-mj"><span class="tid">R5-3</span> (B10) 시연 노면 트랙 — <b>수집(R3-2)에도 필요 → 앞당김</b><span class="who w-mj">MJ</span></div>
+      <div class="task b-mj"><span class="tid">R5-4</span> (B11) 킥보드 외형 셸 (선택·연출)<span class="who w-mj">MJ</span></div>
+      <div class="task b-all crit"><span class="tid">R5-5</span> (D3) 실주행 리허설 — 자갈 감속→아스팔트 복귀, 로그+영상<span class="who w-all">ALL</span></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><h3>R6 — 제출물 ⭐</h3><span class="period">지금부터 ~ 9/1</span></div>
+    <div class="tasks">
+      <div class="task b-all crit"><span class="tid">R6-1</span> (E3) <b>PPT 제작</b> — 원고→슬라이드 20p, 실측값은 R2~R5에서<span class="who w-all">ALL</span><span class="dep"><code>보고서/개발완료보고서_초안.md</code> · <b>지금 시작 가능</b></span></div>
+      <div class="task b-mj crit"><span class="tid">R6-2</span> (E4) 시연영상 3분·720p — 제목 규격, YouTube<span class="who w-mj">MJ</span></div>
+      <div class="task b-cw crit"><span class="tid">R6-3</span> (E5) <b>제출</b> — 구글폼(신청서+PDF+링크), 팀번호·Public 확인<span class="who w-cw">CW</span><span class="dep"><b>9/1 목표</b> (마감 9/3)</span></div>
+    </div>
+  </div>
+
+  <h2>3. 남은 열흘 일정</h2>
+  <table>
+    <tr><th style="width:110px">날짜</th><th>목표</th><th>내용</th></tr>
+    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>섀시 고정·배선·<b>홀센서</b> / 병렬: R4-1 bind·R6-1 PPT 시작·R4-2 앱 한 줄·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
+    <tr><td>8/26(화)~27(수)</td><td class="st">R2 + R3-1</td><td>실측 체인 반나절 → 즉시 <b>예비실험 성립성 판정</b></td></tr>
+    <tr><td>8/27(수)~28(목)</td><td class="st">R3-2 본 수집</td><td>트랙+실외 5종, 팀 총출동 → 저녁 학습·탑재(R3-3·R3-5)</td></tr>
+    <tr><td>8/29(금)</td><td class="st">E2E·안전</td><td>R4-3 앱 E2E → R5-1 통합 → R5-2 안전 시나리오 표</td></tr>
+    <tr><td>8/30(토)~31(일)</td><td class="st">리허설·영상</td><td>R5-5 리허설 + R6-2 촬영·편집, R3-4 윈도우 비교, PPT 실측값</td></tr>
+    <tr><td><b>9/1(월)</b></td><td class="st">🎯 제출</td><td>PDF 변환 → 구글폼 제출 (R6-3)</td></tr>
+    <tr><td>9/2~3</td><td class="st">버퍼</td><td>재촬영·보고서 수정 예비일</td></tr>
+  </table>
+
+  <h2>크리티컬 패스</h2>
+  <div class="cpath">
+    <div class="cflow">
+      <div class="cnode">R1<small>섀시·홀센서</small></div><span class="arrow">→</span>
+      <div class="cnode">R2<small>B5→B6→B6a→B7</small></div><span class="arrow">→</span>
+      <div class="cnode">R3-1<small>A1 성립성</small></div><span class="arrow">→</span>
+      <div class="cnode">R3-2<small>C1 수집</small></div><span class="arrow">→</span>
+      <div class="cnode">R3-3~5<small>학습·탑재</small></div><span class="arrow">→</span>
+      <div class="cnode">R5-1·2<small>E2E·안전</small></div><span class="arrow">→</span>
+      <div class="cnode">R5-5<small>리허설</small></div><span class="arrow">→</span>
+      <div class="cnode">R6-2<small>영상</small></div><span class="arrow">→</span>
+      <div class="cnode">R6-3<small>제출 9/1</small></div>
+    </div>
+    <div class="cflow" style="margin-bottom:0">
+      <span style="font-size:.8rem;color:var(--sub)">병렬:</span>
+      <div class="pnode">R4 통신 E2E (Pi만)</div>
+      <div class="pnode">R6-1 PPT (지금부터)</div>
+      <div class="pnode">R5-3 트랙 (수집에도 필요)</div>
+    </div>
+    <p class="note">⚡ <b>오늘의 선두는 R1.</b> 섀시 배선이 끝나는 순간 R2~R3이 연쇄로 열린다.</p>
+  </div>
+
+  <h2>4. 리스크 & 대비</h2>
+  <table>
+    <tr><th>리스크</th><th>영향</th><th>대비</th></tr>
+    <tr><td><b>R3-1 판정 "구분 약함"</b></td><td>프로젝트 전제 흔들림</td><td>500Hz↑·IMU 마운트 변경 후 재실험. <b>R2 직후 즉시</b> — 늦을수록 치명적</td></tr>
+    <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
+    <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
+    <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
+    <tr><td>Pi 오프라인 지속·하드웨어 재발</td><td>R2·R4 지연</td><td>8/25 최우선 확인. <code>estop.py</code>·<code>setup_check.py</code> 즉시 진단</td></tr>
+    <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
+    <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
+  </table>
+
+  <h2>5. 완료 기준 (Definition of Done)</h2>
   <div class="dod"><ul>
-    <li>앱 START → 정속주행 → <b>노면별 자동 감속</b> → STOP이 트랙에서 재현된다 (영상 확보)</li>
-    <li>COLLECT CSV 결측 없음 · 모델 세션단위 정확도 <b>≥70%</b></li>
-    <li>안전 시나리오 전 항목 통과 (끊김·워치독·SIGTERM 모두 모터 정지)</li>
-    <li>보고서 20p · 영상 3분 · Public 레포 — <b>9/1 제출 완료</b></li>
+    <li>앱 START→정속주행→노면별 자동 감속→STOP이 <b>트랙에서 재현</b> (영상 확보)</li>
+    <li>COLLECT CSV 결측 0 · 모델 <b>세션단위 정확도 ≥70%</b></li>
+    <li>안전 시나리오 <b>5종 전부</b> 통과 (끊김·워치독·SIGTERM·스톨·저신뢰)</li>
+    <li>보고서 20p PDF · 영상 3분 · Public 레포 — <b>9/1 제출 완료</b></li>
   </ul></div>
+
+  <h2>부록 — 실기 명령 치트시트</h2>
+<pre>ssh kick-ip                                   # Pi 접속 · 코드: ~/embedded_kickboard
+python -m pytest                              # RPi/에서 — 188 GREEN 확인
+python scripts/setup_check.py --pwm --jitter  # ⚠️ 바퀴 공중 · ENA→GPIO27 점퍼
+python scripts/estop.py                       # 🚨 비상 정지 (언제든)
+
+python scripts/calibrate_encoder.py --rev 5 --diameter 0.065     # R2-2
+python scripts/pid_tune.py --real --sec 6 --csv tune_01.csv      # R2-4 공중→지면
+
+sudo bash scripts/rfcomm_setup.sh             # 통신 준비 (부팅마다 1회)
+python -m pi.main --app --real                # 통합 앱 기동
+
+python scripts/collect_premise.py --label gravel --seconds 15    # R3-1 예비
+python scripts/analyze_surfaces.py data/                         # 성립성 판정
+python scripts/train.py data/ --out models/road_rf.json          # R3-3 (PC)
+python scripts/train.py data/ --window distance --window-pulses 8  # R3-4
+scp models/road_rf.json kick-ip:~/embedded_kickboard/RPi/models/   # R3-5 탑재</pre>
 
 </div>
 </body>
