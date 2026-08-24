@@ -17,7 +17,8 @@ class Sample(TypedDict):
     wheel_pulse: int                # 엔코더 누적 펄스(단조증가 스냅샷)
 
 
-RoadClass = Literal["asphalt", "bike_path", "sidewalk_block", "concrete", "gravel"]
+RoadClass = Literal["asphalt", "bike_path", "sidewalk_block", "concrete", "gravel", "unknown"]
+# unknown = 앱 "기타". policy에서 fail-safe 감속. 표시명 매핑은 공통계약 계약 2 / pi/comm/protocol.py
 Mode = Literal["IDLE", "COLLECT", "DEMO"]
 
 

@@ -19,7 +19,7 @@
 | 폴더 | 내용 | 담당 | 브랜치 |
 | --- | --- | --- | --- |
 | `RPi/` | 구동·속도제어(**동제**) / 데이터수집·앱통신·인지(**찬우**) | 동제·찬우 | `dj` · `cw` |
-| `app/` | 스마트폰 앱(BLE 컨트롤러) | 도현 | `dh` |
+| `app/` | 스마트폰 앱(Bluetooth RFCOMM 컨트롤러) | 도현 | `dh` |
 | `sash/` | RC카 틀(섀시) 3D 프린팅 파일 (회로·보드 배치는 RPi 담당과 소통) | 명재 | `mj` |
 | `docs/` | 전체 프로젝트 문서 + 파트별 문서(RPi_docs / app_docs) | 공통 | — |
 
@@ -33,18 +33,18 @@
 | ② | 속도제어 | `SpeedController.set_target()/update()` | ①+엔코더 | 동제 |
 | ③ | 데이터수집 | `Sampler.start()`·`Logger.open/write/close` | 센서 | 찬우 |
 | — | 노면인지 | `Windower/Model/policy` | ③의 `Sample` 계약 | 찬우 |
-| ④ | 앱통신 | `BleServer.on_command()/send_telemetry()` | bluezero | 찬우 |
+| ④ | 앱통신 | `BleServer.on_command()/send_telemetry()` | RFCOMM socket | 찬우 |
 | 통합 | controller | 위를 모드별로 배선(IDLE/COLLECT/DEMO) | 전부 | 찬우 |
 
-> ④ 앱통신은 **Pi측 BLE 서버**(찬우). 스마트폰 앱 자체는 `app/`(도현).
+> ④ 앱통신은 **Pi측 RFCOMM(SPP) 서버**(찬우) — 앱 완성본 규격에 Pi가 맞춤(issue #10 종결). 스마트폰 앱 자체는 `app/`(도현).
 
-- **공통 계약(먼저 고정)**: `Sample` 스키마, 앱 명령/텔레메트리(BLE), 노면 클래스. 계약이 고정돼야 각자 병렬 개발 가능.
+- **공통 계약(먼저 고정)**: `Sample` 스키마, 앱 명령/텔레메트리(RFCOMM·JSON), 노면 클래스. 계약이 고정돼야 각자 병렬 개발 가능.
 - **안전 최우선**: 움직이는 차량이므로 STOP/연결끊김/에러/종료 시 **항상 모터 먼저 정지**. 불확실하면 감속/정지.
 - 상세: [`docs/RPi_docs/설계명세서.md`](docs/RPi_docs/설계명세서.md)
 
 ## 기술 스택
 
-- **RPi**: Python 3 · `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · `bluezero`(BLE) · `numpy` · `pytest`
+- **RPi**: Python 3 · `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · 표준 `socket`(RFCOMM) · `numpy` · `pytest`
 - **학습**: PC(오프라인) — 세션 단위 train/test 분리, TFLite로 변환해 Pi에서 추론만
 - **샘플링**: 200Hz(MPU FIFO로 지터 흡수) — 노면 고주파 정보를 담기 위한 나이퀴스트 근거
 
