@@ -96,7 +96,7 @@
     <div class="owner"><b>동제</b><span class="tag w-dj">DJ · DJ</span>
       <p>하드웨어 조립·배선·전원 / 엔코더 실측보정 / PID 튜닝 / Pi 셋업</p></div>
     <div class="owner"><b>명재</b><span class="tag w-mj">MJ · mj</span>
-      <p>3D 섀시·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
+      <p>섀시(아크릴 RC카 모형 채택)·킥보드 외형 / 부품 마운트 / 시연 노면 트랙</p></div>
     <div class="owner"><b>도현</b><span class="tag w-dh">DH · dh</span>
       <p>앱 수정(issue #10 반영) / 앱↔Pi 실연동</p></div>
     <div class="owner"><b>공동</b><span class="tag w-all">ALL</span>
@@ -115,7 +115,7 @@
       <li>A4 전원계산 · 핀맵 9단계·결선그림 · L298N배선·배선표</li>
     </ul></div>
     <div class="col todo"><h3>⬜ 남음</h3><ul>
-      <li>🔧 <b>섀시 조립 중</b> — 바퀴·모터 장착 → 배터리만 연결하면 주행</li>
+      <li>🔧 <b>섀시 확정: 기성 RC카 아크릴 모형</b>(08-24, 3D 프린팅 대체) — 부품 고정·배선 연결 진행 중</li>
       <li>🔴 <b>홀센서(A3144) 연결</b> — B5 나머지·B6 엔코더 보정의 전제</li>
       <li>✅ <b>B6a 안전 3종 코드</b>(08-24) · <b>B6/B7 도구·B8·C2/C3/C4 파이프라인</b>(188 tests) · <b>E3 보고서 원고</b>(공식 양식) — DUTY_MAX 0.75·소프트스타트·스톨감지. ⬜ 실측 보정(홀센서 후) · <b>DJ 합의</b>(스톨감지=controller, config 상수)</li>
       <li>🔴 <b>A1 예비실험</b> — 이제 RC카로 직접 굴려 수집 가능</li>
@@ -136,10 +136,10 @@
       <div class="task b-cw crit"><span class="tid">A1</span><span class="star">⭐</span> 노면 진동 예비실험 (5종×3회 → 분석 판정)<span class="who w-cw">CW</span><span class="dep">의존 없음 — 프로젝트 성립 전제</span></div>
       <div class="task b-all" style="background:#eef7f2"><span class="tid">A2 ✅</span> issue #10 합의 — <b>완료 2026-08-14</b><span class="who w-cw">CW</span><span class="who w-dh">DH</span><span class="dep"><b>앱 완성본 기준으로 Pi가 맞춤.</b> ①파일관리 Pi 지원 ②라벨링=수집 후 RENAME ③<b>자전거도로 추가</b> ④단위 환산은 앱<br>자동 확정: RFCOMM · <code>type</code> 필드 · 대문자 SET_MODE · ACK/ERROR → 공통계약 계약 2</span></div>
       <div class="task b-dj" style="background:#eef7f2;border-left-color:var(--dj)"><span class="tid">A4 ✅</span> C-1 전원 재계산 — <b>완료 2026-08-10</b><span class="who w-dj">DJ</span><span class="dep">→ <b>전원계산.md</b> · CW 확인 대기 · 모터 <b>TT 1:48</b> / 배터리 <b>2S 18650</b>(컷오프 7.0V) / Pi는 <b>USB PD 보조배터리 별도</b> → <b>벅컨버터 발주 불필요</b><br>⚠️ L298N 조건부 유지 — 스톨 시 채널당 2.4A로 연속정격(2A) 초과 → <code>DUTY_MAX=0.75</code>·소프트스타트·스톨감지·방열판 <b>4개가 전제</b></span></div>
-      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A3 ✅</span> 하드웨어 배선 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">MPU·L298N·모터 4개·전원 분리 <b>실측 확인</b>(모터 30~100% 회전·정지, throttled=0x0) · 🔧 <b>섀시 조립 진행 중</b> → 완료 시 주행 가능<br>⬜ 남음: <b>홀센서(A3144) 연결</b> · 1000µF 콘덴서 · 방열판</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">A3 ✅</span> 하드웨어 배선 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">MPU·L298N·모터 4개·전원 분리 <b>실측 확인</b>(모터 30~100% 회전·정지, throttled=0x0) · 🔧 <b>섀시=아크릴 RC카 모형 확정(08-24)</b>, 고정·배선 진행 중 → 완료 시 주행 가능<br>⬜ 남음: <b>홀센서(A3144) 연결</b> · 1000µF 콘덴서 · 방열판</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">A5 ✅</span> Pi 5 셋업 — <b>완료 2026-08-14</b><span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">SSH 키(<code>ssh kick</code>) · I2C · 패키지(~~bluezero~~ 폐기) · <code>setup_check.py</code> 소프트웨어 <b>전부 PASS</b> · <b>Pi에서 128 tests GREEN</b><br>⬜ <code>--pwm</code>/<code>--jitter</code> 실측은 B7 전에 (⚠️ 실제 백엔드 <code>lgpio.tx_pwm</code> — 지터 확인)</span></div>
       <div class="task b-cw" style="background:#eaf1fe"><span class="tid">A6 ✅</span> ⑦ 통합 controller — <b>완료 2026-08-10</b> (PR #15)<span class="who w-cw">CW</span><span class="dep"><code>pi/controller.py</code> · 21 tests · 상태머신(§5 전이표) + 모드 배선(COLLECT→Logger / DEMO→Windower→Model→policy→②)<br>안전 정지 경로 일원화 <code>_safe_stop</code>(<b>모터 먼저→파일→IDLE</b>) · 추론 실패 → fail-safe 감속</span></div>
-      <div class="task b-mj"><span class="tid">A7</span> 3D 섀시·마운트 설계 (IMU 리지드, DJ와 소통)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
+      <div class="task b-mj" style="background:#eef7f2"><span class="tid">A7 ✅</span> 섀시 — <b>기성 RC카 아크릴 모형 채택 08-24</b><span class="who w-mj">MJ</span><span class="dep">3D 프린팅 폐기 · 마운트 원칙 유지(IMU 리지드·배터리 바닥) · 🔧 고정·배선 진행 중</span></div>
       <div class="task b-cw" style="background:#eaf1fe"><span class="tid">E1 ✅</span> 팀명 <b>"킥라니"</b> — 08-24<span class="who w-all">ALL</span><span class="dep">한글 가능 확인</span></div>
     </div>
   </div>
@@ -158,7 +158,7 @@
       <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B8 ✅</span> 속도 정책 통일 — <b>08-24</b><span class="who w-cw">CW</span><span class="dep"><code>TARGET_SPEED_MPS = SPEED_SAFE_MPS</code> · 값 0.4/0.25/0.1 유지, B7 후 조정</span></div>
       <div class="task b-all"><span class="tid">B9</span> 앱↔Pi 실연동 E2E<span class="who w-dh">DH</span><span class="who w-cw">CW</span><span class="dep">의존: B3·B4</span></div>
       <div class="task b-mj"><span class="tid">B10</span> 시연 노면 트랙 제작 (노면 샘플판)<span class="who w-mj">MJ</span><span class="dep">의존 없음</span></div>
-      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸 프린팅·조립<span class="who w-mj">MJ</span><span class="dep">의존: A7</span></div>
+      <div class="task b-mj"><span class="tid">B11</span> 킥보드 외형 셸(선택·시연 연출)<span class="who w-mj">MJ</span><span class="dep">아크릴 섀시 치수 기준 · 의존: A7 ✅</span></div>
     </div>
   </div>
 
@@ -206,7 +206,7 @@
       <div><div class="bar w-dj">D2 안전 ⭐</div><div class="bar w-all">C1·D1·D3 공동</div></div>
       <div><div class="bar w-all">E3 보고서</div></div>
       <div class="rowlab">명재 MJ</div>
-      <div><div class="bar w-mj">A7 3D 설계</div></div>
+      <div><div class="bar w-mj" style="opacity:.55">A7 아크릴 채택 ✅</div></div>
       <div><div class="bar w-mj">B10 시연 트랙</div><div class="bar w-mj">B11 외형 셸</div></div>
       <div><div class="bar w-all">C1·D3 공동</div></div>
       <div><div class="bar w-mj">E4 영상 ⭐</div></div>
