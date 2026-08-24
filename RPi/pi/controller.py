@@ -11,10 +11,12 @@
 """
 import logging
 import math
+import time
 
 from pi import config
 from pi.contracts import Mode
 from pi.policy import policy
+from pi.safety import StallDetector
 
 log = logging.getLogger(__name__)
 
@@ -22,14 +24,17 @@ _VALID_MODES = ("collect", "demo")
 
 
 class Controller:
-    def __init__(self, speed, sampler, logger, ble, windower, model, encoder=None):
+    def __init__(self, speed, sampler, logger, ble, windower, model, encoder=None,
+                 clock=time.monotonic):
         self._speed = speed          # ② SpeedController (DJ)
         self._sampler = sampler      # ③ Sampler (CW)
         self._logger = logger        # ③ Logger (CW)
         self._ble = ble              # ④ RfcommServer (CW)
         self._windower = windower    # 인지 (CW)
         self._model = model          # 인지 (CW)
-        self._encoder = encoder      # ②③ 공유 엔코더 — STATUS.distance용(선택)
+        self._encoder = encoder      # ②③ 공유 엔코더 — STATUS.distance·스톨 감지(선택)
+        # B6a③ 스톨 감지: 주행 중 무펄스 → on_error → _safe_stop (워치독과 같은 계층)
+        self._stall = StallDetector(encoder, config.STALL_TIMEOUT_S, clock) if encoder is not None else None
 
         self.state: Mode = "IDLE"
         self.mode = None             # 다음 START에 쓸 모드
@@ -84,6 +89,8 @@ class Controller:
         else:
             self.state = "DEMO"
         self._speed.set_target(config.TARGET_SPEED_MPS)   # 순항 시작
+        if self._stall is not None:
+            self._stall.arm()
         return True
 
     def _stop_run(self) -> None:
@@ -113,6 +120,9 @@ class Controller:
     # ── 제어 주기 (50Hz) ──
     def tick(self) -> None:
         if self.state in ("COLLECT", "DEMO"):
+            if self._stall is not None and self._stall.check():
+                self.on_error(f"스톨 감지 — {config.STALL_TIMEOUT_S}s 무펄스(바퀴 걸림/전원 확인)")
+                return
             self._speed.update()
 
     # ── 텔레메트리 (→ ④) ──
@@ -142,6 +152,8 @@ class Controller:
     def _safe_stop(self) -> None:
         """모터 먼저, 그다음 파일. 어느 경로든 동일."""
         self._speed.stop()
+        if self._stall is not None:
+            self._stall.disarm()
         if self.state == "COLLECT":
             self._logger.close()
         self._file = None

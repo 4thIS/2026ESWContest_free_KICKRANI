@@ -14,11 +14,11 @@ def test_speed_rises_toward_steady_state_under_full_duty():
     g = MockGpio()
     motor = Motor(g)
     plant = MockPlant(g, k=1.0, tau=0.3)
-    motor.set_duty(1.0)  # 듀티 100%
+    motor.set_duty(1.0)  # 듀티 100% 요청 → Motor가 DUTY_MAX(0.75, B6a①)로 클램프
     for _ in range(500):  # 5초
         plant.step(0.01)
-    # 정상상태 속도 k=1.0에 근접
-    assert abs(plant.speed - 1.0) < 0.02
+    # 정상상태 속도 k·DUTY_MAX 에 근접
+    assert abs(plant.speed - 1.0 * config.DUTY_MAX) < 0.02
 
 
 def test_generates_encoder_pulses_as_it_moves():
