@@ -3,7 +3,7 @@
 smbus2          # I2C (MPU-6050)
 gpiozero        # GPIO/PWM
 lgpio           # gpiozero 백엔드 (Pi 5)
-bluezero        # BLE GATT 서버
+# bluezero      # (폐기) BLE GATT → RFCOMM 소켓(표준 socket)으로 전환, issue #10
 # ── 공용 (Windows·Pi 모두) ──
 numpy           # 윈도우·특징 계산
 pytest          # 테스트
