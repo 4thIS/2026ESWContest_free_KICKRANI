@@ -3,7 +3,7 @@
 
 검증 항목 (실행계획 A5):
     1) 플랫폼        Pi 5 인지 (RP1 → lgpio 필요)
-    2) 패키지        smbus2·lgpio·numpy·bluezero 설치 여부
+    2) 패키지        smbus2·lgpio·numpy 설치 여부 + RFCOMM 소켓 지원
     3) I2C           /dev/i2c-N 존재 + MPU-6050 WHO_AM_I(0x68) 응답
     4) GPIO 권한     gpiochip 열기 (권한 없으면 여기서 걸린다)
     5) PWM 출력      ENA/ENB 실동작            [--pwm]
@@ -146,13 +146,20 @@ def check_platform():
 def check_packages():
     ok = True
     for name, why in (("smbus2", "I2C"), ("lgpio", "GPIO/PWM"),
-                      ("numpy", "특징 계산"), ("bluezero", "BLE")):
+                      ("numpy", "특징 계산")):
         try:
             __import__(name)
             print(f"{_PASS} 패키지 {name} ({why})")
         except ImportError:
             print(f"{_FAIL} 패키지 {name} 없음 ({why}) → pip install -r requirements.txt")
             ok = False
+    # 앱통신은 표준 socket의 RFCOMM(계약 2) — 추가 패키지 없음, 커널 Bluetooth 소켓만 필요
+    import socket
+    if hasattr(socket, "AF_BLUETOOTH") and hasattr(socket, "BTPROTO_RFCOMM"):
+        print(f"{_PASS} RFCOMM 소켓 지원 (앱통신)")
+    else:
+        print(f"{_FAIL} RFCOMM 소켓 미지원 (socket.AF_BLUETOOTH 없음) → Pi OS/bluez 확인")
+        ok = False
     return ok
 
 

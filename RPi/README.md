@@ -2,7 +2,7 @@
 
 라즈베리파이(Pi 5)가 담당하는 **모든 코드**가 들어간다. 하나의 프로그램에서 모드 전환으로 동작.
 
-**담당: 동제(dj) — 구동·속도제어 / 찬우(cw) — 데이터수집·앱통신(Pi측 BLE)·인지**
+**담당: 동제(dj) — 구동·속도제어 / 찬우(cw) — 데이터수집·앱통신(Pi측 RFCOMM)·인지**
 
 ## 담당 기능
 
@@ -12,7 +12,7 @@
 | ② | 속도제어 | A3144 홀센서 피드백으로 목표 속도 유지 (PID) | 동제(dj) |
 | ③ | 데이터 수집 | MPU-6050(진동)+엔코더를 200Hz 샘플링 → CSV 저장 | 찬우(cw) |
 | — | 노면 인지 | 진동 스트림 → 윈도우 → TFLite 추론 → 노면 분류 → 목표속도 | 찬우(cw) |
-| ④ | 앱 통신 | BLE GATT 서버 (앱 명령 수신, 노면·속도 텔레메트리 송신) | 찬우(cw) |
+| ④ | 앱 통신 | RFCOMM(SPP) 서버 — 앱 명령 ACK/ERROR, STATUS 송신, 파일관리 (`pi/comm/`) | 찬우(cw) |
 
 각 기능은 **독립 모듈**로 개발 후 통합 계층(controller)에서 계약대로 조립한다.
 
@@ -40,7 +40,7 @@ scripts/             collect_premise.py · analyze_surfaces.py
 ## 환경
 
 - **Raspberry Pi 5**, Python 3
-- `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · `bluezero`(BLE) · `numpy` · `pytest`
+- `smbus2`(I2C) · `gpiozero`+`lgpio`(GPIO/PWM) · `tflite-runtime`(추론) · 표준 `socket`(RFCOMM 앱통신) · `numpy` · `pytest`
 
 ## Pi 5 셋업 (실행계획 A5)
 

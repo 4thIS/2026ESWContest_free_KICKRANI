@@ -40,11 +40,13 @@ class FakeWindower:
     """every번째 add마다 윈도우를 뱉는다."""
     def __init__(self, every=3):
         self._every = every
-        self._n = 0
+        self._buf = []
 
     def add(self, s):
-        self._n += 1
-        return ["win"] if self._n % self._every == 0 else None
+        self._buf.append(s)
+        if len(self._buf) % self._every == 0:
+            return list(self._buf[-self._every:])
+        return None
 
 
 class FakeModel:
@@ -108,12 +110,15 @@ def test_start_collect_opens_logger_and_sets_cruise():
     assert sc.target == config.TARGET_SPEED_MPS
 
 
-def test_set_label_is_used_as_logger_label():
+def test_handle_command_returns_true_on_accept_false_on_reject():
     c, sc, sampler, logger, ble = build()
-    c.handle_command({"cmd": "SET_LABEL", "label": "gravel"})
-    c.handle_command({"cmd": "SET_MODE", "mode": "collect"})
-    c.handle_command({"cmd": "START"})
-    assert logger.opened == ["gravel"]
+    assert c.handle_command({"cmd": "START"}) is False          # 모드 미설정 → 거부
+    assert c.handle_command({"cmd": "SET_MODE", "mode": "collect"}) is True
+    assert c.handle_command({"cmd": "START"}) is True
+    assert c.handle_command({"cmd": "SET_MODE", "mode": "demo"}) is False   # 주행 중 모드 변경 거부
+    assert c.handle_command({"cmd": "STOP"}) is True
+    assert c.handle_command({"cmd": "STOP"}) is True            # IDLE에서 STOP은 무해 → 성공
+    assert c.handle_command({"cmd": "SET_LABEL", "label": "x"}) is False   # 폐기된 명령
 
 
 def test_start_demo_sets_cruise_without_logger():
@@ -260,3 +265,28 @@ def test_telemetry_contains_contract_fields():
     assert t["state"] == "COLLECT"
     assert t["mode"] == "collect"
     assert "road" in t and "speed" in t and "file" in t
+    assert "distance" in t and "vibration" in t                 # STATUS(계약 2) 필드
+
+
+class FakeEncoder:
+    def pulses(self): return 12
+    def speed_mps(self): return 0.3
+    def distance_m(self): return 2.5
+
+
+def test_telemetry_distance_from_shared_encoder():
+    sc, sampler, logger, ble = FakeSpeedController(), FakeSampler(), FakeLogger(), FakeBle()
+    c = Controller(speed=sc, sampler=sampler, logger=logger, ble=ble,
+                   windower=FakeWindower(every=3), model=FakeModel(), encoder=FakeEncoder())
+    c.publish_telemetry()
+    assert ble.telemetry[-1]["distance"] == 2.5
+
+
+def test_telemetry_vibration_is_rms_of_last_demo_window():
+    c, sc, sampler, logger, ble = build(windower_every=4)
+    c.handle_command({"cmd": "SET_MODE", "mode": "demo"})
+    c.handle_command({"cmd": "START"})
+    for az in (4096 + 100, 4096 - 100, 4096 + 100, 4096 - 100):   # DC 제거 후 ±100 → RMS 100
+        c.on_sample({"t_ms": 0, "ax": 0, "ay": 0, "az": az, "gx": 0, "gy": 0, "gz": 0, "wheel_pulse": 0})
+    c.publish_telemetry()
+    assert abs(ble.telemetry[-1]["vibration"] - 100.0) < 1e-6

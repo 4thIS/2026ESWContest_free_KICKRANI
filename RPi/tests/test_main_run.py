@@ -38,7 +38,23 @@ def test_build_app_wires_shared_encoder(monkeypatch):
 
     app = main.build_app(force_mock=True)
     assert seen["sampler_enc"] is seen["speed_enc"] is seen["encoder"]
+    assert app.controller._encoder is seen["encoder"]        # STATUS.distance도 같은 엔코더
     assert app.controller.state == "IDLE"
+
+
+def test_make_ble_builds_rfcomm_server_on_injected_listener(monkeypatch):
+    """실물 경로: make_ble → RfcommServer(RFCOMM 리스너). 리스너만 목으로 대체."""
+    from pi.comm.rfcomm_server import RfcommServer
+
+    class FakeListener:
+        closed = False
+        def accept(self): raise OSError
+        def close(self): self.closed = True
+
+    monkeypatch.setattr(main, "make_rfcomm_listener", lambda: FakeListener())
+    srv = main.make_ble()
+    assert isinstance(srv, RfcommServer)
+    srv.stop()
 
 
 class _NullBle:

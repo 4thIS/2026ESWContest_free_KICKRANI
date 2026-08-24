@@ -9,7 +9,7 @@
 
 **통합 실행**(Phase 7 — 수집·인지·제어·앱통신 전부):
     python -m pi.main --app          # 목 부품으로 통합 앱 기동
-    python -m pi.main --app --real   # 실물 Pi 5 (lgpio·I2C·BLE)
+    python -m pi.main --app --real   # 실물 Pi 5 (lgpio·I2C·RFCOMM)
 """
 import argparse
 import atexit
@@ -21,6 +21,8 @@ import time
 from pi import config
 from pi.app import App
 from pi.collect.logger import CsvLogger
+from pi.comm.files import FileManager
+from pi.comm.rfcomm_server import RfcommServer, make_rfcomm_listener
 from pi.hardware.backend import get_gpio
 from pi.hardware.sim import MockPlant
 from pi.infer.model import StubModel
@@ -121,9 +123,11 @@ def make_imu():
 
 
 def make_ble():
-    """실물 BLE 서버. transport는 issue #10 결론 후 연결(B3)."""
-    raise NotImplementedError(
-        "BLE transport 미구현 — issue #10(전송계층 BLE GATT vs RFCOMM) 결정 후 B3에서 연결")
+    """실물 앱통신 서버 — Bluetooth RFCOMM(SPP) 채널 1 (계약 2, issue #10).
+
+    Pi에서 먼저 `scripts/rfcomm_setup.sh`(SDP 등록·discoverable)를 실행해야 앱이 찾는다.
+    """
+    return RfcommServer(listener=make_rfcomm_listener(), files=FileManager(config.LOG_DIR))
 
 
 class _NullImu:
@@ -155,7 +159,8 @@ def build_app(force_mock=False):
     ble = make_ble() if not force_mock else _NullBle()
 
     return App(speed=speed, sampler=sampler, logger=CsvLogger(), ble=ble,
-               windower=Windower(), model=StubModel(), sample_queue=sample_queue)
+               windower=Windower(), model=StubModel(), sample_queue=sample_queue,
+               encoder=encoder)                    # ★ STATUS.distance도 같은 encoder
 
 
 def install_safety_handlers(speed):

@@ -2,7 +2,7 @@
 
     Sampler 스레드(③)  : IMU FIFO drain + 엔코더 → sample_queue     ← Sampler가 소유
     Controller 스레드   : sample_queue 소비 → 모드 라우팅 / 50Hz 제어 / 텔레메트리
-    BLE 스레드(④)      : 명령 in / 텔레메트리 out                    ← BleServer가 소유
+    RFCOMM 스레드(④)      : 명령 in / 텔레메트리 out                    ← RfcommServer가 소유
 
 App은 부품을 **계약(Protocol)으로 주입받아** 스레드·큐만 엮는다(하드웨어 무관).
 실제 객체 조립은 `main.py`가, 목 조립은 테스트가 한다.
@@ -25,22 +25,22 @@ WATCHDOG_TIMEOUT_S = 0.5        # 루프 정지 >500ms → 모터 정지(§6)
 
 
 class App:
-    def __init__(self, speed, sampler, logger, ble, windower, model, sample_queue=None):
+    def __init__(self, speed, sampler, logger, ble, windower, model, sample_queue=None, encoder=None):
         self.sample_queue = sample_queue if sample_queue is not None else queue.Queue()
         self._sampler = sampler
         self._ble = ble
         self.controller = Controller(speed=speed, sampler=sampler, logger=logger,
-                                     ble=ble, windower=windower, model=model)
+                                     ble=ble, windower=windower, model=model, encoder=encoder)
         self.watchdog = Watchdog(WATCHDOG_TIMEOUT_S, self.controller.on_error)
         self._stop = threading.Event()
         self._thread = None
 
     # ── 수명주기 ──
     def start(self) -> None:
-        """Controller.start()(BLE 콜백·Sampler·광고) → Controller 루프 스레드."""
+        """Controller.start()(명령 콜백·Sampler·RFCOMM 대기) → Controller 루프 스레드."""
         self._stop.clear()
         self.controller.start()
-        # BLE 끊김 → 즉시 모터 정지(§6). transport가 지원할 때만 등록.
+        # 앱(RFCOMM) 끊김 → 즉시 모터 정지(§6). 서버가 지원할 때만 등록.
         if hasattr(self._ble, "on_disconnect"):
             self._ble.on_disconnect(self.controller.on_disconnect)
         self._thread = threading.Thread(target=self._run, name="controller", daemon=True)
