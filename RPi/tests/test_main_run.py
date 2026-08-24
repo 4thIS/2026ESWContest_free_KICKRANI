@@ -82,3 +82,21 @@ def test_install_safety_handlers_stops_motor_on_signal(monkeypatch):
     with __import__("pytest").raises(SystemExit):
         handler(main.signal.SIGTERM, None)
     assert rec.stopped == 2                      # SIGTERM → 정지
+
+
+def test_build_app_wraps_motor_with_soft_start(monkeypatch):
+    """B6a ②: 실물·목 모두 SpeedController가 받는 motor는 SoftStartMotor."""
+    from pi.safety import SoftStartMotor
+    seen = {}
+
+    class SpySpeed:
+        def __init__(self, motor, encoder, pid, clock=None): seen["motor"] = motor
+        def set_target(self, v): pass
+        def update(self): pass
+        def stop(self): pass
+
+    monkeypatch.setattr(main, "SpeedController", SpySpeed)
+    monkeypatch.setattr(main, "make_imu", lambda: object())
+    monkeypatch.setattr(main, "make_ble", lambda: _NullBle())
+    main.build_app(force_mock=True)
+    assert isinstance(seen["motor"], SoftStartMotor)

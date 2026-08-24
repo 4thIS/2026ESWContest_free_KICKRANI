@@ -290,3 +290,50 @@ def test_telemetry_vibration_is_rms_of_last_demo_window():
         c.on_sample({"t_ms": 0, "ax": 0, "ay": 0, "az": az, "gx": 0, "gy": 0, "gz": 0, "wheel_pulse": 0})
     c.publish_telemetry()
     assert abs(ble.telemetry[-1]["vibration"] - 100.0) < 1e-6
+
+
+# ── B6a ③ 스톨 감지 → controller.on_error 경로(모터 정지) ──
+class FakeClock:
+    def __init__(self): self.t = 0.0
+    def __call__(self): return self.t
+    def advance(self, dt): self.t += dt
+
+
+class StallEncoder(FakeEncoder):
+    def __init__(self): self.p = 0
+    def pulses(self): return self.p
+
+
+def build_with_stall():
+    clk = FakeClock()
+    enc = StallEncoder()
+    sc, sampler, logger, ble = FakeSpeedController(), FakeSampler(), FakeLogger(), FakeBle()
+    c = Controller(speed=sc, sampler=sampler, logger=logger, ble=ble,
+                   windower=FakeWindower(), model=FakeModel(), encoder=enc, clock=clk)
+    return c, sc, enc, clk
+
+
+def test_stall_without_pulses_stops_motor_and_returns_idle():
+    c, sc, enc, clk = build_with_stall()
+    c.handle_command({"cmd": "SET_MODE", "mode": "demo"})
+    c.handle_command({"cmd": "START"})
+    clk.advance(config.STALL_TIMEOUT_S + 0.1)
+    c.tick()
+    assert c.state == "IDLE"
+    assert sc.stopped >= 1
+
+
+def test_no_stall_while_pulses_keep_coming():
+    c, sc, enc, clk = build_with_stall()
+    c.handle_command({"cmd": "SET_MODE", "mode": "demo"})
+    c.handle_command({"cmd": "START"})
+    for _ in range(5):
+        clk.advance(config.STALL_TIMEOUT_S * 0.8); enc.p += 1; c.tick()
+    assert c.state == "DEMO"
+
+
+def test_stall_not_checked_in_idle():
+    c, sc, enc, clk = build_with_stall()
+    clk.advance(60.0)
+    c.tick()
+    assert sc.stopped == 0

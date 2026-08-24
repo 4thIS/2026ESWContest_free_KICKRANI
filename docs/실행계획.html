@@ -117,7 +117,7 @@
     <div class="col todo"><h3>⬜ 남음</h3><ul>
       <li>🔧 <b>섀시 조립 중</b> — 바퀴·모터 장착 → 배터리만 연결하면 주행</li>
       <li>🔴 <b>홀센서(A3144) 연결</b> — B5 나머지·B6 엔코더 보정의 전제</li>
-      <li>🔴 <b>B6a 안전 3종</b>(DUTY_MAX·소프트스타트·스톨감지) — <b>지면 주행 전 필수</b></li>
+      <li>✅ <b>B6a 안전 3종 코드 완료</b>(08-24, 160 tests) — DUTY_MAX 0.75·소프트스타트·스톨감지. ⬜ 실측 보정(홀센서 후) · <b>DJ 합의</b>(스톨감지=controller, config 상수)</li>
       <li>🔴 <b>A1 예비실험</b> — 이제 RC카로 직접 굴려 수집 가능</li>
       <li>✅ <b>A2 issue #10 종결</b> → ✅ <b>B3 RFCOMM 서버 구현 완료</b>(08-24, 149 tests) — 남은 건 B4(앱 자전거도로)·B9(실연동)</li>
       <li>데이터·모델 · E2E·실주행 · 팀명·레포·보고서·영상·제출</li>
@@ -125,7 +125,7 @@
   </div>
   <div class="cpath" style="margin-top:10px;padding:12px 16px;font-size:.85rem;display:block">
     ⚡ <b>조립 끝나면 바로 할 순서</b> — 홀센서 연결(B5) → <code>setup_check.py --pwm --jitter</code> → B6 엔코더 보정 → <b>B6a 안전 3종</b> → B7 PID(바퀴 공중→지면) → <b>A1 예비실험</b>.
-    CW 다음 코드 = <b>B6a</b>(하드웨어 실측과 함께). B3 ✅ → Pi 켜지면 <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind 확인 → B9.
+    CW 코드 B3 ✅·B6a ✅ → 다음은 <b>실기</b>(홀센서→B5→B6→B6a 실측→B7). 통신은 Pi 켜지면 <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind 확인 → B9.
   </div>
 
   <h2>🗂 태스크 (27개) — ⭐ = 크리티컬 패스</h2>
@@ -152,7 +152,7 @@
       <div class="task b-cw" style="background:#eaf1fe"><span class="tid">B3 ✅</span> <b>RFCOMM 서버</b> — <b>완료 2026-08-24</b> (PR #21)<span class="who w-cw">CW</span><span class="dep"><code>pi/comm/{protocol,files,rfcomm_server}.py</code> · 31 tests(전체 149) · 표준 socket RFCOMM 채널 1 · 앱 규격(type·ACK/ERROR·대문자 모드) · 파일관리 LIST/RENAME/MEMO(메모 사이드카) · STATUS(speed·distance·vibration·roadType 한글) · <code>handle_command</code> bool→ACK/ERROR · SET_LABEL·bluezero 삭제 · <code>scripts/rfcomm_setup.sh</code>(SDP)<br>⬜ Pi 실기 bind 확인(오프라인) → B9</span></div>
       <div class="task b-dh"><span class="tid">B4</span> 앱 수정 — <b>최소</b>: roadTypes에 "자전거도로" 추가 · 단위 표시 확인<span class="who w-dh">DH</span><span class="dep">의존: A2 ✅ · 프로토콜은 Pi가 맞추므로 앱 무변경</span></div>
       <div class="task b-all crit"><span class="tid">B5 🔶</span><span class="star">⭐</span> Pi 실측 검증 — <b>일부 완료</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">✅ MPU 감지·중력 −0.95g / ✅ 모터 회전·정지 / ✅ 저전압 없음<br>⬜ <b>홀센서 펄스</b>(연결 대기) · 200Hz 실측 · FIFO 오버플로 0 · CSV gap</span></div>
-      <div class="task b-all crit"><span class="tid">B6a</span><span class="star">⭐</span> <b>B7 전 필수 코드 3종</b> — DUTY_MAX=0.75 · 소프트스타트 · 스톨감지→정지<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">전원계산 §3 "L298N 유지 전제" — 없이 지면 주행하면 스톨 시 채널 2.4A로 연속정격 초과<br>스톨감지 위치: CW 제안 <b>controller</b>(on_error→_safe_stop 재사용) — DJ 합의 필요 · 의존: B6</span></div>
+      <div class="task b-all" style="background:#eaf1fe"><span class="tid">B6a ✅</span> <b>B7 전 필수 코드 3종</b> — <b>코드 완료 2026-08-24</b><span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">① <code>DUTY_MAX=0.75</code> ② <code>SoftStartMotor</code>(듀티 상승 램프 0.4s, 하강·stop 즉시, 속도데모에도 적용) ③ <code>StallDetector</code>(START arm → tick에서 1.5s 무펄스 → on_error→_safe_stop) · 11 tests(전체 160)<br>⚠️ <b>DJ 합의</b>: 스톨감지 위치=controller · config 상수 3개 · test_sim 기대값 · ⬜ 실측 보정(홀센서 후, 저속 오탐 확인)</span></div>
       <div class="task b-dj crit"><span class="tid">B6</span><span class="star">⭐</span> 엔코더 실측 보정 (자석 수·바퀴 둘레 → config)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5</span></div>
       <div class="task b-dj crit"><span class="tid">B7</span><span class="star">⭐</span> PID 실물 튜닝 (<b>바퀴 공중 → 지면</b>)<span class="who w-dj">DJ</span><span class="dep">의존: A3·A5·B6·<b>B6a</b> · <b>C1의 선행조건</b> — 정속 없이 수집하면 안 됨</span></div>
       <div class="task b-all"><span class="tid">B8</span> D-1 속도 정책 수치 통일<span class="who w-dj">DJ</span><span class="who w-cw">CW</span><span class="dep">의존: B7</span></div>
@@ -197,7 +197,7 @@
       <div class="tl-head">담당</div><div class="tl-head">W1 · 8/10~17<br><small>블로커 제거</small></div><div class="tl-head">W2 · 8/17~24<br><small>통합 완성</small></div><div class="tl-head">W3 · 8/24~31<br><small>모델·검증</small></div><div class="tl-head">마감주 · ~9/3<br><small>제출</small></div>
       <div class="rowlab">찬우 CW</div>
       <div><div class="bar w-cw">A1 예비실험 ⭐</div><div class="bar w-cw">A2 #10합의</div><div class="bar w-cw" style="opacity:.55">A6 controller ✅</div><div class="bar w-cw" style="opacity:.55">B1 main ✅</div><div class="bar w-cw" style="opacity:.55">B2 안전장치 ✅</div></div>
-      <div><div class="bar w-cw">B5 실측 ⭐</div><div class="bar w-cw">B6a 안전3종 ⭐</div><div class="bar w-cw" style="opacity:.55">B3 RFCOMM ✅</div></div>
+      <div><div class="bar w-cw">B5 실측 ⭐</div><div class="bar w-cw" style="opacity:.55">B6a 안전3종 ✅</div><div class="bar w-cw" style="opacity:.55">B3 RFCOMM ✅</div></div>
       <div><div class="bar w-cw">C2 학습 ⭐</div><div class="bar w-cw">C3 윈도우 비교</div><div class="bar w-cw">C4 탑재 ⭐</div><div class="bar w-cw">D2 안전 ⭐</div></div>
       <div><div class="bar w-cw">E2 레포</div><div class="bar w-cw">E5 제출 ⭐</div></div>
       <div class="rowlab">동제 DJ</div>
