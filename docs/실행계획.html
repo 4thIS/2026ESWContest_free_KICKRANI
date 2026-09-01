@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>노면 감지 킥보드 — 실행 계획 (D-10)</title>
+<title>노면 감지 킥보드 — 실행 계획 (D-9)</title>
 <style>
   :root{
     --bg:#f6f7fb; --card:#ffffff; --ink:#1e2430; --sub:#5b6472; --line:#e3e7ef;
@@ -70,16 +70,16 @@
 <div class="wrap">
 
   <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
-  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-08-24 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
+  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-08-25 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
   <div class="meta">📄 정본은 <b>실행계획.md</b> — 이 문서는 같은 내용의 뷰다. <b>수정은 항상 양쪽 같이.</b></div>
-  <div class="dday">D-10 · 예선 마감 9/3(목) · 제출 목표 9/1(화)</div>
+  <div class="dday">D-9 · 예선 마감 9/3(목) · 제출 목표 9/1(화)</div>
 
-  <div class="oneline">💡 <b>소프트웨어는 전 모듈 완성(188 tests GREEN), 제출물 준비 절반 완료.</b> 남은 것은 전부 "실물" —
+  <div class="oneline">💡 <b>소프트웨어 전 모듈 + 실행 준비 완성(197 tests GREEN), 전 PR 머지.</b> 남은 것은 전부 "실물" —
   섀시 배선 마무리 → 실측 체인(B5→B6→B6a→B7) → 데이터(A1→C1) → 학습·탑재(당일) → 검증·영상 → 제출.</div>
 
   <div class="owners">
     <div class="owner"><b>찬우</b><span class="tag w-cw">CW</span><p>수집·통신·인지·통합·ML·안전 + <b>DJ 코드 몫 대행</b>(배선 제외)</p></div>
-    <div class="owner"><b>동제</b><span class="tag w-dj">DJ</span><p>하드웨어 배선·전원 / <b>PR #22·#23 리뷰</b></p></div>
+    <div class="owner"><b>동제</b><span class="tag w-dj">DJ</span><p>하드웨어 배선·전원 / <b>R1-5 모터 채널·머지된 변경 사후 확인</b></p></div>
     <div class="owner"><b>도현</b><span class="tag w-dh">DH</span><p>Android 앱 — 남은 건 <b>B4 한 줄</b>("자전거도로")</p></div>
     <div class="owner"><b>명재</b><span class="tag w-mj">MJ</span><p>섀시(아크릴 채택)·외형 셸·<b>시연 트랙</b>·촬영</p></div>
   </div>
@@ -93,7 +93,7 @@
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) — 남은 앱 작업 = <b>B4 한 줄</b></td></tr>
     <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
-    <tr><td class="st">PR</td><td>✅ #21 머지 · 🔍 <b>#22(B6a)·#23(파이프라인) OPEN — DJ 리뷰 대기</b></td></tr>
+    <tr><td class="st">PR</td><td>✅ <b>#21~#25 전부 머지</b> — 모든 코드·문서가 main 반영, 열린 PR 없음</td></tr>
   </table>
 
   <h2>결정 로그 (프로젝트 방향)</h2>
@@ -156,10 +156,10 @@
   <div class="phase">
     <div class="phase-head"><h3>R4 — 통신 실연동 (병렬)</h3><span class="period">Pi만 켜지면 · 8/25~29</span></div>
     <div class="tasks">
-      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 188 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
+      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 197 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
       <div class="task b-dh"><span class="tid">R4-2</span> (B4) 앱 한 줄 — <code>roadTypes</code>에 <b>"자전거도로"</b><span class="who w-dh">DH</span></div>
       <div class="task b-all"><span class="tid">R4-3</span> (B9) 앱↔Pi E2E — 접속·명령·STATUS·파일탭 (책상 위)<span class="who w-dh">DH</span><span class="who w-cw">CW</span></div>
-      <div class="task b-dj"><span class="tid">R4-4</span> PR <b>#22·#23 리뷰·머지</b><span class="who w-dj">DJ</span><span class="dep">contracts·setup_check·config 상수·스톨감지=controller 결정</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R4-4 ✅</span> PR #22~#25 전부 머지 — 08-25<span class="who w-dj">DJ</span><span class="dep">머지된 변경(contracts·config·스톨감지 위치) 사후 확인만</span></div>
     </div>
   </div>
 
@@ -224,7 +224,7 @@
     <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
     <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
     <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
-    <tr><td>~~Pi·홀센서·자석~~ ✅ 해결</td><td>—</td><td>새 블로커: ⚠️ <b>모터 한쪽 채널</b>(R1-5) · ⚠️ <b>직결 플래핑</b> → 다른 와이파이 전환</td></tr>
+    <tr><td>~~Pi·홀센서·자석·PR 리뷰~~ ✅ 해결</td><td>—</td><td>남은 블로커: ⚠️ <b>모터 한쪽 채널</b>(R1-5) · ⚠️ <b>직결 플래핑</b> → 다른 와이파이 전환</td></tr>
     <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
     <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
   </table>
@@ -239,7 +239,7 @@
 
   <h2>부록 — 실기 명령 치트시트</h2>
 <pre>ssh kick-ip                                   # Pi 접속 · 코드: ~/embedded_kickboard
-python -m pytest                              # RPi/에서 — 188 GREEN 확인
+python -m pytest                              # RPi/에서 — 197 GREEN 확인
 python scripts/setup_check.py --pwm --jitter  # ⚠️ 바퀴 공중 · ENA→GPIO27 점퍼
 python scripts/estop.py                       # 🚨 비상 정지 (언제든)
 
