@@ -88,8 +88,8 @@
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
     <tr><td class="st">RPi 코드</td><td>✅ <b>전 모듈 구현 완료</b> — ①~④·인지·⑦통합·⑧안전(워치독+SIGTERM+<b>안전 3종</b>)·학습/탑재/보정/튜닝 도구. <b>pytest 188 GREEN</b>, TDD</td></tr>
-    <tr><td class="st">하드웨어</td><td>✅ 섀시(아크릴) 고정·배선 완료 · ✅ 홀센서 진단 완료 — <b>GPIO17 핀 손상 발견 → GPIO22(물리15) 이동</b>, KY-003 래치형(3.3V) 감지 실측 OK · ⬜ <b>자석 N-S 교대 배치</b>(수급 대기)·1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">홀센서_트러블슈팅</a></td></tr>
-    <tr><td class="st">Pi 5</td><td>✅ 온라인(<code>kick-eth</code>) · <code>cw</code> 최신 · <b>171 tests GREEN</b> · setup_check 전 PASS · MPU 실측 <b>199.3Hz</b></td></tr>
+    <tr><td class="st">하드웨어</td><td>✅ 섀시·배선·홀센서 — <b>엔코더 체인 완성, PPR=2 실측 확정</b>(08-25, GPIO22·KY-003·자석 N-S 교대·10ms 디바운스) · ⚠️ <b>모터 한쪽 채널 무동작</b>(미해결) · ⬜ 1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅</a></td></tr>
+    <tr><td class="st">Pi 5</td><td>✅ 셋업·코드 최신 · <b>171 tests GREEN</b> · MPU 199.3Hz · ⚠️ <b>직결 이더넷 플래핑</b> → <b>다음 세션은 다른 와이파이로 SSH</b></td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) — 남은 앱 작업 = <b>B4 한 줄</b></td></tr>
     <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
@@ -125,7 +125,8 @@
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-1 ✅</span> 섀시 부품 고정 — 완료 08-24<span class="who w-dj">DJ</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-2 ✅</span> 배선 재연결 — 완료 08-24<span class="who w-dj">DJ</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3 ✅</span> 홀센서 연결·진단 — <b>완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><b>GPIO17(물리11) 핀 손상 발견</b>(5V 풀업 모듈 원인 추정) → <code>ENCODER_PIN=22</code>(물리15) · KY-003 래치형, <b>3.3V(물리17)</b> 급전·풀업 내장 · 감지 실측 OK · 📄 홀센서_트러블슈팅.md</span></div>
-      <div class="task b-dj crit"><span class="tid">R1-3b</span> <b>자석 4개 N-S 극성 교대 배치</b><span class="who w-dj">DJ</span><span class="dep">래치형은 같은 극만으론 토글 불가 · <b>자석 확보 대기 — R2 유일 블로커</b></span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3b ✅</span> 자석 N-S 교대 — <b>완료 08-25</b><span class="who w-dj">DJ</span><span class="dep">래치 토글 정상 · 5바퀴 11펄스 → <b>PPR=2 실측 확정</b> + 10ms 디바운스(프린지 필터)</span></div>
+      <div class="task b-dj crit"><span class="tid">R1-5</span> ⚠️ <b>모터 한쪽 채널 무동작</b> — 다음 세션 최우선<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">양채널 구동 시 한쪽만 회전(08-25) · 용의자: 채널 배선·배터리·시동 토크 · 트러블슈팅 §세션2</span></div>
       <div class="task b-dj"><span class="tid">R1-4</span> 1000µF 콘덴서·방열판 (지면 주행 전)<span class="who w-dj">DJ</span></div>
     </div>
   </div>
@@ -133,7 +134,7 @@
   <div class="phase">
     <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">도구 준비 완료 — 반나절 코스 · 8/26~27</span></div>
     <div class="tasks">
-      <div class="task b-cw crit"><span class="tid">R2-1</span> (B5) 바퀴 펄스(자석 배치 후) + <code>--pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">PULSES_PER_REV 실측(2 예상) · 저속 간격 보고 STALL_TIMEOUT 조정</span></div>
+      <div class="task b-cw crit"><span class="tid">R2-1 🔶</span> (B5) ✅ 손 회전·PPR=2·디바운스 / ⬜ 모터 구동 검증 + <code>--pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">R1-5 해결 후 · STALL_TIMEOUT 1.5→2.0s 검토</span></div>
       <div class="task b-cw crit"><span class="tid">R2-2</span> (B6) <code>calibrate_encoder.py --rev 5</code> → config 확정<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R2-3</span> (B6a) 안전 3종 실측 — 램프·<b>저속 스톨 오탐</b>·걸림 정지<span class="who w-cw">CW</span><span class="dep">4펄스/회전 → 0.1 m/s에서 펄스 간격 실측 → STALL_TIMEOUT_S 조정</span></div>
       <div class="task b-cw crit"><span class="tid">R2-4</span> (B7) <code>pid_tune.py --real</code> — <b>바퀴 공중→지면</b>, 0.4 m/s 수렴<span class="who w-cw">CW</span><span class="dep">C1의 선행조건</span></div>
@@ -185,7 +186,7 @@
   <h2>3. 남은 열흘 일정</h2>
   <table>
     <tr><th style="width:110px">날짜</th><th>목표</th><th>내용</th></tr>
-    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>~~R1~~ ✅ → <b>자석 확보·N-S 교대 배치</b> / 병렬: R4-1 bind·R6-1 PPT 시작·R4-2 앱 한 줄·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
+    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>~~자석·PPR~~ ✅ → <b>R1-5 모터 채널 진단</b>(다른 와이파이) / 병렬: R4-1 bind·R6-1 PPT 시작·R4-2 앱 한 줄·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
     <tr><td>8/26(화)~27(수)</td><td class="st">R2 + R3-1</td><td>실측 체인 반나절 → 즉시 <b>예비실험 성립성 판정</b></td></tr>
     <tr><td>8/27(수)~28(목)</td><td class="st">R3-2 본 수집</td><td>트랙+실외 5종, 팀 총출동 → 저녁 학습·탑재(R3-3·R3-5)</td></tr>
     <tr><td>8/29(금)</td><td class="st">E2E·안전</td><td>R4-3 앱 E2E → R5-1 통합 → R5-2 안전 시나리오 표</td></tr>
@@ -223,7 +224,7 @@
     <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
     <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
     <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
-    <tr><td>~~Pi 오프라인·홀센서 무반응~~ ✅ 해결(GPIO17 손상→22)</td><td>—</td><td>물리 11 사용 금지 명문화 · 새 블로커: <b>자석 수급</b></td></tr>
+    <tr><td>~~Pi·홀센서·자석~~ ✅ 해결</td><td>—</td><td>새 블로커: ⚠️ <b>모터 한쪽 채널</b>(R1-5) · ⚠️ <b>직결 플래핑</b> → 다른 와이파이 전환</td></tr>
     <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
     <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
   </table>
