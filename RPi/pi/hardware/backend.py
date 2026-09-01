@@ -93,6 +93,9 @@ class LgpioGpio:  # pragma: no cover  (실물 Pi에서만 실행 — 하드웨�
 
     def add_edge_callback(self, pin, cb):
         self._lgpio.gpio_claim_alert(self._h, pin, self._lgpio.RISING_EDGE)
+        # 글리치 필터: 자석 프린지 자기장에 의한 래치 깜빡임(수 ms 미만) 제거
+        from pi import config
+        self._lgpio.gpio_set_debounce_micros(self._h, pin, config.ENCODER_DEBOUNCE_US)
         # 콜백은 (chip, gpio, level, tick) 시그니처 → 인자 무시 래핑
         self._lgpio.callback(
             self._h, pin, self._lgpio.RISING_EDGE, lambda *a: cb()

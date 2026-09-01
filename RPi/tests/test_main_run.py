@@ -124,3 +124,17 @@ def test_build_app_loads_forest_model_when_file_exists(tmp_path, monkeypatch):
     export_sklearn_forest(rf, list(FEATURE_KEYS), tmp_path / "rf.json")
     monkeypatch.setattr(config, "MODEL_PATH", str(tmp_path / "rf.json"))
     assert isinstance(main.build_app(force_mock=True).controller._model, ForestModel)
+
+
+def test_speed_flag_overrides_cruise_target(monkeypatch):
+    """--app --speed 0.3 → 수집 속도 구간 지정(config 수정 없이)."""
+    from pi import config
+    called = {}
+    monkeypatch.setattr(main, "run_app", lambda force_mock: called.setdefault("mock", force_mock))
+    orig = config.TARGET_SPEED_MPS
+    try:
+        main.main(["--app", "--speed", "0.3"])
+        assert config.TARGET_SPEED_MPS == 0.3
+        assert called["mock"] is True
+    finally:
+        config.TARGET_SPEED_MPS = orig

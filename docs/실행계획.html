@@ -87,9 +87,9 @@
   <h2>0. 현재 상태 (2026-08-24 전면 갱신)</h2>
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
-    <tr><td class="st">RPi 코드</td><td>✅ <b>전 모듈 구현 완료</b> — ①~④·인지·⑦통합·⑧안전(워치독+SIGTERM+<b>안전 3종</b>)·학습/탑재/보정/튜닝 도구. <b>pytest 188 GREEN</b>, TDD</td></tr>
-    <tr><td class="st">하드웨어</td><td>✅ 배선 실측 완료(MPU −0.95g · 모터 회전·정지 · 전원 분리) · ✅ <b>섀시 = 기성 RC카 아크릴 모형</b>(08-24) · 🔧 고정·배선 진행 중 · ⬜ 홀센서·1000µF·방열판</td></tr>
-    <tr><td class="st">Pi 5</td><td>✅ 셋업 완료(SSH·I2C·패키지) — ⚠️ <b>현재 오프라인</b>. 켜지면 pull → tests → RFCOMM bind</td></tr>
+    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
+    <tr><td class="st">하드웨어</td><td>✅ 섀시·배선·홀센서 — <b>엔코더 체인 완성, PPR=2 실측 확정</b>(08-25, GPIO22·KY-003·자석 N-S 교대·10ms 디바운스) · ⚠️ <b>모터 한쪽 채널 무동작</b>(미해결) · ⬜ 1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅</a></td></tr>
+    <tr><td class="st">Pi 5</td><td>✅ 셋업·코드 최신 · <b>171 tests GREEN</b> · MPU 199.3Hz · ⚠️ <b>직결 이더넷 플래핑</b> → <b>다음 세션은 다른 와이파이로 SSH</b></td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) — 남은 앱 작업 = <b>B4 한 줄</b></td></tr>
     <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
@@ -115,16 +115,18 @@
     <tr><td>08-14</td><td>A2 issue #10 통신 합의 · A3 배선 실측 · A5 Pi 셋업(Pi에서 전체 tests GREEN)</td></tr>
     <tr><td>08-24</td><td><b>B3 RFCOMM 서버</b>(앱 규격·파일관리·STATUS·끊김 훅, PR #21 머지) · <b>B6a 안전 3종 코드</b>(PR #22) · B8 속도 통일 · <b>B6/B7 도구</b>(calibrate_encoder·pid_tune) · <b>C2~C4 파이프라인</b>(train.py→JSON→ForestModel 자동 로드, DistanceWindower) (PR #23) · A7 아크릴 섀시 채택 · E1 팀명 · E2 레포 rename · <b>E3 보고서 원고</b>(공식 7항목 양식)</td></tr>
   </table>
-  <p class="note"><b>CW 코드 작업 전부 소진</b> — 이제부터는 실기·데이터·팀 협업·제출물.</p>
+  <p class="note"><b>CW 코드 작업 소진 + 실행 준비 완료</b> — 이후는 실행런북 순서대로.</p>
 
   <h2>2. 남은 작업 (실행 순서)</h2>
 
   <div class="phase">
     <div class="phase-head"><h3>R1 — 하드웨어 마무리 ⭐</h3><span class="period">🔧 진행 중 · 8/25~26</span></div>
     <div class="tasks">
-      <div class="task b-dj crit"><span class="tid">R1-1</span> 섀시(아크릴) 부품 고정 — <b>IMU 리지드 마운트</b><span class="who w-dj">DJ</span><span class="dep">유격·공진 시 노면 신호 오염 — 볼트 고정, 테이프 금지</span></div>
-      <div class="task b-dj crit"><span class="tid">R1-2</span> 배선 재연결 (배선표.csv, GND 공통)<span class="who w-dj">DJ</span><span class="dep">금지 행 38·39 주의</span></div>
-      <div class="task b-dj crit"><span class="tid">R1-3</span> <b>홀센서(A3144) 연결</b> — R2 전체의 관문<span class="who w-dj">DJ</span><span class="dep">VCC=5V(물리4)·DO=GPIO17(물리11)·풀업 10kΩ→3.3V·자석 4개</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-1 ✅</span> 섀시 부품 고정 — 완료 08-24<span class="who w-dj">DJ</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-2 ✅</span> 배선 재연결 — 완료 08-24<span class="who w-dj">DJ</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3 ✅</span> 홀센서 연결·진단 — <b>완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><b>GPIO17(물리11) 핀 손상 발견</b>(5V 풀업 모듈 원인 추정) → <code>ENCODER_PIN=22</code>(물리15) · KY-003 래치형, <b>3.3V(물리17)</b> 급전·풀업 내장 · 감지 실측 OK · 📄 홀센서_트러블슈팅.md</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3b ✅</span> 자석 N-S 교대 — <b>완료 08-25</b><span class="who w-dj">DJ</span><span class="dep">래치 토글 정상 · 5바퀴 11펄스 → <b>PPR=2 실측 확정</b> + 10ms 디바운스(프린지 필터)</span></div>
+      <div class="task b-dj crit"><span class="tid">R1-5</span> ⚠️ <b>모터 한쪽 채널 무동작</b> — 다음 세션 최우선<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">양채널 구동 시 한쪽만 회전(08-25) · 용의자: 채널 배선·배터리·시동 토크 · 트러블슈팅 §세션2</span></div>
       <div class="task b-dj"><span class="tid">R1-4</span> 1000µF 콘덴서·방열판 (지면 주행 전)<span class="who w-dj">DJ</span></div>
     </div>
   </div>
@@ -132,7 +134,7 @@
   <div class="phase">
     <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">도구 준비 완료 — 반나절 코스 · 8/26~27</span></div>
     <div class="tasks">
-      <div class="task b-cw crit"><span class="tid">R2-1</span> (B5) 홀센서 펄스 + <code>setup_check.py --pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">지터 크면 PID 진동 → 수집 데이터 오염</span></div>
+      <div class="task b-cw crit"><span class="tid">R2-1 🔶</span> (B5) ✅ 손 회전·PPR=2·디바운스 / ⬜ 모터 구동 검증 + <code>--pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">R1-5 해결 후 · STALL_TIMEOUT 1.5→2.0s 검토</span></div>
       <div class="task b-cw crit"><span class="tid">R2-2</span> (B6) <code>calibrate_encoder.py --rev 5</code> → config 확정<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R2-3</span> (B6a) 안전 3종 실측 — 램프·<b>저속 스톨 오탐</b>·걸림 정지<span class="who w-cw">CW</span><span class="dep">4펄스/회전 → 0.1 m/s에서 펄스 간격 실측 → STALL_TIMEOUT_S 조정</span></div>
       <div class="task b-cw crit"><span class="tid">R2-4</span> (B7) <code>pid_tune.py --real</code> — <b>바퀴 공중→지면</b>, 0.4 m/s 수렴<span class="who w-cw">CW</span><span class="dep">C1의 선행조건</span></div>
@@ -144,7 +146,7 @@
     <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">8/26~28</span></div>
     <div class="tasks">
       <div class="task b-cw crit"><span class="tid">R3-1</span> (A1) <b>예비실험 — 성립성 관문</b>: 2~3종 수집 → <code>analyze_surfaces.py</code><span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
-      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 5종 × 세션 5+ × 10~20초, 앱 RENAME 라벨링<span class="who w-all">ALL</span><span class="dep">⚠️ <b>정속(B7) 없이 수집 금지</b> — 모델이 속도를 학습(shortcut). 목표속도 0.3/0.4/0.5 구간을 라벨에 병기</span></div>
+      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 🔧 준비 완료(런북 3단계·앱 기본)<span class="who w-all">ALL</span><span class="dep">⚠️ 정속(B7) 없이 수집 금지 · <code>--app --speed 0.3/0.4/0.5</code> · 세션마다 <code>check_data.py</code> QC</span></div>
       <div class="task b-cw crit"><span class="tid">R3-3</span> (C2) <code>train.py</code> — 세션 CV 정확도·혼동행렬 (목표 ≥70%)<span class="who w-cw">CW</span></div>
       <div class="task b-cw"><span class="tid">R3-4</span> (C3) 시간 vs 거리 윈도우 비교 → 보고서 수치<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R3-5</span> (C4) <code>models/road_rf.json</code> 배치 → DEMO 감속 확인<span class="who w-cw">CW</span><span class="dep">코드 완료라 당일 가능</span></div>
@@ -184,7 +186,7 @@
   <h2>3. 남은 열흘 일정</h2>
   <table>
     <tr><th style="width:110px">날짜</th><th>목표</th><th>내용</th></tr>
-    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>섀시 고정·배선·<b>홀센서</b> / 병렬: R4-1 bind·R6-1 PPT 시작·R4-2 앱 한 줄·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
+    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>~~자석·PPR~~ ✅ → <b>R1-5 모터 채널 진단</b>(다른 와이파이) / 병렬: R4-1 bind·R6-1 PPT 시작·R4-2 앱 한 줄·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
     <tr><td>8/26(화)~27(수)</td><td class="st">R2 + R3-1</td><td>실측 체인 반나절 → 즉시 <b>예비실험 성립성 판정</b></td></tr>
     <tr><td>8/27(수)~28(목)</td><td class="st">R3-2 본 수집</td><td>트랙+실외 5종, 팀 총출동 → 저녁 학습·탑재(R3-3·R3-5)</td></tr>
     <tr><td>8/29(금)</td><td class="st">E2E·안전</td><td>R4-3 앱 E2E → R5-1 통합 → R5-2 안전 시나리오 표</td></tr>
@@ -222,7 +224,7 @@
     <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
     <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
     <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
-    <tr><td>Pi 오프라인 지속·하드웨어 재발</td><td>R2·R4 지연</td><td>8/25 최우선 확인. <code>estop.py</code>·<code>setup_check.py</code> 즉시 진단</td></tr>
+    <tr><td>~~Pi·홀센서·자석~~ ✅ 해결</td><td>—</td><td>새 블로커: ⚠️ <b>모터 한쪽 채널</b>(R1-5) · ⚠️ <b>직결 플래핑</b> → 다른 와이파이 전환</td></tr>
     <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
     <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
   </table>

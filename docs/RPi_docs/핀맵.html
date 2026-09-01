@@ -126,15 +126,15 @@
   <table>
     <thead><tr><th>기능</th><th>BCM</th><th>물리</th><th>연결</th></tr></thead>
     <tbody>
-      <tr><td><span class="tag" style="background:var(--w-33)"></span>3.3V</td><td class="p">3V3</td><td><span class="phys">1</span></td><td>MPU-6050 VCC · <strong>A3144 DO 풀업 10kΩ</strong></td></tr>
-      <tr><td><span class="tag" style="background:var(--w-5)"></span>5V 출력</td><td class="p">5V</td><td><span class="phys">4</span></td><td><strong>A3144 VCC</strong> — ⚠️ 3.3V로는 동작 안 함(정격 4.5V↑)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-33)"></span>3.3V</td><td class="p">3V3</td><td><span class="phys">1</span></td><td>MPU-6050 VCC · <s>A3144 DO 풀업 10kΩ</s> (폐기 — KY-003 풀업 내장)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-5)"></span>5V 출력</td><td class="p">5V</td><td><span class="phys">4</span></td><td><s>A3144 VCC</s> — 미사용(2026-08-24: 홀센서 VCC는 3.3V 물리17로 이전)</td></tr>
       <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SDA</td><td class="p">GPIO2</td><td><span class="phys">3</span></td><td>MPU-6050 SDA</td></tr>
       <tr><td><span class="tag" style="background:var(--w-i2c)"></span>I2C SCL</td><td class="p">GPIO3</td><td><span class="phys">5</span></td><td>MPU-6050 SCL</td></tr>
-      <tr><td><span class="tag" style="background:var(--w-hall)"></span>홀센서</td><td class="p">GPIO17</td><td><span class="phys">11</span></td><td>A3144 DO (오픈컬렉터 → <strong>3.3V로</strong> 풀업)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-hall)"></span>홀센서</td><td class="p">GPIO17</td><td><span class="phys">11</span></td><td>❌ <strong>사용 금지 — 핀 손상</strong>(2026-08-24 실측, 홀센서_트러블슈팅.md). 홀센서 신호는 GPIO22(물리15)로 이전</td></tr>
       <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 좌</td><td class="p">GPIO18</td><td><span class="phys">12</span></td><td>L298N ENA (좌 속도 PWM)</td></tr>
       <tr><td><span class="tag" style="background:var(--w-pwm)"></span>모터 우</td><td class="p">GPIO13</td><td><span class="phys">33</span></td><td>L298N ENB (우 속도 PWM)</td></tr>
       <tr><td><span class="tag" style="background:var(--accent)"></span>지터 측정</td><td class="p">GPIO27</td><td><span class="phys">13</span></td><td>임시 — <code class="k">setup_check.py --jitter</code> 때만 ENA에서 점퍼</td></tr>
-      <tr><td><span class="tag" style="background:var(--w-gnd)"></span>GND</td><td class="p">GND</td><td><span class="phys">6</span>·<span class="phys">9</span>·<span class="phys">14</span></td><td>공통 접지 — <span class="phys">6</span> MPU · <span class="phys">9</span> A3144 · <span class="phys">14</span> L298N·배터리(−)</td></tr>
+      <tr><td><span class="tag" style="background:var(--w-gnd)"></span>GND</td><td class="p">GND</td><td><span class="phys">6</span>·<span class="phys">9</span>·<span class="phys">14</span></td><td>공통 접지 — <span class="phys">6</span> MPU · <span class="phys">9</span> KY-003 · <span class="phys">14</span> L298N·배터리(−)</td></tr>
     </tbody>
   </table>
   <p style="font-size:12.5px;color:var(--ink-muted);margin-top:10px;">
@@ -160,7 +160,7 @@
       <tr><td class="p">L298N <span class="mono">ENA / ENB</span></td><td>Pi 물리 <span class="phys">12</span> / <span class="phys">33</span></td><td>Pi 3.3V로 L298 입력 구동 가능(V<sub>IH</sub> 2.3V)</td></tr>
       <tr><td class="p">L298N <span class="mono">5V</span> 단자</td><td><strong>Pi에 연결 금지</strong></td><td>⚠️ 출력이라 Pi 5V와 충돌</td></tr>
       <tr><td class="p">MPU-6050</td><td>VCC→<span class="phys">1</span> · GND→<span class="phys">6</span> · SDA→<span class="phys">3</span> · SCL→<span class="phys">5</span></td><td>AD0→GND (주소 0x68)</td></tr>
-      <tr><td class="p">A3144 홀센서</td><td>VCC→<span class="phys">4</span>(5V) · GND→<span class="phys">9</span> · DO→<span class="phys">11</span></td><td>DO–3.3V 사이 10kΩ 풀업</td></tr>
+      <tr><td class="p">KY-003 홀센서 모듈</td><td>VCC(가운데)→<span class="phys">17</span>(3.3V) · GND(−)→<span class="phys">9</span> · S→<span class="phys">15</span>(GPIO22)</td><td>풀업 내장 → 외부 저항 불필요 · ⚠️ 5V 급전 금지 · 물리 11 사용 금지(핀 손상)</td></tr>
       <tr><td class="p">자석 4개</td><td><strong>구동륜 1개</strong>에만 90°마다 부착</td><td>엔코더는 1채널 — 바퀴 지정 필요</td></tr>
     </tbody>
   </table>
@@ -341,7 +341,7 @@
         <li><strong>2S 배터리 분리 · Pi USB-C 분리.</strong> 9단계까지 전원은 들어가지 않는다.</li>
         <li>L298N <span class="mono">ENA·ENB</span> 점퍼캡 <strong>뺀다</strong> · <span class="mono">5V EN</span> 점퍼는 <strong>꽂아둔다</strong>.</li>
         <li>L298N 칩에 <strong>방열판 부착</strong>. 배선이 다 붙으면 손이 안 들어간다 — 지금 한다.</li>
-        <li><strong>구동륜 1개</strong>에만 자석 4개를 90°마다(<strong>그림 3</strong>). 4개 모두 <strong>같은 극이 바깥(센서 쪽)</strong>을 향해야 한다 — A3144는 단극성이라 극이 섞이면 펄스가 4개가 아니라 2개로 잡힌다.</li>
+        <li><strong>구동륜 1개</strong>에만 자석 4개를 90°마다(<strong>그림 3</strong>). ⚠️ 재정정(2026-08-24): 실물 모듈(KY-003)이 <strong>래치형</strong> → <strong>N-S-N-S 극성 교대</strong>로 붙여야 토글된다(같은 극만이면 첫 자석에서 잠김). 상승엣지 카운트 기준 회전당 2펄스 예상 — calibrate_encoder.py로 실측 확정.</li>
         <li>차체를 받침대에 올려 <strong>바퀴를 공중에 띄운다.</strong> 이 상태를 끝까지 유지한다.</li>
       </ul>
       <figure>
