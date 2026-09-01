@@ -203,7 +203,7 @@ def run_app(force_mock=False):
         print("=== 정지 완료 ===")
 
 
-def main():
+def main(argv=None):
     # Windows 콘솔(cp949)에서도 한글 출력이 깨지지 않도록. (Pi/Linux는 기본 UTF-8)
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -217,7 +217,12 @@ def main():
                         help="실물 라즈베리파이에서 실제 모터 구동")
     parser.add_argument("--duration", type=float, default=None,
                         help="주행/시뮬 시간(초)")
-    args = parser.parse_args()
+    parser.add_argument("--speed", type=float, default=None,
+                        help="순항 목표 속도 m/s 오버라이드 — 수집(C1) 속도 구간(0.3/0.4/0.5)용")
+    args = parser.parse_args(argv)
+
+    if args.speed is not None:
+        config.TARGET_SPEED_MPS = args.speed          # START 시 순항 목표로 쓰임(수집 구간용)
 
     if args.app:
         run_app(force_mock=not args.real)

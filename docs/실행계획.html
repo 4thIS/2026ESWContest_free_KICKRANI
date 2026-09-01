@@ -87,7 +87,7 @@
   <h2>0. 현재 상태 (2026-08-24 전면 갱신)</h2>
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
-    <tr><td class="st">RPi 코드</td><td>✅ <b>전 모듈 구현 완료</b> — ①~④·인지·⑦통합·⑧안전(워치독+SIGTERM+<b>안전 3종</b>)·학습/탑재/보정/튜닝 도구. <b>pytest 188 GREEN</b>, TDD</td></tr>
+    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
     <tr><td class="st">하드웨어</td><td>✅ 섀시·배선·홀센서 — <b>엔코더 체인 완성, PPR=2 실측 확정</b>(08-25, GPIO22·KY-003·자석 N-S 교대·10ms 디바운스) · ⚠️ <b>모터 한쪽 채널 무동작</b>(미해결) · ⬜ 1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅</a></td></tr>
     <tr><td class="st">Pi 5</td><td>✅ 셋업·코드 최신 · <b>171 tests GREEN</b> · MPU 199.3Hz · ⚠️ <b>직결 이더넷 플래핑</b> → <b>다음 세션은 다른 와이파이로 SSH</b></td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) — 남은 앱 작업 = <b>B4 한 줄</b></td></tr>
@@ -115,7 +115,7 @@
     <tr><td>08-14</td><td>A2 issue #10 통신 합의 · A3 배선 실측 · A5 Pi 셋업(Pi에서 전체 tests GREEN)</td></tr>
     <tr><td>08-24</td><td><b>B3 RFCOMM 서버</b>(앱 규격·파일관리·STATUS·끊김 훅, PR #21 머지) · <b>B6a 안전 3종 코드</b>(PR #22) · B8 속도 통일 · <b>B6/B7 도구</b>(calibrate_encoder·pid_tune) · <b>C2~C4 파이프라인</b>(train.py→JSON→ForestModel 자동 로드, DistanceWindower) (PR #23) · A7 아크릴 섀시 채택 · E1 팀명 · E2 레포 rename · <b>E3 보고서 원고</b>(공식 7항목 양식)</td></tr>
   </table>
-  <p class="note"><b>CW 코드 작업 전부 소진</b> — 이제부터는 실기·데이터·팀 협업·제출물.</p>
+  <p class="note"><b>CW 코드 작업 소진 + 실행 준비 완료</b> — 이후는 실행런북 순서대로.</p>
 
   <h2>2. 남은 작업 (실행 순서)</h2>
 
@@ -146,7 +146,7 @@
     <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">8/26~28</span></div>
     <div class="tasks">
       <div class="task b-cw crit"><span class="tid">R3-1</span> (A1) <b>예비실험 — 성립성 관문</b>: 2~3종 수집 → <code>analyze_surfaces.py</code><span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
-      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 5종 × 세션 5+ × 10~20초, 앱 RENAME 라벨링<span class="who w-all">ALL</span><span class="dep">⚠️ <b>정속(B7) 없이 수집 금지</b> — 모델이 속도를 학습(shortcut). 목표속도 0.3/0.4/0.5 구간을 라벨에 병기</span></div>
+      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 🔧 준비 완료(런북 3단계·앱 기본)<span class="who w-all">ALL</span><span class="dep">⚠️ 정속(B7) 없이 수집 금지 · <code>--app --speed 0.3/0.4/0.5</code> · 세션마다 <code>check_data.py</code> QC</span></div>
       <div class="task b-cw crit"><span class="tid">R3-3</span> (C2) <code>train.py</code> — 세션 CV 정확도·혼동행렬 (목표 ≥70%)<span class="who w-cw">CW</span></div>
       <div class="task b-cw"><span class="tid">R3-4</span> (C3) 시간 vs 거리 윈도우 비교 → 보고서 수치<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R3-5</span> (C4) <code>models/road_rf.json</code> 배치 → DEMO 감속 확인<span class="who w-cw">CW</span><span class="dep">코드 완료라 당일 가능</span></div>

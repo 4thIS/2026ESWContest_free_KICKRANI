@@ -40,7 +40,7 @@ MIN_MOVING_SPEED_MPS = 0.05    # 이 이하는 '정지'로 간주
 DUTY_MIN = 0.0                 # PWM 듀티 하한
 DUTY_MAX = 0.75                # PWM 듀티 상한 — B6a①: L298N 채널 2A 연속정격 여유(전원계산 §3). 1.0 금지
 SOFT_START_S = 0.4             # B6a②: 듀티 0→1.0 램프 시간(s). 돌입전류·스톨 시 2.4A 완화
-STALL_TIMEOUT_S = 1.5          # B6a③: 주행 중 엔코더 무펄스 지속 시 정지(s). 홀센서 4펄스/회전 기준
+STALL_TIMEOUT_S = 2.0          # B6a③: 주행 중 무펄스 지속 시 정지(s). PPR=2 확정으로 0.1m/s 펄스 간격 ≈1.02s → 여유 2.0s(실측 후 미세조정)
 CONTROL_HZ = 50                # 제어 주기(Hz) → dt=0.02s
 
 # ── 샘플링 (③ 데이터수집) ──
