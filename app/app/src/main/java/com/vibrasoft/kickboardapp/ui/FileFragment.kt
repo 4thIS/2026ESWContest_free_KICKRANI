@@ -142,7 +142,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             if (!sent) {
                 pendingRename = null
                 _binding?.let {
-                    Toast.makeText(requireContext(), "이름 변경 요청 전송 실패", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "노면 지정 요청 전송 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -156,7 +156,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             if (ok) {
                 adapter.renameFile(oldName, newName)
             } else {
-                Toast.makeText(requireContext(), "이름 변경 실패: $oldName", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "노면 지정 실패: $oldName", Toast.LENGTH_SHORT).show()
             }
         }
     }

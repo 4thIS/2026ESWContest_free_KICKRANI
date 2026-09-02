@@ -142,7 +142,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         b.tvSpeed.text = SpeedFormat.format(status.speed, settings.speedUnit)
         b.tvDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
         b.tvVibration.text = status.vibration?.let { "%.2f".format(it) } ?: "-"
-        if (status.roadType != null) {
+        // 노면 유형은 시연모드에서만 보인다. Pi는 STOP 후에도 마지막 추론값을 계속
+        // 보내므로(controller._safe_stop이 road를 안 지움), 수집모드에서 직전 시연의
+        // 값이 남아 표시되는 것을 여기서 막는다.
+        if (b.rbDemo.isChecked && status.roadType != null) {
             b.rowRoadType.visibility = View.VISIBLE
             b.tvRoadType.text = status.roadType
         } else {
