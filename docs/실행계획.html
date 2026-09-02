@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>노면 감지 킥보드 — 실행 계획 (D-9)</title>
+<title>노면 감지 킥보드 — 실행 계획 (D-DAY)</title>
 <style>
   :root{
     --bg:#f6f7fb; --card:#ffffff; --ink:#1e2430; --sub:#5b6472; --line:#e3e7ef;
@@ -70,11 +70,11 @@
 <div class="wrap">
 
   <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
-  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-08-25 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
+  <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-09-03 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
   <div class="meta">📄 정본은 <b>실행계획.md</b> — 이 문서는 같은 내용의 뷰다. <b>수정은 항상 양쪽 같이.</b></div>
-  <div class="dday">D-9 · 예선 마감 9/3(목) · 제출 목표 9/1(화)</div>
+  <div class="dday">🔥 D-DAY — 오늘(9/3) 마감 · 남은 것: A1→수집→모델→시연영상→PPT→제출</div>
 
-  <div class="oneline">💡 <b>소프트웨어 전 모듈 + 실행 준비 완성(197 tests GREEN), 전 PR 머지.</b> 남은 것은 전부 "실물" —
+  <div class="oneline">💡 <b>주행·통신 전 체인 실측 통과(09-02): 킥·엔코더·PID·앱 E2E·수집 무결성.</b> 남은 것은 데이터·제출물 —
   섀시 배선 마무리 → 실측 체인(B5→B6→B6a→B7) → 데이터(A1→C1) → 학습·탑재(당일) → 검증·영상 → 제출.</div>
 
   <div class="owners">
@@ -88,8 +88,8 @@
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
     <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
-    <tr><td class="st">하드웨어</td><td>✅ 섀시·배선·홀센서 — <b>엔코더 체인 완성, PPR=2 실측 확정</b>(08-25, GPIO22·KY-003·자석 N-S 교대·10ms 디바운스) · ⚠️ <b>모터 한쪽 채널 무동작</b>(미해결) · ⬜ 1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅</a></td></tr>
-    <tr><td class="st">Pi 5</td><td>✅ 셋업·코드 최신 · <b>171 tests GREEN</b> · MPU 199.3Hz · ⚠️ <b>직결 이더넷 플래핑</b> → <b>다음 세션은 다른 와이파이로 SSH</b></td></tr>
+    <tr><td class="st">하드웨어</td><td>✅ <b>주행 체인 전부 실측 통과(09-02)</b>: 시동 킥·엔코더(PPR=2)·PID(kp1.5/ki0.8)·방향 교정 · ~~모터 무동작~~=시동 임계·배터리로 해명 · ⬜ <b>Pi 이동 전원</b>·1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅 §세션3</a></td></tr>
+    <tr><td class="st">Pi 5</td><td>✅ <b>183 tests GREEN</b> · RFCOMM 상주 · Wi-Fi 3프로필 자동접속 · 📄 <a href="RPi_docs/SSH접속.md"><b>SSH접속 가이드</b></a> (<code>kick-home</code>/<code>kick-wifi</code>)</td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) · ✅ <b>R4-2 완료(08-26)</b> — 자전거도로·속도단위 선택·ACK 기반 세션 상태·수집모드 노면 숨김(37 tests GREEN, 실기기 UI 확인) — ⬜ 남은 앱 작업 없음 → <b>R4-3 E2E</b></td></tr>
     <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
@@ -126,7 +126,7 @@
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-2 ✅</span> 배선 재연결 — 완료 08-24<span class="who w-dj">DJ</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3 ✅</span> 홀센서 연결·진단 — <b>완료 08-24</b><span class="who w-cw">CW</span><span class="dep"><b>GPIO17(물리11) 핀 손상 발견</b>(5V 풀업 모듈 원인 추정) → <code>ENCODER_PIN=22</code>(물리15) · KY-003 래치형, <b>3.3V(물리17)</b> 급전·풀업 내장 · 감지 실측 OK · 📄 홀센서_트러블슈팅.md</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-3b ✅</span> 자석 N-S 교대 — <b>완료 08-25</b><span class="who w-dj">DJ</span><span class="dep">래치 토글 정상 · 5바퀴 11펄스 → <b>PPR=2 실측 확정</b> + 10ms 디바운스(프린지 필터)</span></div>
-      <div class="task b-dj crit"><span class="tid">R1-5</span> ⚠️ <b>모터 한쪽 채널 무동작</b> — 다음 세션 최우선<span class="who w-cw">CW</span><span class="who w-dj">DJ</span><span class="dep">양채널 구동 시 한쪽만 회전(08-25) · 용의자: 채널 배선·배터리·시동 토크 · 트러블슈팅 §세션2</span></div>
+      <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-5 ✅</span> 모터 무동작 — <b>해명·해결 09-02</b><span class="who w-cw">CW</span><span class="dep">배선 아님 — 시동 임계 듀티(60~100%)+배터리 방전 → <b>시동 킥</b>(PR #28) · 방향 교정 완료</span></div>
       <div class="task b-dj"><span class="tid">R1-4</span> 1000µF 콘덴서·방열판 (지면 주행 전)<span class="who w-dj">DJ</span></div>
     </div>
   </div>
@@ -134,11 +134,11 @@
   <div class="phase">
     <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">도구 준비 완료 — 반나절 코스 · 8/26~27</span></div>
     <div class="tasks">
-      <div class="task b-cw crit"><span class="tid">R2-1 🔶</span> (B5) ✅ 손 회전·PPR=2·디바운스 / ⬜ 모터 구동 검증 + <code>--pwm --jitter</code><span class="who w-cw">CW</span><span class="dep">R1-5 해결 후 · STALL_TIMEOUT 1.5→2.0s 검토</span></div>
+      <div class="task b-cw" style="background:#eef7f2"><span class="tid">R2-1 ✅</span> 엔코더 실측 — <b>완결 09-02</b> (모터 구동 31펄스/10s·PPR=2)<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R2-2</span> (B6) <code>calibrate_encoder.py --rev 5</code> → config 확정<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R2-3</span> (B6a) 안전 3종 실측 — 램프·<b>저속 스톨 오탐</b>·걸림 정지<span class="who w-cw">CW</span><span class="dep">4펄스/회전 → 0.1 m/s에서 펄스 간격 실측 → STALL_TIMEOUT_S 조정</span></div>
-      <div class="task b-cw crit"><span class="tid">R2-4</span> (B7) <code>pid_tune.py --real</code> — <b>바퀴 공중→지면</b>, 0.4 m/s 수렴<span class="who w-cw">CW</span><span class="dep">C1의 선행조건</span></div>
-      <div class="task b-cw"><span class="tid">R2-5</span> (B5) 수집 무결성 — 200Hz·FIFO 0·CSV gap 0<span class="who w-cw">CW</span></div>
+      <div class="task b-cw" style="background:#eef7f2"><span class="tid">R2-4 ✅</span> PID 공중 확정 — kp1.5/ki0.8 (09-02)<span class="who w-cw">CW</span><span class="dep">상승 0.46s·정상오차 −0.017 · 지면 재튜닝은 필요시</span></div>
+      <div class="task b-cw" style="background:#eef7f2"><span class="tid">R2-5 ✅</span> 수집 무결성 — 13.2s=2,640행 200Hz·gap 0 (09-02)<span class="who w-cw">CW</span></div>
     </div>
   </div>
 
@@ -224,7 +224,7 @@
     <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
     <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
     <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
-    <tr><td>~~Pi·홀센서·자석·PR 리뷰~~ ✅ 해결</td><td>—</td><td>남은 블로커: ⚠️ <b>모터 한쪽 채널</b>(R1-5) · ⚠️ <b>직결 플래핑</b> → 다른 와이파이 전환</td></tr>
+    <tr><td>~~모터·엔코더·통신~~ ✅ 전부 해결</td><td>—</td><td>남은 블로커: <b>시간(오늘 마감)</b> · Pi 이동 전원(실내는 콘센트)</td></tr>
     <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
     <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
   </table>
