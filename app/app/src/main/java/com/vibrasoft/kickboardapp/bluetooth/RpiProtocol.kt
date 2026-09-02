@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
+import android.util.Log
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -67,7 +68,7 @@ class RpiProtocol(private val connector: BluetoothConnector) {
                     is RpiMessage.Status -> statusListeners.toList().forEach { it(message) }
                     is RpiMessage.Files -> filesListeners.toList().forEach { it(message.files) }
                     is RpiMessage.Error -> errorListeners.toList().forEach { it(message.cmd, message.message) }
-                    null -> {}
+                    null -> Log.w("RpiLink", "파싱 불가(무시): $line")
                 }
             }
         }
