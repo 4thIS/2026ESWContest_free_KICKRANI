@@ -138,3 +138,25 @@ def test_speed_flag_overrides_cruise_target(monkeypatch):
         assert called["mock"] is True
     finally:
         config.TARGET_SPEED_MPS = orig
+
+
+def test_build_app_soft_start_has_kick_from_config(monkeypatch):
+    """시동 킥이 실물 조립 경로에 config 값으로 연결된다."""
+    from pi.safety import SoftStartMotor
+    from pi import config
+    seen = {}
+
+    class SpySpeed:
+        def __init__(self, motor, encoder, pid, clock=None): seen["motor"] = motor
+        def set_target(self, v): pass
+        def update(self): pass
+        def stop(self): pass
+
+    monkeypatch.setattr(main, "SpeedController", SpySpeed)
+    monkeypatch.setattr(main, "make_imu", lambda: object())
+    monkeypatch.setattr(main, "make_ble", lambda: _NullBle())
+    main.build_app(force_mock=True)
+    m = seen["motor"]
+    assert isinstance(m, SoftStartMotor)
+    assert m._kick_duty == config.DUTY_MAX
+    assert m._kick_s == config.STARTUP_KICK_S

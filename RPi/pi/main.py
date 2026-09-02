@@ -49,7 +49,8 @@ class _StepClock:
 
 
 def _build_controller(gpio, clock):
-    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S, clock=clock)   # B6a② (속도데모·--real도)
+    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S, clock=clock,
+                           kick_duty=config.DUTY_MAX, kick_s=config.STARTUP_KICK_S)   # B6a②+킥 (속도데모·--real도)
     encoder = Encoder(gpio, clock=clock)          # ②③ 공유 인스턴스
     pid = PID(config.PID_KP, config.PID_KI, config.PID_KD,
               out_min=config.DUTY_MIN, out_max=config.DUTY_MAX)
@@ -146,7 +147,8 @@ class _NullBle:
 def build_app(force_mock=False):
     """부품을 조립해 통합 App을 만든다. **엔코더는 ②·③이 공유**(공통계약 B-1)."""
     gpio = get_gpio(force_mock=force_mock)
-    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S)   # B6a② 램프 (Motor 자체는 정지로 시작)
+    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S,
+                           kick_duty=config.DUTY_MAX, kick_s=config.STARTUP_KICK_S)   # B6a② 램프 + 시동 킥
     motor.stop()                                   # 시작 시퀀스: 모터 정지 확정(§5)
 
     encoder = Encoder(gpio)                        # ★ 단일 인스턴스

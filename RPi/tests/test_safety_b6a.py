@@ -85,3 +85,41 @@ def test_stall_detector_inactive_until_armed_and_after_disarm():
     clk.advance(5.0); assert sd.check() is False
     sd.arm(); clk.advance(5.0); sd.disarm()
     assert sd.check() is False
+
+
+# ── ②b 시동 킥(kick-start) — 배터리 처짐·기어 마찰에도 저듀티 주행 가능하게 ──
+def test_kick_start_applies_full_duty_then_drops_to_target():
+    clk, m = FakeClock(), SpyMotor()
+    ss = SoftStartMotor(m, ramp_s=0.4, clock=clk, kick_duty=0.75, kick_s=0.2)
+    ss.set_duty(0.3)                      # 정지→출발: 램프 대신 킥
+    assert m.duties[-1] == 0.75
+    clk.advance(0.1); ss.set_duty(0.3)    # 킥 창 내 유지
+    assert m.duties[-1] == 0.75
+    clk.advance(0.15); ss.set_duty(0.3)   # 킥 종료(0.25s) → 목표로 하강
+    assert m.duties[-1] == 0.3
+
+
+def test_kick_fires_only_from_standstill():
+    clk, m = FakeClock(), SpyMotor()
+    ss = SoftStartMotor(m, ramp_s=0.4, clock=clk, kick_duty=0.75, kick_s=0.2)
+    ss.set_duty(0.3); clk.advance(0.3); ss.set_duty(0.3)   # 킥 끝나고 0.3 주행 중
+    clk.advance(0.1); ss.set_duty(0.6)     # 주행 중 증속 → 킥 없이 램프(0.3 + 2.5*0.1 = 0.55)
+    assert m.duties[-1] != 0.75
+    assert abs(m.duties[-1] - 0.55) < 1e-9
+
+
+def test_stop_rearms_kick():
+    clk, m = FakeClock(), SpyMotor()
+    ss = SoftStartMotor(m, ramp_s=0.4, clock=clk, kick_duty=0.75, kick_s=0.2)
+    ss.set_duty(0.3); clk.advance(0.3); ss.set_duty(0.3)
+    ss.stop()
+    clk.advance(1.0)
+    ss.set_duty(0.3)                       # 재출발 → 다시 킥
+    assert m.duties[-1] == 0.75
+
+
+def test_kick_disabled_by_default_keeps_ramp_behavior():
+    clk, m = FakeClock(), SpyMotor()
+    ss = SoftStartMotor(m, ramp_s=0.4, clock=clk)          # 킥 미지정 = 기존 램프
+    ss.set_duty(0.8)
+    assert m.duties[-1] == 0.0
