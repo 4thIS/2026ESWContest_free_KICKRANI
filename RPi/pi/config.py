@@ -37,7 +37,7 @@ PID_KD = 0.0
 # 순항(수집·시연 시작) 목표 = 안전 노면 속도와 동일 — B8에서 통일(아래 SPEED_SAFE_MPS 참조)
 TARGET_SPEED_MPS = 0.4         # == SPEED_SAFE_MPS (아래에서 재대입)
 MIN_MOVING_SPEED_MPS = 0.05    # 이 이하는 '정지'로 간주
-DUTY_MIN = 0.0                 # PWM 듀티 하한
+DUTY_MIN = 0.35                # PWM 듀티 하한 — 주행 유지 임계 밑으로 PID가 못 내리게(스터터 방지, 09-03 실측)
 DUTY_MAX = 0.75                # PWM 듀티 상한 — B6a①: L298N 채널 2A 연속정격 여유(전원계산 §3). 1.0 금지
 SOFT_START_S = 0.4             # B6a②: 듀티 0→1.0 램프 시간(s). 돌입전류·스톨 시 2.4A 완화
 STARTUP_KICK_S = 0.2           # 시동 킥(s): 정지→출발 시 DUTY_MAX를 잠깐 쏴 정지 마찰 극복(2026-09-02 실측: 시동 임계가 듀티 60~100%로 배터리에 따라 변동)
