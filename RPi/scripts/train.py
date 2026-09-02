@@ -144,7 +144,8 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--window", choices=("time", "distance"), default="time")
     ap.add_argument("--window-samples", type=int, default=config.WINDOW_SAMPLES)
-    ap.add_argument("--window-pulses", type=int, default=8, help="거리 윈도우 길이(펄스). 4펄스=1회전≈0.2m")
+    ap.add_argument("--window-pulses", type=int, default=8,
+                    help="거리 윈도우 길이(펄스). PPR=2 실측 확정 → 1펄스≈0.102m (8≈0.82m, 12≈1.2m, 20≈2.0m)")
     ap.add_argument("--folds", type=int, default=5)
     a = ap.parse_args(argv)
     rep = run(a.data_dir, Path(a.out), a.rate, a.trees, a.seed, a.window, a.window_samples,

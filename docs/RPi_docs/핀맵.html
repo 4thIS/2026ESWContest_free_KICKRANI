@@ -102,7 +102,13 @@
 <div class="wrap">
   <p class="eyebrow">노면 감지 킥보드 · 구동부 (DJ)</p>
   <h1>Raspberry Pi 5 핀맵</h1>
-  <p class="lede">최종 부품(L298N · A3144 홀센서 · MPU-6050) 기준으로 40핀 헤더에서 <strong>실제 쓰는 핀만</strong> 표시. 색이 역할이다. 물리핀 번호 = 헤더에 꽂는 실제 자리.</p>
+  <p class="lede">최종 부품(L298N · <strong>KY-003 래치형 홀센서</strong> · MPU-6050) 기준으로 40핀 헤더에서 <strong>실제 쓰는 핀만</strong> 표시. 색이 역할이다. 물리핀 번호 = 헤더에 꽂는 실제 자리.</p>
+  <div class="stopbox"><b>🛑 2026-08-24 변경 — 홀센서 배선이 바뀌었다.</b>
+    A3144 베어 소자 + 10kΩ 풀업 계획은 <strong>폐기</strong>. 실물은 <strong>KY-003 래치형(풀업 내장)</strong>이며
+    <strong>3.3V(물리 17) 급전 · S 직결 · 외부 풀업 없음</strong>이다.
+    <strong>엔코더 핀 = GPIO22(물리 15)</strong> — <strong>물리 11(GPIO17)은 손상돼 사용 금지</strong>.
+    문서 하단 조립 절차의 A3144 그림·표는 <strong>폐기된 계획의 기록</strong>이다.
+  </div>
 
   <h2>40핀 헤더 (실제 배치)</h2>
   <div class="board">
@@ -469,13 +475,30 @@
     </li>
 
     <li>
-      <h3>A3144 홀센서 + 10kΩ 풀업 <span class="when">— 가장 조심할 단계</span></h3>
+      <h3>홀센서 (KY-003 래치형) <span class="when">— 가장 조심할 단계</span></h3>
+
+      <div class="stopbox"><b>🛑 아래 "A3144 + 10kΩ 풀업" 배선은 폐기됐다 (2026-08-24).</b>
+        실물이 <strong>KY-003 래치형 모듈</strong>(풀업 내장)이라 그 배선을 그대로 하면 <strong>DO가 5V로 나와 GPIO가 손상된다.</strong>
+        실제로 <strong>GPIO17(물리 11)이 손상됐고</strong>, 엔코더 핀을 <strong>GPIO22(물리 15)</strong>로 옮겼다.
+        경위: <code class="k">홀센서_트러블슈팅.md</code>
+      </div>
+
+      <div class="chk"><b>✅ 현재 확정 배선</b> —
+        <span class="mono">VCC</span>→<span class="phys">17</span>(<strong>3.3V</strong>) ·
+        <span class="mono">GND</span>→<span class="phys">9</span> ·
+        <span class="mono">S(신호)</span>→<span class="phys">15</span>(<strong>GPIO22</strong>) <strong>직결</strong>.
+        <strong>외부 풀업 저항 없음</strong>(모듈 내장). <strong>물리 11 사용 금지 · 5V 급전 금지.</strong>
+        자석은 <strong>N-S 교대 4개</strong> → 상승엣지 기준 <code class="k">ENCODER_PULSES_PER_REV = 2</code>(실측 확정), 소프트웨어 디바운스 10ms.
+      </div>
+
       <ul>
-        <li>핀 배열: <strong>마킹된 평평한 앞면을 보고 왼쪽부터 1=VCC · 2=GND · 3=OUT</strong> (구입품 데이터시트로 재확인할 것).</li>
-        <li><span class="mono">VCC</span>→<span class="phys">4</span>(<strong>5V</strong>) · <span class="mono">GND</span>→<span class="phys">9</span> · <span class="mono">OUT</span>→<span class="phys">11</span>(GPIO17).</li>
-        <li><strong>10kΩ을 <span class="mono">OUT</span> ↔ <span class="phys">1</span>(3.3V) 사이</strong>에 넣는다. 오픈컬렉터라 이 풀업이 없으면 신호가 아예 안 나온다.</li>
         <li>센서와 자석 간격 <strong>1~3mm</strong>, 자석이 센서 정면을 스치도록 위치를 잡는다(<strong>그림 3</strong>).</li>
+        <li><s>핀 배열: 마킹된 평평한 앞면을 보고 왼쪽부터 1=VCC · 2=GND · 3=OUT</s> — <em>베어 소자 A3144 기준. KY-003 모듈은 실크 인쇄(<span class="mono">-</span>/<span class="mono">middle</span>/<span class="mono">S</span>)를 따른다.</em></li>
+        <li><s><span class="mono">VCC</span>→<span class="phys">4</span>(5V) · <span class="mono">OUT</span>→<span class="phys">11</span>(GPIO17)</s> — <strong>폐기</strong>(위 확정 배선 참고)</li>
+        <li><s>10kΩ을 <span class="mono">OUT</span> ↔ <span class="phys">1</span>(3.3V) 사이에 넣는다</s> — <strong>폐기</strong>(모듈 풀업 내장)</li>
       </ul>
+
+      <p style="margin:10px 0 0;opacity:.75;font-size:.92em"><em>아래 그림은 <strong>폐기된 A3144 베어 소자 계획</strong>의 기록이다. 실제 배선은 위 "현재 확정 배선"을 따른다.</em></p>
       <figure>
         <svg role="img" aria-label="A3144는 5V로 급전하되 출력 풀업 저항은 3.3V에 물려야 GPIO가 안전하다"
              viewBox="0 0 640 315" style="width:100%;max-width:640px;min-width:560px">
@@ -531,7 +554,7 @@
         </figcaption>
       </figure>
       <div class="stopbox">⚠️ <strong>풀업을 5V에 물리면 안 된다.</strong> DO 하이가 5V로 나와 <strong>Pi GPIO가 손상</strong>된다. VCC만 5V, 풀업은 3.3V — 이게 이 부품의 전부다. 같은 이유로 <strong>풀업 내장 3핀 모듈은 쓰지 않는다</strong>(<span class="mono">전원계산.md §7-7</span>).</div>
-      <div class="chk"><b>✅ 검증</b> — GPIO17을 읽으면서 자석을 갖다 대면 <strong>0</strong>, 떼면 <strong>1</strong>. 반응이 없으면 <strong>자석을 뒤집어</strong> 다시 시도(A3144는 한쪽 극에만 반응). 바퀴를 손으로 한 바퀴 돌려 <strong>펄스 4개</strong>가 세어지는지까지 확인 → 그대로 B6(엔코더 실측 보정)로 이어진다.</div>
+      <div class="chk"><b>✅ 검증</b> — <strong>GPIO22</strong>를 읽으면서 자석을 갖다 대면 레벨이 <strong>토글</strong>된다. KY-003은 <strong>래치형</strong>이라 한쪽 극에서 ON으로 걸리고 <strong>반대 극을 대야 OFF</strong>로 풀린다 — 그래서 바퀴 자석은 <strong>N-S 교대</strong>로 붙인다. 반응이 없으면 자석을 뒤집어 다시 시도. 바퀴를 손으로 한 바퀴 돌려 상승엣지 <strong>2펄스</strong>(실측 확정 <code class="k">ENCODER_PULSES_PER_REV=2</code>)가 세어지는지 확인 → 그대로 B6(엔코더 실측 보정)로 이어진다.</div>
     </li>
 
     <li class="stop">
@@ -569,10 +592,10 @@
     [5,"GPIO3 · SCL","--w-i2c","MPU SCL"], [6,"GND","--w-gnd","MPU GND"],
     [7,"GPIO4",null,""],              [8,"GPIO14 · TXD",null,""],
     [9,"GND","--w-gnd","홀센서"],      [10,"GPIO15 · RXD",null,""],
-    [11,"GPIO17","--w-hall","A3144 DO"],[12,"GPIO18","--w-pwm","ENA 좌"],
+    [11,"GPIO17",null,"❌ 손상 — 사용 금지"],[12,"GPIO18","--w-pwm","ENA 좌"],
     [13,"GPIO27","--accent","지터 측정(임시)"], [14,"GND","--w-gnd","L298N·배터리−"],
-    [15,"GPIO22",null,""],            [16,"GPIO23",null,""],
-    [17,"3V3",null,""],              [18,"GPIO24",null,""],
+    [15,"GPIO22","--w-hall","홀센서 S(신호)"], [16,"GPIO23",null,""],
+    [17,"3V3","--w-33","홀센서 VCC (3.3V)"],  [18,"GPIO24",null,""],
     [19,"GPIO10",null,""],            [20,"GND",null,""],
     [21,"GPIO9",null,""],             [22,"GPIO25",null,""],
     [23,"GPIO11",null,""],            [24,"GPIO8",null,""],
