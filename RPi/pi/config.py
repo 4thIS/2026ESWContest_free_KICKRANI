@@ -29,8 +29,8 @@ WHEEL_CIRCUMFERENCE_M = 0.204    # 지름 65mm → π×0.065 ≈ 0.2042 m
 ENCODER_STOP_TIMEOUT_S = 1.0
 
 # ── PID 정속 주행 게인 (② 속도제어, DJ) — ⚠️ 실물 튜닝 ──
-PID_KP = 0.8
-PID_KI = 0.4
+PID_KP = 1.5
+PID_KI = 0.8
 PID_KD = 0.0
 
 # ── 주행 제어 (② 속도제어, DJ) ──
