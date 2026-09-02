@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.vibrasoft.kickboardapp.MainActivity
 import com.vibrasoft.kickboardapp.data.AppSettings
+import com.vibrasoft.kickboardapp.data.SpeedUnit
 import com.vibrasoft.kickboardapp.databinding.BottomsheetSettingsBinding
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,15 @@ class SettingsBottomSheet : BottomSheetDialogFragment() {
 
         updateCurrentDeviceLabel()
         binding.btnReselect.setOnClickListener { devicePicker.requestPick() }
+
+        when (settings.speedUnit) {
+            SpeedUnit.KMH -> binding.rbUnitKmh.isChecked = true
+            SpeedUnit.MPS -> binding.rbUnitMps.isChecked = true
+        }
+        binding.rgSpeedUnit.setOnCheckedChangeListener { _, checkedId ->
+            settings.speedUnit =
+                if (checkedId == binding.rbUnitMps.id) SpeedUnit.MPS else SpeedUnit.KMH
+        }
     }
 
     private fun updateCurrentDeviceLabel() {

@@ -14,13 +14,13 @@
     <Button android:id="@+id/btn_rename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="이름변경"
+        android:text="노면 지정"
         android:textSize="12sp"/>
 
     <Button android:id="@+id/btn_memo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="메모"
+        android:text="메모 추가"
         android:textSize="12sp"
         android:layout_marginStart="8dp"/>
 </LinearLayout>

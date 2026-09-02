@@ -9,6 +9,9 @@ import com.vibrasoft.kickboardapp.MainActivity
 import com.vibrasoft.kickboardapp.R
 import com.vibrasoft.kickboardapp.bluetooth.RpiMessage
 import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
+import com.vibrasoft.kickboardapp.bluetooth.SessionState
+import com.vibrasoft.kickboardapp.data.AppSettings
+import com.vibrasoft.kickboardapp.data.SpeedFormat
 import com.vibrasoft.kickboardapp.databinding.FragmentMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,15 +23,24 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private lateinit var rpiProtocol: RpiProtocol
 
+    private lateinit var settings: AppSettings
+
     private var isConnected = false
-    private var isSessionRunning = false
+    private val session = SessionState()
     private var timerJob: Job? = null
+    private var pendingTimeoutJob: Job? = null
     private var elapsedSeconds = 0L
 
     private val statusCallback: (RpiMessage.Status) -> Unit = { status -> updateStatusDisplay(status) }
     private val disconnectedCallback: () -> Unit = { handleDisconnected() }
+    private val ackCallback: (String, Boolean) -> Unit = { cmd, ok -> handleAck(cmd, ok) }
     private val onErrorCallback: (String, String) -> Unit = { cmd, message ->
         _binding?.let {
+            session.onError(cmd)
+            if (cmd == "START" || cmd == "STOP") {
+                pendingTimeoutJob?.cancel()
+                updateButtonStates()
+            }
             Toast.makeText(requireContext(), "$cmd 실패: $message", Toast.LENGTH_SHORT).show()
         }
     }
@@ -38,16 +50,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMainBinding.bind(view)
         rpiProtocol = (requireActivity() as MainActivity).rpiProtocol
+        settings = AppSettings(requireContext())
 
         rpiProtocol.addStatusListener(statusCallback)
         rpiProtocol.addDisconnectedListener(disconnectedCallback)
+        rpiProtocol.addAckListener(ackCallback)
         rpiProtocol.addErrorListener(onErrorCallback)
         rpiProtocol.addConnectedListener(connectedCallback)
 
         binding.btnSession.setOnClickListener {
-            // 연타 재진입 차단: IO 대기 중 중복 클릭 방지 (updateButtonStates가 상태 복원)
-            binding.btnSession.isEnabled = false
-            if (isSessionRunning) stopSession() else startSession()
+            // 연타 재진입 차단: ACK/ERROR/타임아웃까지 pending으로 잠금
+            if (session.isRunning) stopSession() else startSession()
         }
     }
 
@@ -66,31 +79,73 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun startSession() {
         val mode = if (binding.rbDemo.isChecked) "DEMO" else "COLLECT"
         resetTelemetryDisplay()
+        session.startRequested()
+        updateButtonStates()
         viewLifecycleOwner.lifecycleScope.launch {
             rpiProtocol.sendCommand(RpiProtocol.buildSetModeCommand(mode))
-            rpiProtocol.sendCommand(RpiProtocol.buildStartCommand())
-            isSessionRunning = true
-            elapsedSeconds = 0L
-            startTimer()
-            updateButtonStates()
+            val sent = rpiProtocol.sendCommand(RpiProtocol.buildStartCommand())
+            if (!sent) {
+                abortPending("출발 명령 전송 실패")
+            } else {
+                startPendingTimeout()
+            }
         }
     }
 
     private fun stopSession() {
+        session.stopRequested()
+        updateButtonStates()
         viewLifecycleOwner.lifecycleScope.launch {
-            rpiProtocol.sendCommand(RpiProtocol.buildStopCommand())
-            isSessionRunning = false
+            val sent = rpiProtocol.sendCommand(RpiProtocol.buildStopCommand())
+            if (!sent) {
+                abortPending("정지 명령 전송 실패")
+            } else {
+                startPendingTimeout()
+            }
+        }
+    }
+
+    // 세션 상태는 Pi의 ACK로만 확정한다 (START 거부 시 '실행 중' 오표시 방지)
+    private fun handleAck(cmd: String, ok: Boolean) {
+        if (cmd != "START" && cmd != "STOP") return
+        pendingTimeoutJob?.cancel()
+        val wasRunning = session.isRunning
+        session.onAck(cmd, ok)
+        _binding ?: return
+        if (!wasRunning && session.isRunning) {
+            elapsedSeconds = 0L
+            startTimer()
+        } else if (wasRunning && !session.isRunning) {
             timerJob?.cancel()
+        }
+        updateButtonStates()
+    }
+
+    private fun startPendingTimeout() {
+        pendingTimeoutJob?.cancel()
+        pendingTimeoutJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(PENDING_TIMEOUT_MS)
+            abortPending("응답 없음 (Pi 연결 상태 확인)")
+        }
+    }
+
+    private fun abortPending(message: String) {
+        session.onTimeout()
+        _binding?.let {
             updateButtonStates()
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun updateStatusDisplay(status: RpiMessage.Status) {
         val b = _binding ?: return
-        b.tvSpeed.text = "%.1f km/h".format(status.speed)
+        b.tvSpeed.text = SpeedFormat.format(status.speed, settings.speedUnit)
         b.tvDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
         b.tvVibration.text = status.vibration?.let { "%.2f".format(it) } ?: "-"
-        if (status.roadType != null) {
+        // 노면 유형은 시연모드에서만 보인다. Pi는 STOP 후에도 마지막 추론값을 계속
+        // 보내므로(controller._safe_stop이 road를 안 지움), 수집모드에서 직전 시연의
+        // 값이 남아 표시되는 것을 여기서 막는다.
+        if (b.rbDemo.isChecked && status.roadType != null) {
             b.rowRoadType.visibility = View.VISIBLE
             b.tvRoadType.text = status.roadType
         } else {
@@ -100,7 +155,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun resetTelemetryDisplay() {
         val b = _binding ?: return
-        b.tvSpeed.text = "- km/h"
+        b.tvSpeed.text = SpeedFormat.format(null, settings.speedUnit)
         b.tvDistance.text = "- m"
         b.tvVibration.text = "-"
         b.rowRoadType.visibility = View.GONE
@@ -109,8 +164,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun handleDisconnected() {
         _binding?.let { b ->
             isConnected = false
-            isSessionRunning = false
+            session.onDisconnected()
             timerJob?.cancel()
+            pendingTimeoutJob?.cancel()
             b.tvConnection.text = "○ 미연결"
             resetTelemetryDisplay()
             updateButtonStates()
@@ -132,19 +188,26 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun updateButtonStates() {
-        binding.rbCollect.isEnabled = isConnected && !isSessionRunning
-        binding.rbDemo.isEnabled = isConnected && !isSessionRunning
-        binding.btnSession.isEnabled = isConnected
-        binding.btnSession.text = if (isSessionRunning) "정지" else "출발"
+        val idle = !session.isRunning && !session.isPending
+        binding.rbCollect.isEnabled = isConnected && idle
+        binding.rbDemo.isEnabled = isConnected && idle
+        binding.btnSession.isEnabled = isConnected && !session.isPending
+        binding.btnSession.text = if (session.isRunning) "정지" else "출발"
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         timerJob?.cancel()
+        pendingTimeoutJob?.cancel()
         rpiProtocol.removeStatusListener(statusCallback)
         rpiProtocol.removeDisconnectedListener(disconnectedCallback)
+        rpiProtocol.removeAckListener(ackCallback)
         rpiProtocol.removeErrorListener(onErrorCallback)
         rpiProtocol.removeConnectedListener(connectedCallback)
         _binding = null
+    }
+
+    companion object {
+        private const val PENDING_TIMEOUT_MS = 3000L
     }
 }

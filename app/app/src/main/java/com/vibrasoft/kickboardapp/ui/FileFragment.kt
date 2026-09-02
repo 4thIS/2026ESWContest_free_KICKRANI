@@ -21,7 +21,8 @@ class FileFragment : Fragment(R.layout.fragment_file) {
     private lateinit var rpiProtocol: RpiProtocol
     private lateinit var adapter: FileAdapter
 
-    private val roadTypes = listOf("아스팔트", "보도블럭", "콘크리트", "비포장", "기타")
+    // 공통계약 계약 2 노면 매핑표 순서 (PR #20)
+    private val roadTypes = listOf("아스팔트", "자전거도로", "보도블럭", "콘크리트", "비포장", "기타")
     private val roadConditions = listOf("정상", "불량")
     private var pendingRename: Pair<String, String>? = null
     private var isConnected = false
@@ -141,7 +142,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             if (!sent) {
                 pendingRename = null
                 _binding?.let {
-                    Toast.makeText(requireContext(), "이름 변경 요청 전송 실패", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "노면 지정 요청 전송 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -155,7 +156,7 @@ class FileFragment : Fragment(R.layout.fragment_file) {
             if (ok) {
                 adapter.renameFile(oldName, newName)
             } else {
-                Toast.makeText(requireContext(), "이름 변경 실패: $oldName", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "노면 지정 실패: $oldName", Toast.LENGTH_SHORT).show()
             }
         }
     }
