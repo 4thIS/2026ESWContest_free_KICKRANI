@@ -10,6 +10,7 @@ import com.vibrasoft.kickboardapp.R
 import com.vibrasoft.kickboardapp.bluetooth.RpiMessage
 import com.vibrasoft.kickboardapp.bluetooth.RpiProtocol
 import com.vibrasoft.kickboardapp.bluetooth.SessionState
+import com.vibrasoft.kickboardapp.bluetooth.StopDetector
 import com.vibrasoft.kickboardapp.data.AppSettings
 import com.vibrasoft.kickboardapp.data.SpeedFormat
 import com.vibrasoft.kickboardapp.databinding.FragmentMainBinding
@@ -30,6 +31,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private var timerJob: Job? = null
     private var pendingTimeoutJob: Job? = null
     private var elapsedSeconds = 0L
+
+    // 이동거리는 Pi가 엔코더 누적값으로 보내므로, 출발 시점을 기준으로 빼서 주행 단위로 만든다.
+    private val stopDetector = StopDetector()
+    private var distanceBaseM: Float? = null
+    private var awaitingDistanceBase = false
 
     private val statusCallback: (RpiMessage.Status) -> Unit = { status -> updateStatusDisplay(status) }
     private val disconnectedCallback: () -> Unit = { handleDisconnected() }
@@ -113,11 +119,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         session.onAck(cmd, ok)
         _binding ?: return
         if (!wasRunning && session.isRunning) {
+            // 출발 — 경과시간·이동거리를 0부터 다시 센다
             elapsedSeconds = 0L
+            distanceBaseM = null
+            awaitingDistanceBase = true
+            stopDetector.reset()
+            _binding?.tvDistance?.text = "0.0 m"
             startTimer()
-        } else if (wasRunning && !session.isRunning) {
-            timerJob?.cancel()
         }
+        // 정지 ACK를 받아도 타이머를 멈추지 않는다 — 관성으로 굴러가는 동안 계속 잰다.
+        // 실제 정지는 updateStatusDisplay가 거리로 판정해 freezeTrip()으로 끝낸다.
         updateButtonStates()
     }
 
@@ -140,7 +151,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun updateStatusDisplay(status: RpiMessage.Status) {
         val b = _binding ?: return
         b.tvSpeed.text = SpeedFormat.format(status.speed, settings.speedUnit)
-        b.tvDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
+        updateTripDistance(b, status.distance)
+        // 누적 거리는 Pi 원값 그대로 — 세션과 무관하게 항상 갱신한다
+        b.tvTotalDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
         b.tvVibration.text = status.vibration?.let { "%.2f".format(it) } ?: "-"
         // 노면 유형은 시연모드에서만 보인다. Pi는 STOP 후에도 마지막 추론값을 계속
         // 보내므로(controller._safe_stop이 road를 안 지움), 수집모드에서 직전 시연의
@@ -153,10 +166,37 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    /** 주행 거리 = Pi 누적거리 − 출발 시점 기준값. 감속이 끝나면 값을 동결한다. */
+    private fun updateTripDistance(b: FragmentMainBinding, rawDistance: Float?) {
+        val measuring = session.isRunning || session.isWindingDown
+        if (!measuring) return                      // 동결 — 마지막 값 유지
+
+        if (awaitingDistanceBase && rawDistance != null) {
+            distanceBaseM = rawDistance
+            awaitingDistanceBase = false
+        }
+        val base = distanceBaseM
+        if (rawDistance != null && base != null) {
+            b.tvDistance.text = "%.1f m".format((rawDistance - base).coerceAtLeast(0f))
+        }
+
+        if (session.isWindingDown) {
+            stopDetector.onDistance(rawDistance)
+            if (stopDetector.isStopped) freezeTrip()
+        }
+    }
+
+    /** 관성 구간 종료 — 경과시간·이동거리를 다음 출발까지 그대로 둔다. */
+    private fun freezeTrip() {
+        session.windDownFinished()
+        timerJob?.cancel()
+        updateButtonStates()
+    }
+
     private fun resetTelemetryDisplay() {
         val b = _binding ?: return
         b.tvSpeed.text = SpeedFormat.format(null, settings.speedUnit)
-        b.tvDistance.text = "- m"
+        b.tvDistance.text = "- m"       // 주행 거리만 초기화 — 누적은 Pi 값이라 그대로 둔다
         b.tvVibration.text = "-"
         b.rowRoadType.visibility = View.GONE
     }
@@ -167,6 +207,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             session.onDisconnected()
             timerJob?.cancel()
             pendingTimeoutJob?.cancel()
+            stopDetector.reset()
+            distanceBaseM = null
+            awaitingDistanceBase = false
             b.tvConnection.text = "○ 미연결"
             resetTelemetryDisplay()
             updateButtonStates()

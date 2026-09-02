@@ -99,4 +99,52 @@ class SessionStateTest {
         assertFalse(s.isPending)
         assertFalse(s.isRunning)
     }
+
+    @Test
+    fun `STOP ACK 직후에는 감속 측정 중이다`() {
+        val s = SessionState()
+        s.startRequested(); s.onAck("START", ok = true)
+        s.stopRequested(); s.onAck("STOP", ok = true)
+        assertFalse(s.isRunning)
+        assertTrue(s.isWindingDown)
+    }
+
+    @Test
+    fun `감속이 끝나면 측정을 멈춘다`() {
+        val s = SessionState()
+        s.startRequested(); s.onAck("START", ok = true)
+        s.stopRequested(); s.onAck("STOP", ok = true)
+        s.windDownFinished()
+        assertFalse(s.isWindingDown)
+        assertFalse(s.isRunning)
+    }
+
+    @Test
+    fun `STOP이 거부되면 감속 측정에 들어가지 않는다`() {
+        val s = SessionState()
+        s.startRequested(); s.onAck("START", ok = true)
+        s.stopRequested(); s.onError("STOP")
+        assertTrue(s.isRunning)
+        assertFalse(s.isWindingDown)
+    }
+
+    @Test
+    fun `재출발하면 감속 상태가 해제된다`() {
+        val s = SessionState()
+        s.startRequested(); s.onAck("START", ok = true)
+        s.stopRequested(); s.onAck("STOP", ok = true)
+        assertTrue(s.isWindingDown)
+        s.startRequested(); s.onAck("START", ok = true)
+        assertTrue(s.isRunning)
+        assertFalse(s.isWindingDown)
+    }
+
+    @Test
+    fun `연결이 끊기면 감속 상태도 해제된다`() {
+        val s = SessionState()
+        s.startRequested(); s.onAck("START", ok = true)
+        s.stopRequested(); s.onAck("STOP", ok = true)
+        s.onDisconnected()
+        assertFalse(s.isWindingDown)
+    }
 }

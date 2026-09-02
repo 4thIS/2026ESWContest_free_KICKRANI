@@ -2,6 +2,7 @@ package com.vibrasoft.kickboardapp.ui
 
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,6 +67,13 @@ class SettingsBottomSheet : BottomSheetDialogFragment() {
                 settings.deviceAddress = device.address
                 protocol.startListening()
                 updateCurrentDeviceLabel()
+            } else {
+                // 이전에는 실패해도 아무 표시가 없어 원인을 알 수 없었다. 상세는 logcat "RpiLink".
+                Toast.makeText(
+                    requireContext(),
+                    "연결 실패 — Pi에서 서버가 떠 있는지, 페어링이 유지되는지 확인",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
