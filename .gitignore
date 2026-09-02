@@ -1,0 +1,20 @@
+# 루트에서 도구를 실행했을 때 생기는 산출물.
+# 파트별 세부 규칙은 RPi/.gitignore · app/.gitignore 참고.
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# pytest (루트에서 pytest를 돌리면 여기에 생긴다)
+.pytest_cache/
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+*.swp
+
+# 로그
+*.log

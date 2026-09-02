@@ -1,10 +1,28 @@
-# KickboardApp — 개발 문서
+# KickboardApp — 개발 문서 (🗄️ 아카이브 — ESP32 시절 원본)
+
+> ## ⚠️ 이 문서는 현행 구조와 다르다 (2026-09-03 표기)
+>
+> 작성 시점(2026-06-29)에는 **ESP32-S3 + WiFi AP + HTTP** 구조였다. **2026-08-01경 ESP32를 폐기하고
+> 라즈베리파이 5 단일 보드로 통합**하면서 아래 내용 대부분이 무효가 됐다. 초기 화면 구성·세션 흐름의
+> 설계 의도를 보존하려고 남겨둔다.
+>
+> | 이 문서 | 현행 |
+> | --- | --- |
+> | 장치 = LilyGo T-Energy S3 (ESP32-S3) | **Raspberry Pi 5** 단일 보드 (구동·수집·추론·통신 통합) |
+> | WiFi AP(192.168.4.1) + HTTP(OkHttp) | **Bluetooth Classic RFCOMM(SPP)** + 줄 단위 JSON |
+> | `POST /start` `/stop` `/speed` `/sync` `/files` … | `{"cmd":"START"}` `SET_MODE` `STOP` `LIST_FILES` `RENAME` `MEMO` |
+> | 속도 = 폰 **GPS**(앱이 장치로 전송) | 속도 = Pi **엔코더**(홀센서), Pi가 `STATUS`로 앱에 송신 |
+> | 저장 = 장치 **SD카드**, `speed`·`label` 컬럼 | Pi 로컬 CSV — `timestamp_ms,ax,ay,az,gx,gy,gz,wheel_pulse` (라벨은 파일명) |
+> | 팀/작품명 "VibraSafe Scooter" | 팀 **킥라니** · 레포 `4thIS/2026ESWContest_free_KICKRANI` |
+>
+> **현행 규격은 [`../docs/RPi_docs/공통계약.md`](../docs/RPi_docs/공통계약.md) 계약 2가 기준이고,
+> 앱 현황은 [`README.md`](README.md)에 있다.**
 
 > 작성일: 2026-06-29 | 담당: 도현
 
 ---
 
-## 1. 프로젝트 개요
+## 1. 프로젝트 개요 *(작성 당시)*
 
 임베디드SW경진대회 출품작 **VibraSafe Scooter**의 데이터 수집용 Android 앱.
 LilyGo T-Energy S3 (ESP32-S3) 장치와 WiFi AP로 통신하며, 세션 제어·GPS 속도 수집·파일 관리를 담당한다.

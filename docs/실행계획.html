@@ -72,10 +72,10 @@
   <h1>🛴 노면 감지 킥보드 — 실행 계획</h1>
   <div class="meta">제24회 임베디드SW경진대회 자유공모 · 팀 <b>킥라니</b> · 기준일 2026-09-03 · 레포 <code>4thIS/2026ESWContest_free_KICKRANI</code></div>
   <div class="meta">📄 정본은 <b>실행계획.md</b> — 이 문서는 같은 내용의 뷰다. <b>수정은 항상 양쪽 같이.</b></div>
-  <div class="dday">🔥 D-DAY — 오늘(9/3) 마감 · 남은 것: A1→수집→모델→시연영상→PPT→제출</div>
+  <div class="dday">🔥 D-DAY — 오늘(9/3) 마감 · <b>팀 목표였던 9/1 제출은 지났다 — 버퍼 0</b> · 남은 것: A1→수집→모델→시연영상→PPT→제출</div>
 
-  <div class="oneline">💡 <b>주행·통신 전 체인 실측 통과(09-02): 킥·엔코더·PID·앱 E2E·수집 무결성.</b> 남은 것은 데이터·제출물 —
-  섀시 배선 마무리 → 실측 체인(B5→B6→B6a→B7) → 데이터(A1→C1) → 학습·탑재(당일) → 검증·영상 → 제출.</div>
+  <div class="oneline">💡 <b>주행·통신 전 체인 실측 통과(09-02): 킥·엔코더·PID·앱 E2E·수집 무결성.</b>
+  R1·R2·R4는 사실상 끝났고 <b>데이터(R3) 하나가 전부를 막고 있다</b> — A1 성립성 → C1 수집 → 학습·탑재 → 시연·영상 → 제출.</div>
 
   <div class="owners">
     <div class="owner"><b>찬우</b><span class="tag w-cw">CW</span><p>수집·통신·인지·통합·ML·안전 + <b>DJ 코드 몫 대행</b>(배선 제외)</p></div>
@@ -84,16 +84,16 @@
     <div class="owner"><b>명재</b><span class="tag w-mj">MJ</span><p>섀시(아크릴 채택)·외형 셸·<b>시연 트랙</b>·촬영</p></div>
   </div>
 
-  <h2>0. 현재 상태 (2026-08-24 전면 갱신)</h2>
+  <h2>0. 현재 상태 (2026-09-03 갱신)</h2>
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
-    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
+    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b>(sklearn 설치된 PC 기준) · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
     <tr><td class="st">하드웨어</td><td>✅ <b>주행 체인 전부 실측 통과(09-02)</b>: 시동 킥·엔코더(PPR=2)·PID(kp1.5/ki0.8)·방향 교정 · ~~모터 무동작~~=시동 임계·배터리로 해명 · ⬜ <b>Pi 이동 전원</b>·1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅 §세션3</a></td></tr>
-    <tr><td class="st">Pi 5</td><td>✅ <b>183 tests GREEN</b> · RFCOMM 상주 · Wi-Fi 3프로필 자동접속 · 📄 <a href="RPi_docs/SSH접속.md"><b>SSH접속 가이드</b></a> (<code>kick-home</code>/<code>kick-wifi</code>)</td></tr>
+    <tr><td class="st">Pi 5</td><td>✅ <b>183 passed / 4 skipped</b>(sklearn 미설치가 정상 — <b>스킵은 실패 아님</b>) · RFCOMM 상주 · Wi-Fi 3프로필 자동접속 · 📄 <a href="RPi_docs/SSH접속.md"><b>SSH접속 가이드</b></a> (<code>kick-home</code>/<code>kick-wifi</code>)</td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) · ✅ <b>R4-2 완료(08-26)</b> — 자전거도로·속도단위 선택·ACK 기반 세션 상태·수집모드 노면 숨김(37 tests GREEN, 실기기 UI 확인) — ⬜ 남은 앱 작업 없음 → <b>R4-3 E2E</b></td></tr>
     <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
-    <tr><td class="st">PR</td><td>✅ <b>#21~#25 전부 머지</b> — 모든 코드·문서가 main 반영, 열린 PR 없음</td></tr>
+    <tr><td class="st">PR</td><td>✅ <b>#30까지 전부 머지</b> — 모든 코드·문서가 main 반영, 열린 PR 없음. <code>main</code> = <code>cw</code> = <code>DJ</code> 동일 커밋</td></tr>
   </table>
 
   <h2>결정 로그 (프로젝트 방향)</h2>
@@ -120,7 +120,7 @@
   <h2>2. 남은 작업 (실행 순서)</h2>
 
   <div class="phase">
-    <div class="phase-head"><h3>R1 — 하드웨어 마무리 ⭐</h3><span class="period">🔧 진행 중 · 8/25~26</span></div>
+    <div class="phase-head"><h3>R1 — 하드웨어 마무리 ⭐</h3><span class="period">✅ 사실상 완료 — 잔여 R1-4(콘덴서·방열판)</span></div>
     <div class="tasks">
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-1 ✅</span> 섀시 부품 고정 — 완료 08-24<span class="who w-dj">DJ</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R1-2 ✅</span> 배선 재연결 — 완료 08-24<span class="who w-dj">DJ</span></div>
@@ -132,7 +132,7 @@
   </div>
 
   <div class="phase">
-    <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">도구 준비 완료 — 반나절 코스 · 8/26~27</span></div>
+    <div class="phase-head"><h3>R2 — 실측 체인 ⭐</h3><span class="period">✅ 주요 항목 통과(09-02) — R2-2·R2-3만 잔여(오늘 건너뜀)</span></div>
     <div class="tasks">
       <div class="task b-cw" style="background:#eef7f2"><span class="tid">R2-1 ✅</span> 엔코더 실측 — <b>완결 09-02</b> (모터 구동 31펄스/10s·PPR=2)<span class="who w-cw">CW</span></div>
       <div class="task b-cw crit"><span class="tid">R2-2</span> (B6) <code>calibrate_encoder.py --rev 5</code> → config 확정<span class="who w-cw">CW</span></div>
@@ -143,7 +143,7 @@
   </div>
 
   <div class="phase">
-    <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">8/26~28</span></div>
+    <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">🔥 오늘의 크리티컬 패스 — 실데이터 0건</span></div>
     <div class="tasks">
       <div class="task b-cw crit"><span class="tid">R3-1</span> (A1) <b>예비실험 — 성립성 관문</b>: 2~3종 수집 → <code>analyze_surfaces.py</code><span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
       <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 🔧 준비 완료(런북 3단계·앱 기본)<span class="who w-all">ALL</span><span class="dep">⚠️ 정속(B7) 없이 수집 금지 · <code>--app --speed 0.3/0.4/0.5</code> · 세션마다 <code>check_data.py</code> QC</span></div>
@@ -154,9 +154,9 @@
   </div>
 
   <div class="phase">
-    <div class="phase-head"><h3>R4 — 통신 실연동 (병렬)</h3><span class="period">Pi만 켜지면 · 8/25~29</span></div>
+    <div class="phase-head"><h3>R4 — 통신 실연동 (병렬)</h3><span class="period">✅ 전 항목 완료(09-02)</span></div>
     <div class="tasks">
-      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 197 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
+      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → pytest(183 passed/4 skipped) → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
       <div class="task b-dh" style="background:var(--done)"><span class="tid">R4-2 ✅</span> (B4) <b>앱 수정</b> — <b>완료 2026-08-26</b><span class="who w-dh">DH</span><span class="dep"><b>37 tests GREEN</b> · 프로토콜 무변경<br>① <code>roadTypes</code>에 <b>"자전거도로"</b> ② <b>속도 단위 선택</b>(km/h·m/s, 유선은 m/s 원값·표시 시점 환산 — 3.6배 오류 해소) ③ <b>ACK 기반 세션 상태</b>(START 거부 시 "실행 중" 오표시 해소·3초 타임아웃) ④ <b>수집모드 노면 숨김</b>(<code>_safe_stop</code>이 road를 안 지워 직전 시연 값이 남던 문제) + 파일탭 버튼 "노면 지정"·"메모 추가" ⑤ <b>주행 거리·시간 측정</b>(출발 시 0부터 · 정지 후 관성 구간까지 재고 멈추면 동결 · 거리로 정지 판정 — <b>Pi 무변경</b>)<br>⬜ <b>Pi 실연동 미검증</b> — 목 하니스로 화면만 확인(목 코드는 개인 레포 전용). 실연동은 <b>R4-3</b></span></div>
       <div class="task b-all"><span class="tid">R4-3</span> (B9) 앱↔Pi E2E — 접속·명령·STATUS·파일탭 (책상 위)<span class="who w-dh">DH</span><span class="who w-cw">CW</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R4-4 ✅</span> PR #22~#25 전부 머지 — 08-25<span class="who w-dj">DJ</span><span class="dep">머지된 변경(contracts·config·스톨감지 위치) 사후 확인만</span></div>
@@ -164,7 +164,7 @@
   </div>
 
   <div class="phase">
-    <div class="phase-head"><h3>R5 — 검증·시연 ⭐</h3><span class="period">8/29~31</span></div>
+    <div class="phase-head"><h3>R5 — 검증·시연 ⭐</h3><span class="period">오늘 — R3 이후 즉시</span></div>
     <div class="tasks">
       <div class="task b-all crit"><span class="tid">R5-1</span> (D1) E2E 통합 — START→정속→수집/시연→STOP, DEMO 반응 &lt;1초<span class="who w-all">ALL</span></div>
       <div class="task b-all crit"><span class="tid">R5-2</span> (D2) 안전 시나리오 5종 표 — 끊김·워치독·SIGTERM·스톨·저신뢰<span class="who w-cw">CW</span><span class="who w-dj">DJ</span></div>
@@ -175,58 +175,60 @@
   </div>
 
   <div class="phase">
-    <div class="phase-head"><h3>R6 — 제출물 ⭐</h3><span class="period">지금부터 ~ 9/1</span></div>
+    <div class="phase-head"><h3>R6 — 제출물 ⭐</h3><span class="period">🔥 오늘 마감 (9/3)</span></div>
     <div class="tasks">
       <div class="task b-all crit"><span class="tid">R6-1</span> (E3) <b>PPT 제작</b> — 원고→슬라이드 20p, 실측값은 R2~R5에서<span class="who w-all">ALL</span><span class="dep"><code>보고서/개발완료보고서_초안.md</code> · <b>지금 시작 가능</b></span></div>
       <div class="task b-mj crit"><span class="tid">R6-2</span> (E4) 시연영상 3분·720p — 제목 규격, YouTube<span class="who w-mj">MJ</span></div>
-      <div class="task b-cw crit"><span class="tid">R6-3</span> (E5) <b>제출</b> — 구글폼(신청서+PDF+링크), 팀번호·Public 확인<span class="who w-cw">CW</span><span class="dep"><b>9/1 목표</b> (마감 9/3)</span></div>
+      <div class="task b-cw crit"><span class="tid">R6-3</span> (E5) <b>제출</b> — 구글폼(신청서+PDF+링크), 팀번호·Public 확인<span class="who w-cw">CW</span><span class="dep">🔥 <b>마감 2026-09-03(목) — 오늘</b>. 9/1 목표는 지났고 버퍼가 없다</span></div>
     </div>
   </div>
 
-  <h2>3. 남은 열흘 일정</h2>
+  <h2>3. 오늘(D-DAY, 9/3) 순서 — 버퍼 없음</h2>
+  <p style="margin:0 0 10px;font-size:.92rem;color:var(--sub)">크리티컬 패스가 <b>R3 하나로 좁혀졌다.</b> 순서대로 진행하되, 시간이 부족하면 <b>범위를 줄이고 순서는 지킨다.</b></p>
   <table>
-    <tr><th style="width:110px">날짜</th><th>목표</th><th>내용</th></tr>
-    <tr><td>8/25(월)~26(화)</td><td class="st">R1 완료</td><td>~~자석·PPR~~ ✅ → <b>R1-5 모터 채널 진단</b>(다른 와이파이) / 병렬: R4-1 bind·R6-1 PPT 시작·<s>R4-2 앱</s> ✅ 완료·R5-3 트랙 착수·R4-4 PR 리뷰</td></tr>
-    <tr><td>8/26(화)~27(수)</td><td class="st">R2 + R3-1</td><td>실측 체인 반나절 → 즉시 <b>예비실험 성립성 판정</b></td></tr>
-    <tr><td>8/27(수)~28(목)</td><td class="st">R3-2 본 수집</td><td>트랙+실외 5종, 팀 총출동 → 저녁 학습·탑재(R3-3·R3-5)</td></tr>
-    <tr><td>8/29(금)</td><td class="st">E2E·안전</td><td>R4-3 앱 E2E → R5-1 통합 → R5-2 안전 시나리오 표</td></tr>
-    <tr><td>8/30(토)~31(일)</td><td class="st">리허설·영상</td><td>R5-5 리허설 + R6-2 촬영·편집, R3-4 윈도우 비교, PPT 실측값</td></tr>
-    <tr><td><b>9/1(월)</b></td><td class="st">🎯 제출</td><td>PDF 변환 → 구글폼 제출 (R6-3)</td></tr>
-    <tr><td>9/2~3</td><td class="st">버퍼</td><td>재촬영·보고서 수정 예비일</td></tr>
+    <tr><th style="width:36px">#</th><th style="width:210px">작업</th><th>최소 목표(축소안)</th></tr>
+    <tr><td>0</td><td class="st">PC 학습 환경</td><td><code>py -m pip install -r RPi/requirements-analysis.txt</code> — <b>sklearn 없으면 학습 자체가 불가.</b> 가장 먼저 확인</td></tr>
+    <tr><td>1</td><td class="st">R3-1 A1 성립성</td><td>30분 관문. 실내 2질감이라도 구분되면 즉시 다음으로 → <a href="RPi_docs/실행런북.md">런북 2단계</a></td></tr>
+    <tr><td>2</td><td class="st">R3-2 C1 수집</td><td>원안 5종×5세션. 시간 없으면 <b>3종(아스팔트·보도블럭·자갈)×3세션×10초</b>로 축소 — 위험/안전 대비만 서면 시연은 성립 → <a href="RPi_docs/실행런북.md">런북 3단계</a></td></tr>
+    <tr><td>3</td><td class="st">R3-3 학습 · R3-5 탑재</td><td><code>train.py</code> → <code>road_rf.json</code> → <code>scp</code> → DEMO 감속 확인. 정확도 미달이어도 <b>탑재된 상태</b>를 우선 확보</td></tr>
+    <tr><td>4</td><td class="st">R5-5 리허설 · R6-2 영상</td><td>3분 풀편집이 어려우면 <b>핵심 시연(노면 전환→감속) 한 컷</b>을 먼저 확보</td></tr>
+    <tr><td>5</td><td class="st">R6-1 PPT · R6-3 제출</td><td>🟨 실측값 채워 PDF 변환 → <b>구글폼 제출</b>. 마감 시각 내 제출이 최우선</td></tr>
   </table>
+  <p style="margin:8px 0 0;font-size:.9rem;color:var(--sub)">
+    ⬜ <b>R3-4</b>(시간 vs 거리 윈도우 비교)는 여유 있을 때만 — 보고서 차별성 항목이지만 제출보다 뒤다.<br>
+    ⬜ <b>R2-2</b>(엔코더 보정)·<b>R2-3</b>(스톨 실측)은 주행이 이미 되므로 <b>오늘은 건너뛴다.</b>
+  </p>
 
   <h2>크리티컬 패스</h2>
   <div class="cpath">
     <div class="cflow">
-      <div class="cnode">R1<small>섀시·홀센서</small></div><span class="arrow">→</span>
-      <div class="cnode">R2<small>B5→B6→B6a→B7</small></div><span class="arrow">→</span>
+      <div class="cnode">sklearn<small>PC 설치</small></div><span class="arrow">→</span>
       <div class="cnode">R3-1<small>A1 성립성</small></div><span class="arrow">→</span>
       <div class="cnode">R3-2<small>C1 수집</small></div><span class="arrow">→</span>
-      <div class="cnode">R3-3~5<small>학습·탑재</small></div><span class="arrow">→</span>
-      <div class="cnode">R5-1·2<small>E2E·안전</small></div><span class="arrow">→</span>
+      <div class="cnode">R3-3·5<small>학습·탑재</small></div><span class="arrow">→</span>
       <div class="cnode">R5-5<small>리허설</small></div><span class="arrow">→</span>
       <div class="cnode">R6-2<small>영상</small></div><span class="arrow">→</span>
-      <div class="cnode">R6-3<small>제출 9/1</small></div>
+      <div class="cnode">R6-3<small>제출 (오늘)</small></div>
     </div>
     <div class="cflow" style="margin-bottom:0">
       <span style="font-size:.8rem;color:var(--sub)">병렬:</span>
-      <div class="pnode">R4 통신 E2E (Pi만)</div>
-      <div class="pnode">R6-1 PPT (지금부터)</div>
-      <div class="pnode">R5-3 트랙 (수집에도 필요)</div>
+      <div class="pnode">R6-1 PPT (수집·학습 도는 동안)</div>
+      <div class="pnode">R5-3 트랙 (수집 시작 전까지)</div>
     </div>
-    <p class="note">⚡ <b>오늘의 선두는 R1.</b> 섀시 배선이 끝나는 순간 R2~R3이 연쇄로 열린다.</p>
+    <p class="note">⚡ <b>오늘의 선두는 R3.</b> R1·R2·R4는 사실상 끝났고, <b>데이터 하나가 전부를 막고 있다.</b></p>
   </div>
 
   <h2>4. 리스크 & 대비</h2>
   <table>
     <tr><th>리스크</th><th>영향</th><th>대비</th></tr>
-    <tr><td><b>R3-1 판정 "구분 약함"</b></td><td>프로젝트 전제 흔들림</td><td>500Hz↑·IMU 마운트 변경 후 재실험. <b>R2 직후 즉시</b> — 늦을수록 치명적</td></tr>
+    <tr><td><b>R3-1 판정 "구분 약함"</b></td><td>프로젝트 전제 흔들림</td><td>500Hz↑·IMU 마운트 변경 후 재실험. <b>오늘 가장 먼저</b> — 늦을수록 치명적</td></tr>
     <tr><td><b>정속 없이 수집</b></td><td>모델이 속도 학습 → DEMO 붕괴·재수집</td><td>R3-2 의존에 B7 명시. 순서만 지키면 추가 비용 0</td></tr>
     <tr><td>아크릴 섀시 IMU 마운트 불량(유격·공진)</td><td>마운트 진동이 노면 신호에 섞임</td><td><b>리지드 고정</b>(볼트, 테이프 금지) → R3-1에서 정지 노이즈 확인</td></tr>
-    <tr><td>저속 스톨 오탐(4펄스/회전)</td><td>주행 중 불필요 정지</td><td>R2-3에서 0.1 m/s 펄스 간격 실측 → <code>STALL_TIMEOUT_S</code> 조정</td></tr>
-    <tr><td>~~모터·엔코더·통신~~ ✅ 전부 해결</td><td>—</td><td>남은 블로커: <b>시간(오늘 마감)</b> · Pi 이동 전원(실내는 콘센트)</td></tr>
-    <tr><td>DJ 리뷰 지연(#22·#23)</td><td>main 미반영</td><td>실기는 cw 브랜치로 진행, 머지는 D1 전까지</td></tr>
-    <tr><td>시간 부족(수집·영상 몰림)</td><td>제출물 품질</td><td>PPT 지금부터 병렬·트랙 앞당김·9/1 제출로 이틀 버퍼</td></tr>
+    <tr><td>저속 스톨 오탐(2펄스/회전)</td><td>주행 중 불필요 정지</td><td><code>STALL_TIMEOUT_S=2.0</code>으로 이미 여유 확보. 오늘은 R2-3 건너뜀</td></tr>
+    <tr><td>~~모터·엔코더·통신~~ ✅ 전부 해결 · ~~DJ 리뷰 지연~~ ✅ 전 PR 머지</td><td>—</td><td>남은 블로커: <b>시간(오늘 마감)</b> · Pi 이동 전원(실내는 콘센트)</td></tr>
+    <tr><td><b>시간 부족 — 9/1 목표를 놓쳐 버퍼 0</b></td><td>제출 자체가 위험</td><td>§3 <b>축소안</b>으로 범위를 줄이되 순서는 유지. <b>제출 &gt; 영상 &gt; 정확도</b> 순으로 포기</td></tr>
+    <tr><td><b>PC에 sklearn 미설치</b></td><td><code>train.py</code> 실행 불가 → 학습에서 멈춤</td><td>수집 <b>전에</b> <code>py -m pip install -r RPi/requirements-analysis.txt</code>. Pi엔 불필요(numpy 추론)</td></tr>
+    <tr><td>테스트 수 오판(Pi 183 vs PC 197)</td><td>실기에서 "깨졌다" 착각·시간 낭비</td><td><b>Pi는 183 passed / 4 skipped가 정상.</b> 런북·README에 명시함</td></tr>
   </table>
 
   <h2>5. 완료 기준 (Definition of Done)</h2>
@@ -234,12 +236,15 @@
     <li>앱 START→정속주행→노면별 자동 감속→STOP이 <b>트랙에서 재현</b> (영상 확보)</li>
     <li>COLLECT CSV 결측 0 · 모델 <b>세션단위 정확도 ≥70%</b></li>
     <li>안전 시나리오 <b>5종 전부</b> 통과 (끊김·워치독·SIGTERM·스톨·저신뢰)</li>
-    <li>보고서 20p PDF · 영상 3분 · Public 레포 — <b>9/1 제출 완료</b></li>
+    <li>보고서 20p PDF · 영상 3분 · Public 레포 — <b>제출 완료(마감 2026-09-03)</b></li>
   </ul></div>
 
   <h2>부록 — 실기 명령 치트시트</h2>
-<pre>ssh kick-ip                                   # Pi 접속 · 코드: ~/embedded_kickboard
-python -m pytest                              # RPi/에서 — 197 GREEN 확인
+<pre>py -m pip install -r RPi/requirements-analysis.txt   # PC 학습 환경 (오늘 가장 먼저)
+
+ssh kick-ip                                   # Pi 접속 · 코드: ~/embedded_kickboard
+python -m pytest                              # RPi/에서 — Pi는 183 passed/4 skipped가 정상
+                                              #            sklearn 있는 PC는 197 passed
 python scripts/setup_check.py --pwm --jitter  # ⚠️ 바퀴 공중 · ENA→GPIO27 점퍼
 python scripts/estop.py                       # 🚨 비상 정지 (언제든)
 
