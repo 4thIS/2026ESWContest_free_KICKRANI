@@ -11,8 +11,16 @@ class SessionState {
     var isPending = false
         private set
 
+    /**
+     * 정지 버튼을 눌렀지만 차량이 아직 굴러가는 구간.
+     * 이때도 경과시간·이동거리를 계속 재고, 실제로 멈추면 [windDownFinished]로 동결한다.
+     */
+    var isWindingDown = false
+        private set
+
     fun startRequested() {
         isPending = true
+        isWindingDown = false
     }
 
     fun stopRequested() {
@@ -27,7 +35,10 @@ class SessionState {
             }
             "STOP" -> {
                 isPending = false
-                if (ok) isRunning = false
+                if (ok) {
+                    isRunning = false
+                    isWindingDown = true        // 관성 구간 — 멈출 때까지 계속 측정
+                }
             }
         }
     }
@@ -40,8 +51,14 @@ class SessionState {
         isPending = false
     }
 
+    /** 차량이 실제로 멈춤 — 경과시간·이동거리를 동결한다. */
+    fun windDownFinished() {
+        isWindingDown = false
+    }
+
     fun onDisconnected() {
         isRunning = false
         isPending = false
+        isWindingDown = false
     }
 }
