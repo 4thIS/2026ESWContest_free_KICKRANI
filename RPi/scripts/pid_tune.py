@@ -42,7 +42,8 @@ def run(real, kp, ki, kd, target, duration_s, quiet=False, csv_path=None):
     dt = 1.0 / config.CONTROL_HZ
     gpio = get_gpio(force_mock=not real)
     clock = time.monotonic if real else _StepClock()
-    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S, clock=clock)
+    motor = SoftStartMotor(Motor(gpio), config.SOFT_START_S, clock=clock,
+                           kick_duty=config.DUTY_MAX, kick_s=config.STARTUP_KICK_S)
     encoder = Encoder(gpio, clock=clock)
     pid = PID(kp, ki, kd, out_min=config.DUTY_MIN, out_max=config.DUTY_MAX)
     sc = SpeedController(motor, encoder, pid, clock=clock)

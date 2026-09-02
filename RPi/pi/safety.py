@@ -48,18 +48,35 @@ class Watchdog:
 class SoftStartMotor:
     """Motor 래퍼(공통계약 `Motor` 그대로). 듀티 **상승만** 램프로 제한, 하강·stop은 즉시.
 
+    시동 킥(kick): 정지 상태에서 출발할 때만 `kick_s`초 동안 `kick_duty`(보통 DUTY_MAX)를
+    쏴서 정지 마찰을 이긴 뒤 목표 듀티로 내려온다 — 배터리가 처져도 저듀티 주행 가능.
+    짧은 킥은 L298N 열 예산에 무해(안전 3종의 목적은 '지속' 스톨 전류 차단).
     set_duty가 50Hz로 불린다는 가정 없이, 시계로 경과시간을 재서 허용 상승폭을 계산한다.
     """
-    def __init__(self, motor, ramp_s, clock=time.monotonic):
+    def __init__(self, motor, ramp_s, clock=time.monotonic, kick_duty=None, kick_s=0.0):
         self._m = motor
         self._rate = 1.0 / ramp_s          # 듀티/초
         self._clock = clock
+        self._kick_duty = kick_duty
+        self._kick_s = kick_s
         self._cur = 0.0
         self._last_t = None
+        self._kick_until = None
 
     def set_duty(self, duty):
         now = self._clock()
-        if self._last_t is None:            # 첫 호출: 0부터 출발
+        # 정지→출발 순간: 킥 시작
+        if (self._kick_duty is not None and self._kick_s > 0
+                and self._cur == 0.0 and duty > 0.0 and self._kick_until is None):
+            self._kick_until = now + self._kick_s
+        if self._kick_until is not None:
+            if now < self._kick_until:
+                self._last_t = now
+                self._cur = self._kick_duty
+                self._m.set_duty(self._cur)
+                return
+            self._kick_until = None         # 킥 종료 → 목표로 하강(즉시 허용)
+        if self._last_t is None:            # 첫 호출(킥 없음): 0부터 출발
             allowed = 0.0
         else:
             allowed = self._cur + self._rate * (now - self._last_t)
@@ -70,6 +87,7 @@ class SoftStartMotor:
     def stop(self):
         self._cur = 0.0
         self._last_t = None
+        self._kick_until = None
         self._m.stop()
 
 
