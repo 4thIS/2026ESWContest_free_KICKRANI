@@ -1,0 +1,4 @@
+<resources>
+    <!-- 야간 모드에서는 팝업 배경이 어두우므로 밝은 글자로. values/themes.xml의 짝. -->
+    <style name="ThemeOverlay.KickboardApp.Popup" parent="ThemeOverlay.MaterialComponents.Dark" />
+</resources>

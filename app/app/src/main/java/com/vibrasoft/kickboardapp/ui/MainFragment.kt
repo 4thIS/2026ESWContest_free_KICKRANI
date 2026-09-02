@@ -152,6 +152,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val b = _binding ?: return
         b.tvSpeed.text = SpeedFormat.format(status.speed, settings.speedUnit)
         updateTripDistance(b, status.distance)
+        // 누적 거리는 Pi 원값 그대로 — 세션과 무관하게 항상 갱신한다
+        b.tvTotalDistance.text = status.distance?.let { "%.1f m".format(it) } ?: "- m"
         b.tvVibration.text = status.vibration?.let { "%.2f".format(it) } ?: "-"
         // 노면 유형은 시연모드에서만 보인다. Pi는 STOP 후에도 마지막 추론값을 계속
         // 보내므로(controller._safe_stop이 road를 안 지움), 수집모드에서 직전 시연의
@@ -194,7 +196,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun resetTelemetryDisplay() {
         val b = _binding ?: return
         b.tvSpeed.text = SpeedFormat.format(null, settings.speedUnit)
-        b.tvDistance.text = "- m"
+        b.tvDistance.text = "- m"       // 주행 거리만 초기화 — 누적은 Pi 값이라 그대로 둔다
         b.tvVibration.text = "-"
         b.rowRoadType.visibility = View.GONE
     }

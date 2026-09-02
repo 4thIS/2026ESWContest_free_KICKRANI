@@ -96,8 +96,25 @@
                     <TextView android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="이동거리"/>
+                        android:text="주행 거리"/>
                     <TextView android:id="@+id/tv_distance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- m"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Pi가 보내는 엔코더 누적값 원값. 주행 단위가 아니라 서버 기동 이후 총합. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="누적 거리"/>
+                    <TextView android:id="@+id/tv_total_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="- m"

@@ -13,4 +13,9 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- 오버플로 팝업 전용. 툴바 본체는 Dark 오버레이(보라 배경 위 흰 글자)를 쓰지만,
+         팝업은 배경이 시스템 테마를 따라가므로 글자색도 같이 따라가야 한다.
+         values-night에 Dark 짝이 있다. -->
+    <style name="ThemeOverlay.KickboardApp.Popup" parent="ThemeOverlay.MaterialComponents.Light" />
 </resources>
