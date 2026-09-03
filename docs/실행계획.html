@@ -87,11 +87,11 @@
   <h2>0. 현재 상태 (2026-08-24 전면 갱신)</h2>
   <table>
     <tr><th style="width:130px">영역</th><th>상태</th></tr>
-    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 197 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
+    <tr><td class="st">RPi 코드</td><td>✅ 전 모듈 + 실행 준비 도구(수집 QC·속도 플래그·<b>합성 E2E 총연습</b>) — <b>pytest 202 GREEN</b> · 📄 <a href="RPi_docs/실행런북.md"><b>실행런북</b></a> = 수집→학습→탑재→시연→제출 대본</td></tr>
     <tr><td class="st">하드웨어</td><td>✅ <b>주행 체인 전부 실측 통과(09-02)</b>: 시동 킥·엔코더(PPR=2)·PID(kp1.5/ki0.8)·방향 교정 · ~~모터 무동작~~=시동 임계·배터리로 해명 · ⬜ <b>Pi 이동 전원</b>·1000µF·방열판 · 📄 <a href="RPi_docs/홀센서_트러블슈팅.md">트러블슈팅 §세션3</a></td></tr>
     <tr><td class="st">Pi 5</td><td>✅ <b>183 tests GREEN</b> · RFCOMM 상주 · Wi-Fi 3프로필 자동접속 · 📄 <a href="RPi_docs/SSH접속.md"><b>SSH접속 가이드</b></a> (<code>kick-home</code>/<code>kick-wifi</code>)</td></tr>
     <tr><td class="st">앱</td><td>✅ 완성본이 규격 기준(issue #10 종결, Pi가 맞춤) · ✅ <b>R4-2 완료(08-26)</b> — 자전거도로·속도단위 선택·ACK 기반 세션 상태·수집모드 노면 숨김(37 tests GREEN, 실기기 UI 확인) — ⬜ 남은 앱 작업 없음 → <b>R4-3 E2E</b></td></tr>
-    <tr><td class="st">데이터·모델</td><td>🔧 파이프라인 완성(<code>train.py</code>→JSON→numpy 추론) — ⬜ <b>실데이터 0건</b>. A1→C1이 최대 미지수</td></tr>
+    <tr><td class="st">데이터·모델</td><td>✅ <b>완료(09-03)</b>: C1 10세션 QC 10/10 PASS → 세션 CV <b>79.4%</b>(거리 윈도우 78.1% 대등)·혼동행렬 확보 → <code>road_rf.json</code> Pi 탑재·ForestModel 로드·kick-app 가동</td></tr>
     <tr><td class="st">제출물</td><td>✅ 팀명 킥라니 · ✅ 레포 rename · 📝 보고서 <b>원고 완료</b>(공식 7항목) · ⬜ PPT·실측값·영상</td></tr>
     <tr><td class="st">PR</td><td>✅ <b>#21~#25 전부 머지</b> — 모든 코드·문서가 main 반영, 열린 PR 없음</td></tr>
   </table>
@@ -145,18 +145,18 @@
   <div class="phase">
     <div class="phase-head"><h3>R3 — 데이터·모델 ⭐ 최대 미지수</h3><span class="period">8/26~28</span></div>
     <div class="tasks">
-      <div class="task b-cw crit"><span class="tid">R3-1</span> (A1) <b>예비실험 — 성립성 관문</b>: 2~3종 수집 → <code>analyze_surfaces.py</code><span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
-      <div class="task b-all crit"><span class="tid">R3-2</span> (C1) 본 수집 — 🔧 준비 완료(런북 3단계·앱 기본)<span class="who w-all">ALL</span><span class="dep">⚠️ 정속(B7) 없이 수집 금지 · <code>--app --speed 0.3/0.4/0.5</code> · 세션마다 <code>check_data.py</code> QC</span></div>
-      <div class="task b-cw crit"><span class="tid">R3-3</span> (C2) <code>train.py</code> — 세션 CV 정확도·혼동행렬 (목표 ≥70%)<span class="who w-cw">CW</span></div>
-      <div class="task b-cw"><span class="tid">R3-4</span> (C3) 시간 vs 거리 윈도우 비교 → 보고서 수치<span class="who w-cw">CW</span></div>
-      <div class="task b-cw crit"><span class="tid">R3-5</span> (C4) <code>models/road_rf.json</code> 배치 → DEMO 감속 확인<span class="who w-cw">CW</span><span class="dep">코드 완료라 당일 가능</span></div>
+      <div class="task b-cw crit"><span class="tid">R3-1</span> ✅ (A1) 성립성 — C1 결과로 입증: 스펙트럼 형상(저주파 39.4% vs 31.2%)·자이로로 분리(d&gt;1.3)<span class="who w-cw">CW</span><span class="dep">약하면 500Hz↑·마운트 변경 후 재실험 — R2 직후 즉시</span></div>
+      <div class="task b-all crit"><span class="tid">R3-2</span> ✅ (C1) 본 수집 완료 09-03 — 보도블럭5+아스팔트5, QC 10/10 PASS<span class="who w-all">ALL</span><span class="dep">⚠️ 정속(B7) 없이 수집 금지 · <code>--app --speed 0.3/0.4/0.5</code> · 세션마다 <code>check_data.py</code> QC</span></div>
+      <div class="task b-cw crit"><span class="tid">R3-3</span> ✅ (C2) 학습 완료 09-03 — 세션 CV <b>79.4%</b>(목표 70% 초과), 481 windows<span class="who w-cw">CW</span></div>
+      <div class="task b-cw"><span class="tid">R3-4</span> ✅ (C3) 완료 09-03 — 거리 윈도우 <b>78.1%</b>, 시간과 대등<span class="who w-cw">CW</span></div>
+      <div class="task b-cw crit"><span class="tid">R3-5</span> ✅ (C4) 탑재 완료 09-03 — ForestModel 로드 확인·kick-app active<span class="who w-cw">CW</span><span class="dep">코드 완료라 당일 가능</span></div>
     </div>
   </div>
 
   <div class="phase">
     <div class="phase-head"><h3>R4 — 통신 실연동 (병렬)</h3><span class="period">Pi만 켜지면 · 8/25~29</span></div>
     <div class="tasks">
-      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 197 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
+      <div class="task b-cw"><span class="tid">R4-1</span> Pi 실기: pull → 202 tests → <code>rfcomm_setup.sh</code> → <code>--app --real</code> bind<span class="who w-cw">CW</span></div>
       <div class="task b-dh" style="background:var(--done)"><span class="tid">R4-2 ✅</span> (B4) <b>앱 수정</b> — <b>완료 2026-08-26</b><span class="who w-dh">DH</span><span class="dep"><b>37 tests GREEN</b> · 프로토콜 무변경<br>① <code>roadTypes</code>에 <b>"자전거도로"</b> ② <b>속도 단위 선택</b>(km/h·m/s, 유선은 m/s 원값·표시 시점 환산 — 3.6배 오류 해소) ③ <b>ACK 기반 세션 상태</b>(START 거부 시 "실행 중" 오표시 해소·3초 타임아웃) ④ <b>수집모드 노면 숨김</b>(<code>_safe_stop</code>이 road를 안 지워 직전 시연 값이 남던 문제) + 파일탭 버튼 "노면 지정"·"메모 추가" ⑤ <b>주행 거리·시간 측정</b>(출발 시 0부터 · 정지 후 관성 구간까지 재고 멈추면 동결 · 거리로 정지 판정 — <b>Pi 무변경</b>)<br>⬜ <b>Pi 실연동 미검증</b> — 목 하니스로 화면만 확인(목 코드는 개인 레포 전용). 실연동은 <b>R4-3</b></span></div>
       <div class="task b-all"><span class="tid">R4-3</span> (B9) 앱↔Pi E2E — 접속·명령·STATUS·파일탭 (책상 위)<span class="who w-dh">DH</span><span class="who w-cw">CW</span></div>
       <div class="task b-dj" style="background:#eef7f2"><span class="tid">R4-4 ✅</span> PR #22~#25 전부 머지 — 08-25<span class="who w-dj">DJ</span><span class="dep">머지된 변경(contracts·config·스톨감지 위치) 사후 확인만</span></div>
@@ -239,7 +239,7 @@
 
   <h2>부록 — 실기 명령 치트시트</h2>
 <pre>ssh kick-ip                                   # Pi 접속 · 코드: ~/embedded_kickboard
-python -m pytest                              # RPi/에서 — 197 GREEN 확인
+python -m pytest                              # RPi/에서 — 202 GREEN 확인
 python scripts/setup_check.py --pwm --jitter  # ⚠️ 바퀴 공중 · ENA→GPIO27 점퍼
 python scripts/estop.py                       # 🚨 비상 정지 (언제든)
 
